@@ -12,4 +12,4 @@ set(SOURCE_FILES
 
 add_executable(dual_manipulation_grasp_DB ${SOURCE_FILES})
 
-target_link_libraries(dual_manipulation_grasp_DB ${catkin_LIBRARIES})
+target_link_libraries(dual_manipulation_grasp_DB ${catkin_LIBRARIES} sqlite3)
