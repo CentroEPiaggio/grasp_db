@@ -6,7 +6,7 @@ catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
-set(SOURCE_FILES
+set(SOURCE_FILES src/ros_server.cpp src/database_manager.cpp
   src/main.cpp
 )
 

@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <ros/ros.h>
 #include <sqlite3.h> 
 
 static int callback(void *NotUsed, int argc, char **argv, char **azColName)
@@ -12,8 +12,10 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName)
     return 0;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    ros::init(argc,argv,"database_manager");
+    
     sqlite3 *db;
     int rc;
     /* Open database */
