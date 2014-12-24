@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ros/ros.h>
 #include <sqlite3.h> 
+#include <ros/package.h>
 
 static int callback(void *NotUsed, int argc, char **argv, char **azColName)
 {
@@ -14,12 +15,13 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName)
 
 int main(int argc, char* argv[])
 {
+    std::string path = ros::package::getPath("dual_manipulation_grasp_DB");
     ros::init(argc,argv,"database_manager");
     
     sqlite3 *db;
     int rc;
     /* Open database */
-    rc = sqlite3_open("test.db", &db);
+    rc = sqlite3_open(path.append("/test.db").c_str(), &db);
     if( rc ){
         std::cout<< "Can't open database" << sqlite3_errmsg(db)<<std::endl;
         return 0;
