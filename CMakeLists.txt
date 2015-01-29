@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(dual_manipulation_grasp_DB)
+project(dual_manipulation_grasp_db)
 
 ENABLE_LANGUAGE(CXX)
 
