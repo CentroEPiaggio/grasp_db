@@ -15,7 +15,7 @@ else()
 endif()
 
 
-find_package(catkin REQUIRED COMPONENTS roscpp roslib dual_manipulation_shared)
+find_package(catkin REQUIRED COMPONENTS roscpp roslib dual_manipulation_shared kdl_conversions)
 catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
@@ -31,4 +31,11 @@ add_executable(dual_manipulation_grasp_DB ${SOURCE_FILES})
 
 target_link_libraries(dual_manipulation_grasp_DB ${catkin_LIBRARIES} sqlite3)
 
-add_subdirectory(test)
+
+add_executable(create_iros_db test/create_iros_db.cpp test/table_grasp_maker.cpp)
+
+target_link_libraries(create_iros_db ${catkin_LIBRARIES} sqlite3)
+
+add_executable(make_table_grasps test/table_grasp_main.cpp test/table_grasp_maker.cpp)
+target_link_libraries(make_table_grasps ${catkin_LIBRARIES} sqlite3 )
+

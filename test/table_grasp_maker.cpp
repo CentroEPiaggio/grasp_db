@@ -112,7 +112,7 @@ bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KD
     KDL::Frame obj_ee_rotated(obj_ee);
     
     std::string grasp_name_rotated(grasp_name);
-    grasp_name_rotated += "_" + std::to_string(180*i/yaw_steps_);
+    grasp_name_rotated += "_" + std::to_string(2*180*i/yaw_steps_);
     
     obj_ee_rotated.M = rotz.M*obj_ee_rotated.M;
     
