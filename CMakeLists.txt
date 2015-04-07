@@ -30,3 +30,5 @@ set(SOURCE_FILES src/ros_server.cpp src/database_manager.cpp
 add_executable(dual_manipulation_grasp_DB ${SOURCE_FILES})
 
 target_link_libraries(dual_manipulation_grasp_DB ${catkin_LIBRARIES} sqlite3)
+
+add_subdirectory(test)
