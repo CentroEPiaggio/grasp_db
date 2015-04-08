@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     */
     
     tableGraspMaker table_grasps("top-top.db");
-    KDL::Frame obj_ee(KDL::Vector(0.0,0.0,0.16));
+    KDL::Frame obj_ee(KDL::Vector(0.0,0.0,-0.1));
     table_grasps.create_table_grasps(1,"Bottom",obj_ee);
     
     databaseMapper mapper("top-top.db");

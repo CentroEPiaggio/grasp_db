@@ -87,8 +87,9 @@ void tableGraspMaker::build_grasp_msg(dual_manipulation_shared::grasp_trajectory
   tf::poseKDLToMsg(obj_ee_frame.Inverse(),ee_obj);
   
   // add a higher waypoint on the table
-  obj_ee_wp = obj_ee_final;
-  obj_ee_wp.position.z += WAYPOINT_HEIGHT;
+  KDL::Frame Tz(KDL::Frame(KDL::Vector(0,0,waypoint_height_)));
+  KDL::Frame ee_obj_frame(obj_ee_frame.Inverse());
+  tf::poseKDLToMsg((Tz*ee_obj_frame).Inverse(),obj_ee_wp);
   
   // the frame where the object position is considered (only when inserted)
   attached_object.object.header.frame_id = attached_object.link_name;
