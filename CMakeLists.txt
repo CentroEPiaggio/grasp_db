@@ -47,3 +47,6 @@ target_link_libraries(make_specular_grasps ${catkin_LIBRARIES} sqlite3 )
 
 add_executable(make_automatic_transitions test/automatic_transitions_main.cpp test/named_automatic_transitions.cpp)
 target_link_libraries(make_automatic_transitions ${catkin_LIBRARIES} sqlite3 )
+
+add_executable(create_container_b_db test/create_containerB_db.cpp test/table_grasp_maker.cpp test/specular_grasp_maker.cpp test/named_automatic_transitions.cpp)
+target_link_libraries(create_container_b_db ${catkin_LIBRARIES} sqlite3)
