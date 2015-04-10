@@ -27,8 +27,11 @@ set(SOURCE_FILES src/ros_server.cpp src/database_manager.cpp
   src/main.cpp
 )
 
-add_executable(dual_manipulation_grasp_DB ${SOURCE_FILES})
+add_executable(grasp_storage grasp_storage/grasp_storage.cpp grasp_storage/main.cpp)
+target_link_libraries(grasp_storage ${catkin_LIBRARIES} dual_manipulation_shared)
+add_dependencies(grasp_storage dual_manipulation_shared)
 
+add_executable(dual_manipulation_grasp_DB ${SOURCE_FILES})
 target_link_libraries(dual_manipulation_grasp_DB ${catkin_LIBRARIES} sqlite3)
 
 
