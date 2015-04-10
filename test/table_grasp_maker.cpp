@@ -4,9 +4,12 @@
 #include "table_grasp_maker.h"
 #include "dual_manipulation_shared/serialization_utils.h"
 
-tableGraspMaker::tableGraspMaker(std::string db_name):db_writer(db_name), db_mapper(db_name)
+tableGraspMaker::tableGraspMaker(std::string db_name, uint yaw_steps, uint ee_id, double wp_height, std::string ee_frame):db_writer(db_name), db_mapper(db_name)
 {
-  
+  yaw_steps_ = yaw_steps;
+  end_effector_id_ = ee_id;
+  waypoint_height_ = wp_height;
+  end_effector_frame_ = ee_frame;
 }
 
 bool tableGraspMaker::read_data_from_file(std::string& obj_name, std::string& grasp_name, KDL::Frame& obj_ee_final, std::string filename)
