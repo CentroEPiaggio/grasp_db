@@ -39,3 +39,6 @@ target_link_libraries(create_iros_db ${catkin_LIBRARIES} sqlite3)
 add_executable(make_table_grasps test/table_grasp_main.cpp test/table_grasp_maker.cpp)
 target_link_libraries(make_table_grasps ${catkin_LIBRARIES} sqlite3 )
 
+add_executable(make_specular_grasps test/specular_grasp_main.cpp test/specular_grasp_maker.cpp)
+target_link_libraries(make_specular_grasps ${catkin_LIBRARIES} sqlite3 )
+
