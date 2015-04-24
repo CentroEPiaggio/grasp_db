@@ -15,7 +15,7 @@ else()
 endif()
 
 
-find_package(catkin REQUIRED COMPONENTS roscpp roslib dual_manipulation_shared kdl_conversions)
+find_package(catkin REQUIRED COMPONENTS rviz roscpp roslib dual_manipulation_shared kdl_conversions)
 catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
@@ -50,3 +50,7 @@ target_link_libraries(make_automatic_transitions ${catkin_LIBRARIES} sqlite3 )
 
 add_executable(create_container_b_db test/create_containerB_db.cpp test/table_grasp_maker.cpp test/specular_grasp_maker.cpp test/named_automatic_transitions.cpp)
 target_link_libraries(create_container_b_db ${catkin_LIBRARIES} sqlite3)
+
+add_executable(grasp_modification_utility grasp_modification_utility/grasp_modification_utility.cpp grasp_modification_utility/main.cpp)
+target_link_libraries(grasp_modification_utility ${catkin_LIBRARIES} sqlite3)
+add_dependencies(grasp_modification_utility dual_manipulation_shared)

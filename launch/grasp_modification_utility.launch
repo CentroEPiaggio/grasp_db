@@ -1,0 +1,9 @@
+<launch>
+
+    <include file="$(find dual_manipulation_shared)/launch/dual_manipulation.launch"/>
+
+    <node pkg="dual_manipulation_grasp_db" type="grasp_modification_utility" name="grasp_modification_utility" respawn="false" output="screen"/>
+
+    <node name="grasp_modification_utility_rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find dual_manipulation_grasp_db)/launch/grasp_modification_utility.rviz"/>
+
+</launch>
