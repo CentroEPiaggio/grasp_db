@@ -7,6 +7,11 @@ GMU::GMU():server("grasp_modification_utility_interactive_marker")
     object_marker_pub = node.advertise<visualization_msgs::Marker>( "/grasp_modification_utility_object", 0 );
     hands_marker_pub = node.advertise<visualization_msgs::Marker>( "/grasp_modification_utility_hands", 0 );
     im_sub_obj = node.subscribe("/grasp_modification_utility_interactive_marker/feedback",1,&GMU::im_callback,this);
+    js_sub = node.subscribe("/joint_states", 1, &GMU::publishTF, this);
+
+    transform_.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
+    transform_.setRotation( tf::Quaternion( 0.0, 0.0, 0.0, 1.0) );
+
 }
 
 void GMU::set_object(int id)
@@ -55,7 +60,7 @@ void GMU::publish_object()
 
 void GMU::publish_hands()
 {
-    std::string path = "package://dual_manipulation_grasp_db/object_meshes/r_hand.dae";
+    std::string path = "package://soft_hand_description/meshes/palm_right.stl";
     int i=0;
     for(auto hand_pose:hand_poses)
     {
@@ -65,9 +70,9 @@ void GMU::publish_hands()
 
 	marker.type=visualization_msgs::Marker::MESH_RESOURCE;
 	marker.mesh_resource=path.c_str();
-	marker.scale.x=0.1;
-	marker.scale.y=0.1;
-	marker.scale.z=0.1;
+	marker.scale.x=0.001;
+	marker.scale.y=0.001;
+	marker.scale.z=0.001;
 
 	marker.id=i;
 	marker.ns="hands";
@@ -163,7 +168,14 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
     else
     {
 	hand_poses.at(std::stoi(feedback.marker_name))=feedback.pose;
+    transform_.setOrigin( tf::Vector3(feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z) );
+    transform_.setRotation( tf::Quaternion( feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w) );
     }
+}
+
+void GMU::publishTF(const sensor_msgs::JointState &msg)
+{
+    tf_broadcaster_.sendTransform(tf::StampedTransform(transform_, ros::Time::now(), "world", "hand"));
 }
 
 void GMU::clear()

@@ -8,6 +8,7 @@
 #include "ros/package.h"
 #include "dual_manipulation_shared/grasp_trajectory.h"
 #include "visualization_msgs/Marker.h"
+#include "sensor_msgs/JointState.h"
 #include "dual_manipulation_shared/databasemapper.h"
 #include <interactive_markers/interactive_marker_server.h>
 #include <string>
@@ -30,6 +31,7 @@ private:
     void thread_body();
     void update_position(const visualization_msgs::Marker &marker_);
     void im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback);
+    void publishTF(const sensor_msgs::JointState &msg);
     
     interactive_markers::InteractiveMarkerServer server;
 
@@ -40,8 +42,12 @@ private:
     ros::Publisher hands_marker_pub;
     ros::Subscriber im_sub_obj;
     ros::Subscriber im_sub_hand;
+    ros::Subscriber js_sub;
     
     geometry_msgs::Pose obj_pose;
     int obj_id;
     std::vector<geometry_msgs::Pose> hand_poses;
+
+    tf::Transform transform_;
+    tf::TransformBroadcaster tf_broadcaster_;
 };
