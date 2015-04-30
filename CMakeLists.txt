@@ -44,3 +44,7 @@ target_link_libraries(dual_manipulation_grasp_DB ${catkin_LIBRARIES} sqlite3)
 add_executable(grasp_modification_utility grasp_modification_utility/grasp_modification_utility.cpp grasp_modification_utility/main.cpp)
 target_link_libraries(grasp_modification_utility ${catkin_LIBRARIES} sqlite3)
 add_dependencies(grasp_modification_utility dual_manipulation_shared)
+
+add_executable(create_full_db src/create_full_db.cpp)
+target_link_libraries(create_full_db ${catkin_LIBRARIES} sqlite3)
+add_dependencies(create_full_db dual_manipulation_shared)
