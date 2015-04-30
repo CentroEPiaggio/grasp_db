@@ -18,7 +18,7 @@ int main(int argc, char** argv)
     spin.start();
     GMU gmu;
 
-    ROS_INFO_STREAM("This is a utility to modify one serialized grasp (post grasp pose not included)");
+    ROS_INFO_STREAM("This is a utility to modify one serialized grasp (post grasp pose is with the blue object - grasp trajectory with the green one)");
 
     dual_manipulation_shared::grasp_trajectory grasp_msg;
     int obj_id;
@@ -58,7 +58,12 @@ int main(int argc, char** argv)
 	}
 	
 	gmu.set_object(obj_id);
-	gmu.set_hands(grasp_msg.ee_pose);
+	KDL::Frame obj_hand_postGrasp;
+	tf::poseMsgToKDL(grasp_msg.attObject.object.mesh_poses.front(),obj_hand_postGrasp);
+	obj_hand_postGrasp = obj_hand_postGrasp.Inverse();
+	geometry_msgs::Pose postGrasp_pose;
+	tf::poseKDLToMsg(obj_hand_postGrasp,postGrasp_pose);
+	gmu.set_hands(grasp_msg.ee_pose,postGrasp_pose);
 
 	gmu.publish_object();
 	gmu.publish_hands();
@@ -71,9 +76,9 @@ int main(int argc, char** argv)
 
 	if(cmd=="save")
 	{
-	    geometry_msgs::Pose object;
-	    gmu.get_object(object);
-	    gmu.get_hands(grasp_msg.ee_pose);
+	    geometry_msgs::Pose object,final_object,final_hand;
+	    gmu.get_object(object,final_object);
+	    gmu.get_hands(grasp_msg.ee_pose,final_hand);
 
 	    KDL::Frame world_object, world_hand;
 	    tf::poseMsgToKDL(object,world_object);
@@ -83,6 +88,11 @@ int main(int argc, char** argv)
 		tf::poseMsgToKDL(grasp_msg.ee_pose.at(j),world_hand);
 		tf::poseKDLToMsg(world_object.Inverse()*world_hand,grasp_msg.ee_pose.at(j));
 	    }
+	    
+	    // also modify post-grasp pose
+	    tf::poseMsgToKDL(final_object,world_object);
+	    tf::poseMsgToKDL(final_hand,world_hand);
+	    tf::poseKDLToMsg(world_hand.Inverse()*world_object,grasp_msg.attObject.object.mesh_poses.front());
 
 	    if(!serialize_ik(grasp_msg,file_name))
 	    {

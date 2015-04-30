@@ -21,9 +21,9 @@ public:
     void publish_object();
     void publish_hands();
     void set_object(int id);
-    void set_hands(std::vector<geometry_msgs::Pose> hands);
-    void get_object(geometry_msgs::Pose& obj);
-    void get_hands(std::vector<geometry_msgs::Pose>& hands);
+    void set_hands(std::vector<geometry_msgs::Pose> hands, geometry_msgs::Pose final_hand);
+    void get_object(geometry_msgs::Pose& obj,geometry_msgs::Pose& final_obj);
+    void get_hands(std::vector<geometry_msgs::Pose>& hands, geometry_msgs::Pose& final_hand);
     void clear();
 
     databaseMapper db_mapper;
@@ -47,6 +47,8 @@ private:
     geometry_msgs::Pose obj_pose;
     int obj_id;
     std::vector<geometry_msgs::Pose> hand_poses;
+    geometry_msgs::Pose obj_final_pose;
+    geometry_msgs::Pose hand_final_pose;
 
     tf::Transform transform_;
     tf::TransformBroadcaster tf_broadcaster_;

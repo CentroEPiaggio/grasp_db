@@ -1,8 +1,12 @@
 #include "grasp_modification_utility.h"
+#include "tf_conversions/tf_kdl.h"
+#include "tf/tf.h"
+
+#define FINAL_OFFSET_X 1.0
 
 GMU::GMU():server("grasp_modification_utility_interactive_marker")
 {
-    obj_sub = node.subscribe("/grasp_modification_utility_object",1,&GMU::update_position,this);
+    obj_sub = node.subscribe("/grasp_modification_utility_object",2,&GMU::update_position,this);
     hand_sub = node.subscribe("/grasp_modification_utility_hands",10,&GMU::update_position,this);
     object_marker_pub = node.advertise<visualization_msgs::Marker>( "/grasp_modification_utility_object", 0 );
     hands_marker_pub = node.advertise<visualization_msgs::Marker>( "/grasp_modification_utility_hands", 0 );
@@ -19,19 +23,26 @@ void GMU::set_object(int id)
     obj_id = id;
 }
 
-void GMU::set_hands(std::vector< geometry_msgs::Pose > hands)
+void GMU::set_hands(std::vector< geometry_msgs::Pose > hands, geometry_msgs::Pose final_hand)
 {
     for(auto hand:hands) hand_poses.push_back(hand);
+    hand_final_pose = final_hand;
+    hand_final_pose.position.x += FINAL_OFFSET_X;
 }
 
-void GMU::get_object(geometry_msgs::Pose& obj)
+void GMU::get_object(geometry_msgs::Pose& obj, geometry_msgs::Pose& final_obj)
 {
     obj = obj_pose;
+    final_obj = obj_final_pose;
+    final_obj.position.x -= FINAL_OFFSET_X;
 }
 
-void GMU::get_hands(std::vector< geometry_msgs::Pose >& hands)
+void GMU::get_hands(std::vector< geometry_msgs::Pose >& hands, geometry_msgs::Pose& final_hand)
 {
-    for(int i=0;i<hand_poses.size();i++) hands.at(i)=hand_poses.at(i);
+    hands.clear();
+    for(int i=0;i<hand_poses.size();i++) hands.push_back(hand_poses.at(i));
+    final_hand = hand_final_pose;
+    final_hand.position.x -= FINAL_OFFSET_X;
 }
 
 void GMU::publish_object()
@@ -56,24 +67,32 @@ void GMU::publish_object()
     marker.color.g=1;
     marker.color.b=0;
     object_marker_pub.publish(marker);
+    
+    // final object configuration
+    marker.id = 1;
+    marker.ns = "final_object";
+    marker.pose.position.x += FINAL_OFFSET_X;
+    marker.color.g=0;
+    marker.color.b=1;
+    object_marker_pub.publish(marker);
 }
 
 void GMU::publish_hands()
 {
     std::string path = "package://soft_hand_description/meshes/palm_right.stl";
     int i=0;
+    visualization_msgs::Marker marker;
+    marker.header.frame_id="world";
+    marker.lifetime=ros::DURATION_MAX;
+
+    marker.type=visualization_msgs::Marker::MESH_RESOURCE;
+    marker.mesh_resource=path.c_str();
+    marker.scale.x=0.001;
+    marker.scale.y=0.001;
+    marker.scale.z=0.001;
+    
     for(auto hand_pose:hand_poses)
     {
-        visualization_msgs::Marker marker;
-	marker.header.frame_id="world";
-	marker.lifetime=ros::DURATION_MAX;
-
-	marker.type=visualization_msgs::Marker::MESH_RESOURCE;
-	marker.mesh_resource=path.c_str();
-	marker.scale.x=0.001;
-	marker.scale.y=0.001;
-	marker.scale.z=0.001;
-
 	marker.id=i;
 	marker.ns="hands";
 
@@ -98,6 +117,16 @@ void GMU::publish_hands()
 
 	i++;
     }
+    
+    // final hand configuration
+    marker.id = i;
+    marker.ns = "final_hand";
+    marker.pose = hand_final_pose;
+    marker.color.a=1;
+    marker.color.r=1;
+    marker.color.g=0;
+    marker.color.b=0;
+    hands_marker_pub.publish(marker);
 }
 
 void GMU::update_position(const visualization_msgs::Marker &marker_)
@@ -165,11 +194,30 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
     {
 	obj_pose = feedback.pose;
     }
+    else if(feedback.marker_name=="final_object")
+    {
+	obj_final_pose = feedback.pose;
+    }
     else
     {
+      static tf::TransformListener tf;
+      tf::StampedTransform hand_palm;
+      double timeout = 1.0;
+      if(!tf.waitForTransform("right_hand_palm_link","hand",ros::Time(0), ros::Duration(timeout)))
+	hand_palm.setIdentity();
+      else
+	tf.lookupTransform("right_hand_palm_link","hand", ros::Time(0), hand_palm);
+      transform_.setOrigin( tf::Vector3(feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z) );
+      transform_.setRotation( tf::Quaternion( feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w) );
+      transform_.mult(transform_,hand_palm);
+      if(feedback.marker_name=="final_hand")
+      {
+	hand_final_pose = feedback.pose;
+      }
+      else
+      {
 	hand_poses.at(std::stoi(feedback.marker_name))=feedback.pose;
-    transform_.setOrigin( tf::Vector3(feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z) );
-    transform_.setRotation( tf::Quaternion( feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w) );
+      }
     }
 }
 
@@ -182,7 +230,8 @@ void GMU::clear()
 {
     obj_pose = geometry_msgs::Pose();
     obj_pose.orientation.w=1;
-
+    obj_final_pose = obj_pose;
+    hand_final_pose = obj_pose;
     hand_poses.clear();
 }
 
