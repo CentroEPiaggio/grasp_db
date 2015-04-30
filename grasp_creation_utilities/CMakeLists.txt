@@ -1,0 +1,2 @@
+add_library(grasp_creation_utilities table_grasp_maker.cpp specular_grasp_maker.cpp named_automatic_transitions.cpp)
+target_link_libraries(grasp_creation_utilities ${catkin_LIBRARIES} sqlite3)

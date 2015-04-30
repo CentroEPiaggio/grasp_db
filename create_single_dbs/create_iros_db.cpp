@@ -2,7 +2,7 @@
 #include <kdl/frames.hpp>
 #include <dual_manipulation_shared/databasemapper.h>
 #include <dual_manipulation_shared/databasewriter.h>
-#include "table_grasp_maker.h"
+#include "grasp_creation_utilities/table_grasp_maker.h"
 
 int main(int argc, char **argv)
 {

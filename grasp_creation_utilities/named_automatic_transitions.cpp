@@ -1,4 +1,4 @@
-#include "named_automatic_transitions.h"
+#include "grasp_creation_utilities/named_automatic_transitions.h"
 #include <string>
 
 #define DEBUG 1

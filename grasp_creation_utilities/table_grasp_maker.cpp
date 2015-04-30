@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <kdl_conversions/kdl_msg.h>
 
-#include "table_grasp_maker.h"
+#include "grasp_creation_utilities/table_grasp_maker.h"
 #include "dual_manipulation_shared/serialization_utils.h"
 
 tableGraspMaker::tableGraspMaker(std::string db_name, uint yaw_steps, uint ee_id, double wp_height, std::string ee_frame):db_writer(db_name), db_mapper(db_name)

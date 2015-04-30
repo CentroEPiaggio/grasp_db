@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <string>
 #include "dual_manipulation_shared/databasemapper.h"
-#include "table_grasp_maker.h"
+#include "grasp_creation_utilities/table_grasp_maker.h"
 
 int main()
 {

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "named_automatic_transitions.h"
+#include "grasp_creation_utilities/named_automatic_transitions.h"
 
 #define DB_NAME "top-top.db"
 

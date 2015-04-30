@@ -1,5 +1,5 @@
 #include <iostream>
-#include "specular_grasp_maker.h"
+#include "grasp_creation_utilities/specular_grasp_maker.h"
 
 #define EE_ID 1
 #define EE_FRAME "left_hand_palm_link"

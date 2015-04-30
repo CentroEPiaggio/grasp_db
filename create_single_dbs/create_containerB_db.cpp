@@ -2,9 +2,9 @@
 #include <kdl/frames.hpp>
 #include <dual_manipulation_shared/databasemapper.h>
 #include <dual_manipulation_shared/databasewriter.h>
-#include "table_grasp_maker.h"
-#include "specular_grasp_maker.h"
-#include "named_automatic_transitions.h"
+#include "grasp_creation_utilities/table_grasp_maker.h"
+#include "grasp_creation_utilities/specular_grasp_maker.h"
+#include "grasp_creation_utilities/named_automatic_transitions.h"
 
 #define EE_ID 1
 #define EE_FRAME "left_hand_palm_link"

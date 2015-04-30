@@ -1,4 +1,4 @@
-#include "specular_grasp_maker.h"
+#include "grasp_creation_utilities/specular_grasp_maker.h"
 #include <kdl_conversions/kdl_msg.h>
 #include "dual_manipulation_shared/serialization_utils.h"
 
