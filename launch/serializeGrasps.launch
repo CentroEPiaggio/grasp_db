@@ -1,9 +1,7 @@
 <launch>
 
-	<!-- THIS FILE IS TYPICALLY LAUNCHED ONCE PER DATABASE -->
-
 	<!-- LAUNCH INTERFACE -->
-	<arg name="object" default="test" doc="The object name for which the grasps are defined. It also defines the database name, so ensure that a .db file with the same name exists.-"/>
+	<arg name="object" default="test" doc="The object name for which the grasps are defined. It also defines the database name, so ensure that a .db file with the same name exists. Typically, this is launched only once per database."/>
 
 	<!-- LAUNCH IMPLEMENTATION -->
 

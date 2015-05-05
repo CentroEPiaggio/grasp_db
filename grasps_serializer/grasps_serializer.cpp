@@ -165,7 +165,6 @@ bool GraspsSerializer::updateDatabase()
       }
     }
 
-
     // set the tf variables
     std::string err_msg;
     tf::StampedTransform temp_tf;
@@ -194,7 +193,7 @@ bool GraspsSerializer::updateDatabase()
       }
       else
       {
-          ROS_WARN_STREAM("COULD NOT OBTAIN THE TRANFORM SPECIFIED BY THE WAYPOINT # " << w << "AT " << my_grasp.waypoints.at(w));
+        ROS_WARN_STREAM("COULD NOT OBTAIN THE TRANFORM SPECIFIED BY THE WAYPOINT # " << w << " OF GRASP NAME " << my_grasp.grasp_name);
       }
     }
 
@@ -204,8 +203,15 @@ bool GraspsSerializer::updateDatabase()
       // get the final hand pose w.r.t. world
       transformer_.lookupTransform( world_tf_.c_str(), hand_tf_.c_str(), my_grasp.post_grasp, ref_tf );
 
-      // get the final object pose w.r.t. world
-      transformer_.lookupTransform( world_tf_.c_str(), object_tf_.c_str(), my_grasp.post_grasp, temp_tf );
+      if( transformer_.canTransform( world_tf_.c_str(), object_tf_.c_str(), my_grasp.post_grasp ) )
+      {
+        // get the final object pose w.r.t. world
+        transformer_.lookupTransform( world_tf_.c_str(), object_tf_.c_str(), my_grasp.post_grasp, temp_tf );
+      }
+      else
+      {
+        ROS_WARN_STREAM("COULD NOT OBTAIN THE TRANFORM SPECIFIED BY THE POST OF GRASP NAME " << my_grasp.grasp_name);
+      }
 
       // set the final object pose w.r.t. hand
       tf::poseTFToMsg(ref_tf.inverse()*temp_tf, my_grasp.post_hand_T_obj);
@@ -213,7 +219,7 @@ bool GraspsSerializer::updateDatabase()
     }
     else
     {
-        ROS_WARN_STREAM("COULD NOT OBTAIN THE TRANFORM SPECIFIED BY THE POST AT " << my_grasp.post_grasp);
+      ROS_WARN_STREAM("COULD NOT OBTAIN THE TRANFORM SPECIFIED BY THE POST OF GRASP NAME " << my_grasp.grasp_name);
     }
 
     // save current grasp to database
@@ -233,6 +239,8 @@ bool GraspsSerializer::updateDatabase()
         return false;
       }
     }
+
+    bag.close();
   }
 
   ROS_INFO_STREAM("The database " << object_name_ << ".db has been updated with " << rec_grasps_.size() << " grasps!");
