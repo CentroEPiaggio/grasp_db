@@ -14,37 +14,106 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+#################
+# CATKIN CONFIG #
+#################
 
-find_package(catkin REQUIRED COMPONENTS rviz roscpp roslib dual_manipulation_shared kdl_conversions)
+find_package(catkin REQUIRED COMPONENTS rviz roscpp roslib dual_manipulation_shared kdl_conversions rosbag)
 catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
-message(${catkin_INCLUDE_DIRS})
+#########
+# BUILD #
+#########
 
-include_directories(${catkin_INCLUDE_DIRS})
-set(SOURCE_FILES src/ros_server.cpp src/database_manager.cpp
-  src/main.cpp
+# NOT USED
+#include_directories(${catkin_INCLUDE_DIRS})
+#set(SOURCE_FILES src/ros_server.cpp src/database_manager.cpp
+#  src/main.cpp
+#)
+#add_executable(dual_manipulation_grasp_DB ${SOURCE_FILES})
+#target_link_libraries(dual_manipulation_grasp_DB ${catkin_LIBRARIES} sqlite3)
+
+### CREATE/COMPLETE DATABASES
+
+# CREATION UTILITIES
+include_directories(grasp_creation_utilities/include)
+add_library(grasp_creation_utilities
+	grasp_creation_utilities/table_grasp_maker.cpp
+	grasp_creation_utilities/specular_grasp_maker.cpp
+	grasp_creation_utilities/named_automatic_transitions.cpp
+)
+target_link_libraries(grasp_creation_utilities
+	${catkin_LIBRARIES}
+	sqlite3
 )
 
-include_directories(grasp_creation_utilities/include)
-add_subdirectory(grasp_creation_utilities)
+# DEPRECATED
+# add_subdirectory(db_apps)
+# add_executable(create_iros_db create_iros_db.cpp)
+# target_link_libraries(create_iros_db ${catkin_LIBRARIES} sqlite3 grasp_creation_utilities)
+# add_dependencies(create_iros_db grasp_creation_utilities)
 
-add_subdirectory(create_single_dbs)
+# SINGLE DBs
+add_executable(create_containerB_db
+	db_apps/create_containerB_db.cpp)
+add_dependencies(create_containerB_db
+	grasp_creation_utilities
+)
+target_link_libraries(create_containerB_db 
+	${catkin_LIBRARIES}
+	sqlite3 
+	grasp_creation_utilities
+)
+
+# THIS GROUPS AVAILABLE DATABASES INTO A SINGLE ONE
+add_executable(create_full_db 
+	db_apps/create_full_db.cpp
+)
+add_dependencies(create_full_db
+	dual_manipulation_shared
+)
+target_link_libraries(create_full_db
+	${catkin_LIBRARIES}
+	sqlite3
+)
+
+# GRASPS SERIALIZER
+add_library(grasps_serializer
+	grasps_serializer/grasps_serializer.cpp
+)
+add_dependencies(grasps_serializer
+	dual_manipulation_shared
+)
+target_link_libraries(grasps_serializer
+	dual_manipulation_shared
+	${catkin_LIBRARIES}
+)
+
+add_executable(grasps_serializer_node
+	grasps_serializer/main.cpp
+)
+target_link_libraries(grasps_serializer_node
+	grasps_serializer
+	${catkin_LIBRARIES}
+)
+
+# MODIFICATION UTILIY FOR REFINEMENT
+add_executable(grasp_modification_utility
+	grasp_modification_utility/grasp_modification_utility.cpp
+	grasp_modification_utility/main.cpp)
+add_dependencies(grasp_modification_utility
+	dual_manipulation_shared
+)
+target_link_libraries(grasp_modification_utility
+	${catkin_LIBRARIES}
+	sqlite3
+)
+
+
+#########
+# TESTS #
+#########
 
 add_subdirectory(test)
-
-add_executable(grasp_storage grasp_storage/grasp_storage.cpp grasp_storage/main.cpp)
-target_link_libraries(grasp_storage ${catkin_LIBRARIES} dual_manipulation_shared)
-add_dependencies(grasp_storage dual_manipulation_shared)
-
-add_executable(dual_manipulation_grasp_DB ${SOURCE_FILES})
-target_link_libraries(dual_manipulation_grasp_DB ${catkin_LIBRARIES} sqlite3)
-
-add_executable(grasp_modification_utility grasp_modification_utility/grasp_modification_utility.cpp grasp_modification_utility/main.cpp)
-target_link_libraries(grasp_modification_utility ${catkin_LIBRARIES} sqlite3)
-add_dependencies(grasp_modification_utility dual_manipulation_shared)
-
-add_executable(create_full_db src/create_full_db.cpp)
-target_link_libraries(create_full_db ${catkin_LIBRARIES} sqlite3)
-add_dependencies(create_full_db dual_manipulation_shared)
