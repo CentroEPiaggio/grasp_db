@@ -70,11 +70,16 @@ int main(int argc, char **argv)
       int source_id(gt.first+OBJ_GRASP_FACTOR*std::get<0>(db_mapper.Grasps.at(gt.first)));
       for(auto target:gt.second)
       {
-	int target_id(target+OBJ_GRASP_FACTOR*std::get<0>(db_mapper.Grasps.at(target)));
-	db_writer.writeNewTransition(source_id,target_id);
+        int target_id(target+OBJ_GRASP_FACTOR*std::get<0>(db_mapper.Grasps.at(target)));
+        db_writer.writeNewTransition(source_id,target_id);
       }
     }
   }
+
+  // copy the full database with no timestamp
+  std::string full = "full.db";
+  command = "cp " + path + new_db_name + " " + path + "/" + full;
+  system(command.c_str());
 
   return 0;
 }
