@@ -124,7 +124,7 @@ void GMU::publish_hands()
     marker.pose = hand_final_pose;
     marker.color.a=1;
     marker.color.r=1;
-    marker.color.g=0;
+    marker.color.g=1;
     marker.color.b=0;
     hands_marker_pub.publish(marker);
 }
