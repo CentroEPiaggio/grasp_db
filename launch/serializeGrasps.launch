@@ -1,0 +1,18 @@
+<launch>
+
+	<!-- THIS FILE IS TYPICALLY LAUNCHED ONCE PER DATABASE -->
+
+	<!-- LAUNCH INTERFACE -->
+	<arg name="object" default="test" doc="The object name for which the grasps are defined. It also defines the database name, so ensure that a .db file with the same name exists.-"/>
+
+	<!-- LAUNCH IMPLEMENTATION -->
+
+	<group ns="grasps_serializer">
+
+		<rosparam command="load" file="$(find dual_manipulation_grasp_db)/grasps_info/$(arg object).yaml" />
+		
+		<node name="serializer" pkg="dual_manipulation_grasp_db" type="grasps_serializer_node" output="screen" respawn="false" />
+	
+	</group>
+
+</launch>
