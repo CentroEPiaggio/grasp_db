@@ -27,9 +27,9 @@ int main(int argc, char **argv)
   */
   
   // NOTE: STEP 1 > make specular grasps for left hand
-  std::vector<uint> specularized_grasps = {1,2,3,4,5,6,7,8,9,10};
+  std::vector<uint> specularized_grasps = {1,2,3,4,5,6,7};
   // notice that names are equal, apart from the sign of y!!!
-  std::vector<std::string> specularized_grasp_names = {"side_x+y+","handle_x-","side_x+y-","handle_x-_bottom","handle_rev_x-","handle_x+","side_x-y+","handle_rev_x-_replay","side_x+y-","side_x-y-_bottom"};
+  std::vector<std::string> specularized_grasp_names = {"side_x+y+_top","handle_x-y_top","side_x+y-_top","handle_x-y_bottom","handle_rev_x-y_top","handle_x+y_top","side_x-y+_top"};
   bool top_bottom = false;
 
   assert( specularized_grasps.size() == specularized_grasp_names.size() );
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  ros::spinOnce();
+  // ros::spinOnce();
 
   return 0;
 }

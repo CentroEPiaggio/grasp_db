@@ -68,19 +68,19 @@ grasps:
     end_effector_id: 2
 
 # inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerB_handle_rev_x-_top_replay
-  - name: "handle_rev_x-_top_replay"
-    waypoints: [1428510152.563089, 1428510153.386228]
-    post: 1428510156.556806
-    end_effector_id: 2
+  # - name: "handle_rev_x-_top_replay"
+  #   waypoints: [1428510153.012728, 1428510153.947403]
+  #   post: 1428510156.319480
+  #   end_effector_id: 2
 
 # inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerB_side_x+y+_top_centered_y+
-  - name: "side_x+y+_top_centered_y+"
-    waypoints: [1428510274.950698, 1428510275.465388]
-    post: 1428510278.584014
-    end_effector_id: 2
+  # - name: "side_x+y+_top_centered_y+"
+  #   waypoints: [1428510275.309208, 1428510275.486269]
+  #   post: 1428510278.117469
+  #   end_effector_id: 2
 
 # inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerB_side_x-y+_bottom
-  - name: "side_x-y+_bottom"
-    waypoints: [1428509992.186132, 1428509992.992479]
-    post: 1428509996.124893
-    end_effector_id: 2
+  # - name: "side_x-y+_bottom"
+  #   waypoints: [1428509992.186132, 1428509992.992479]
+  #   post: 1428509996.124893
+  #   end_effector_id: 2
