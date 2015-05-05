@@ -22,31 +22,31 @@ int main(int argc, char **argv)
   /* Assumptions
   - workspaces, geometry, adjacencies, reachability
   - 1 object: containerB (with ID = 2)
-  - 3 end effectors: left_hand right_hand table
+  - 3 end effectors: 1 left_hand 2 right_hand 3 table
   - 10 right hand grasps already serialized
   */
   
-  // NOTE: STEP 1 > make specular grasps
-  std::vector<uint> to_be_converted_grasp_ids = {1,2,3,4,5,6,7,8,9,10};
+  // NOTE: STEP 1 > make specular grasps for left hand
+  std::vector<uint> specularized_grasps = {1,2,3,4,5,6,7,8,9,10};
   // notice that names are equal, apart from the sign of y!!!
-  std::vector<std::string> new_grasp_names = {"side_x+y+","handle_x-","side_x+y-","handle_x-_bottom","handle_rev_x-","handle_x+","side_x-y+","handle_rev_x-_replay","side_x+y-","side_x-y-_bottom"};
+  std::vector<std::string> specularized_grasp_names = {"side_x+y+","handle_x-","side_x+y-","handle_x-_bottom","handle_rev_x-","handle_x+","side_x-y+","handle_rev_x-_replay","side_x+y-","side_x-y-_bottom"};
   bool top_bottom = false;
 
-  assert(to_be_converted_grasp_ids.size()==new_grasp_names.size());
+  assert( specularized_grasps.size() == specularized_grasp_names.size() );
   
   uint new_ee_id = EE_ID;
   std::string new_link_name = EE_FRAME;
   std::vector<std::string> new_joint_names = JOINTS;
   std::string db_name = DB_NAME;
   
-  databaseMapper db_mapper(db_name);
+  databaseMapper db_mapper( db_name );
   
-  specularGraspMaker sgm(new_ee_id,new_link_name,new_joint_names,db_name);
+  specularGraspMaker sgm( new_ee_id, new_link_name, new_joint_names, db_name );
   
-  for(int i=0; i < to_be_converted_grasp_ids.size(); i++)
+  for(int i=0; i < specularized_grasps.size(); i++)
   {
-    uint grasp_id = to_be_converted_grasp_ids.at(i);
-    std::string new_grasp_name = new_grasp_names.at(i);
+    uint grasp_id = specularized_grasps.at(i);
+    std::string new_grasp_name = specularized_grasp_names.at(i);
     
     uint obj_id;
     uint ee_id;
@@ -56,10 +56,10 @@ int main(int argc, char **argv)
     ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id));
     grasp_name = std::get<2>(db_mapper.Grasps.at(grasp_id));
     
-    ROS_INFO_STREAM("Converting grasp " << grasp_name << " > " << new_grasp_name << " (" << (i+1) << " out of " << to_be_converted_grasp_ids.size() << ")");
+    ROS_INFO_STREAM("Converting grasp " << grasp_name << " > " << new_grasp_name << " (" << (i+1) << " out of " << specularized_grasps.size() << ")");
 
     bool transform_ok;
-    transform_ok = sgm.transform_grasp(obj_id,grasp_id,new_grasp_name,top_bottom);
+    transform_ok = sgm.transform_grasp( obj_id, grasp_id, new_grasp_name, top_bottom );
     
     if(!transform_ok)
     {
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
   tableGraspMaker table_grasps(db_name);
   KDL::Frame obj_ee(KDL::Vector(0.0,0.0,0.0));
   
-  if(!table_grasps.create_table_grasps(2,"bottom",obj_ee))
+  if(!table_grasps.create_table_grasps(2, "bottom", obj_ee))
   {
     ROS_FATAL_STREAM("Unable to create table grasps!!!");
     return -1;
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
   correspondences["side_x+y-"] = {"side_x-y+"};
   correspondences["side_x-y-"] = {"side_x+y+"};
   
-  namedAutomaticTransitions nat(prefixes,correspondences,DB_NAME);
+  namedAutomaticTransitions nat( prefixes, correspondences, DB_NAME );
   
   bool write_ok = nat.write_transitions();
   if(!write_ok)

@@ -1,7 +1,0 @@
-add_executable(create_iros_db create_iros_db.cpp)
-target_link_libraries(create_iros_db ${catkin_LIBRARIES} sqlite3 grasp_creation_utilities)
-add_dependencies(create_iros_db grasp_creation_utilities)
-
-add_executable(create_container_b_db create_containerB_db.cpp)
-target_link_libraries(create_container_b_db ${catkin_LIBRARIES} sqlite3 grasp_creation_utilities)
-add_dependencies(create_container_b_db grasp_creation_utilities)
