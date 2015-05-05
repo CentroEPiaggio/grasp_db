@@ -139,7 +139,7 @@ bool GraspsSerializer::updateDatabase()
     // open bag file
     rosbag::Bag bag;
     rec_grasp my_grasp;
-    my_grasp = rec_grasps_.at(0);
+    my_grasp = rec_grasps_.at(i);
     std::string bagfile( path + object_name_ + "_" + my_grasp.grasp_name + "/" + "record.bag" );
 
     ROS_INFO_STREAM( "Opening the bag file: " << bagfile );
