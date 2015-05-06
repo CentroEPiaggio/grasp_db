@@ -1,0 +1,46 @@
+# COPY TO README ONCE IT IS DONE
+
+# the name of the package were the bag files are
+dataset: "pacman_wp2_db"
+# cd catkin_ws/src
+# git clone https://github.com/CentroEPiaggio/unipi-grasp-datasets.git
+# catkin_make (this will automatically download them in the correct folder)
+# for the meshes, you need the pacman-object-database
+
+# the object name (string) (it defines the database name as well)
+object_name: "kitchenUtensilA"
+
+# the object id (int)
+object_id: 7
+
+# parameters for tf listeners in the bagfile
+reference_frame: "camera_rgb_optical_frame" #"camera_link"
+end_effector_frame: "hand_palm_link"
+object_frame: "/object"
+
+# all reasonable good grasps from the acquisitions (array of structs)
+grasps:
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=kitchenUtensilA_handle_top
+# name of the grasp (string, typically from the bag file)
+  - name: "handle_top"
+# grasp trajectory (array of double/float timestamps)
+    waypoints: [1430318161.343063, 1430318162.306372]
+# post-grasp pose (double/float timestamp)
+    post: 1430318167.662949
+# the end-effector these grasp refers to
+# [1] left_hand, [2] right_hand, [3] table
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=kitchenUtensilA_handle_top2
+  # - name: ""
+  #   waypoints: [, ]
+  #   post: 1430318247.541374
+  #   end_effector_id: 2
+# BAD ACQUISITION
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=kitchenUtensilA_top_x+
+  # - name: ""
+  #   waypoints: [, ]
+  #   post: 
+  #   end_effector_id: 2
+# BAD ACQUISITION

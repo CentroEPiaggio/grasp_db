@@ -1,0 +1,80 @@
+# COPY TO README ONCE IT IS DONE
+
+# the name of the package were the bag files are
+dataset: "pacman_wp2_db"
+# cd catkin_ws/src
+# git clone https://github.com/CentroEPiaggio/unipi-grasp-datasets.git
+# catkin_make (this will automatically download them in the correct folder)
+# for the meshes, you need the pacman-object-database
+
+# the object name (string) (it defines the database name as well)
+object_name: "containerA"
+
+# the object id (int)
+object_id: 6
+
+# parameters for tf listeners in the bagfile
+reference_frame: "camera_rgb_optical_frame" #"camera_link"
+end_effector_frame: "hand_palm_link"
+object_frame: "/object"
+
+# all reasonable good grasps from the acquisitions (array of structs)
+grasps:
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_handle_bottom
+# name of the grasp (string, typically from the bag file)
+  - name: "top_x+y-"
+# grasp trajectory (array of double/float timestamps)
+    waypoints: [1430312028.770357, 1430312030.133290]
+# post-grasp pose (double/float timestamp)
+    post: 1430312033.785978
+# the end-effector these grasp refers to
+# [1] left_hand, [2] right_hand, [3] table
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_handle_bottom2
+  - name: "handle_bottom2"
+    waypoints: [1430312065.373620, 1430312066.741248]
+    post: 1430312069.613126
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_handle_bottom3
+  - name: "handle_bottom3"
+    waypoints: [1430312373.779459, 1430312374.721541]
+    post: 1430312377.275906
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_handle_bottom4
+  - name: "handle_bottom4"
+    waypoints: [1430312428.514129, 1430312429.527408]
+    post: 1430312432.568801
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_handle_top
+  - name: "handle_top"
+    waypoints: [1430312135.255488, 1430312136.333405]
+    post: 1430312138.770254
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_handle_top2
+  - name: "handle_top2"
+    waypoints: [1430312166.358604, 1430312167.346406]
+    post: 1430312169.625181
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_top_x-
+  - name: "top_x-"
+    waypoints: [1430311775.024694, 1430311776.212113]
+    post: 1430311780.403143
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_top_x-y-
+  - name: "top_x-y-"
+    waypoints: [1430311867.796743, 1430311869.362081]
+    post: 1430311874.172014
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_top_x+y-
+  - name: "top_x+y-"
+    waypoints: [1430311919.204538, 1430311920.632801]
+    post: 1430311925.594650
+    end_effector_id: 2

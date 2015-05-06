@@ -72,15 +72,18 @@ grasps:
   #   waypoints: [1428510153.012728, 1428510153.947403]
   #   post: 1428510156.319480
   #   end_effector_id: 2
+# BAD QUALITY OF TF TOPIC
 
 # inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerB_side_x+y+_top_centered_y+
   # - name: "side_x+y+_top_centered_y+"
   #   waypoints: [1428510275.309208, 1428510275.486269]
   #   post: 1428510278.117469
   #   end_effector_id: 2
+# BAD QUALITY OF TF TOPIC
 
 # inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerB_side_x-y+_bottom
   # - name: "side_x-y+_bottom"
   #   waypoints: [1428509992.186132, 1428509992.992479]
   #   post: 1428509996.124893
   #   end_effector_id: 2
+# BAD QUALITY OF TF TOPIC

@@ -1,0 +1,56 @@
+# COPY TO README ONCE IT IS DONE
+
+# the name of the package were the bag files are
+dataset: "pacman_wp2_db"
+# cd catkin_ws/src
+# git clone https://github.com/CentroEPiaggio/unipi-grasp-datasets.git
+# catkin_make (this will automatically download them in the correct folder)
+# for the meshes, you need the pacman-object-database
+
+# the object name (string) (it defines the database name as well)
+object_name: "bowlB"
+
+# the object id (int)
+object_id: 5
+
+# parameters for tf listeners in the bagfile
+reference_frame: "camera_rgb_optical_frame" #"camera_link"
+end_effector_frame: "hand_palm_link"
+object_frame: "/object"
+
+# all reasonable good grasps from the acquisitions (array of structs)
+grasps:
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=bowlB_x+_top
+# name of the grasp (string, typically from the bag file)
+  - name: "x+_top"
+# grasp trajectory (array of double/float timestamps)
+    waypoints: [1429188694.190666, 1429188695.116777]
+# post-grasp pose (double/float timestamp)
+    post: 1429188696.624503
+# the end-effector these grasp refers to
+# [1] left_hand, [2] right_hand, [3] table
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=bowlB_x-_topinside
+  - name: "x-_topinside"
+    waypoints: [1429195949.751634, 1429195951.321479]
+    post: 1429195952.597561
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=bowlB_x+y-_top
+  - name: "x+y-_top"
+    waypoints: [1429188836.948244, 1429188838.483166]
+    post: 1429188839.517254
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=bowlB_x+y+_top
+  - name: "x+y+_top"
+    waypoints: [1429188919.939256, 1429188921.451123]
+    post: 1429188924.757825
+    end_effector_id: 2
+
+# inspect: roslaunch pacman_wp2_db playExperiment.launch name:=bowlB_y+_top
+  - name: "y+_top"
+    waypoints: [1429188522.307859, 1429188523.668419]
+    post: 1429188525.315685
+    end_effector_id: 2
