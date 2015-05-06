@@ -22,7 +22,7 @@ object_frame: "/object"
 grasps:
 # inspect: roslaunch pacman_wp2_db playExperiment.launch name:=containerA_handle_bottom
 # name of the grasp (string, typically from the bag file)
-  - name: "top_x+y-"
+  - name: "handle_bottom"
 # grasp trajectory (array of double/float timestamps)
     waypoints: [1430312028.770357, 1430312030.133290]
 # post-grasp pose (double/float timestamp)
