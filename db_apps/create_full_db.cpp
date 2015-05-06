@@ -6,7 +6,7 @@
 
 #define OBJ_GRASP_FACTOR 1000
 
-std::vector<std::string> object_list({"cylinder","containerB"});
+std::vector<std::string> object_list({"cylinder","containerB","mugD","bowlA","bowlB","containerA","kitchenUtensilA","panA","pot"});
 
 int main(int argc, char **argv)
 {
