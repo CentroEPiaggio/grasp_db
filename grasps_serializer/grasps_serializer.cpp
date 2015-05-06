@@ -232,10 +232,10 @@ bool GraspsSerializer::updateDatabase()
 
     if( !serializeGrasp( (uint)grasp_id, my_grasp ) )
     {
-      ROS_WARN_STREAM("GraspsSerializer::save_recording : unable to serialize grasp - deleting database entry just created (grasp #" << grasp_id << ")");
+      ROS_WARN_STREAM("GraspsSerializer::serializeGrasp : unable to serialize grasp - deleting database entry just created (grasp #" << grasp_id << ")");
       if( !db_writer_->deleteGrasp( (uint)grasp_id ) )
       {
-        ROS_ERROR_STREAM("GraspsSerializer::save_recording : unable to delete grasp entry (grasp #" << grasp_id << ") from DB - consider deleting it by hand!");
+        ROS_ERROR_STREAM("GraspsSerializer::serializeGrasp : unable to delete grasp entry (grasp #" << grasp_id << ") from DB - consider deleting it by hand!");
         return false;
       }
     }
@@ -268,7 +268,7 @@ bool GraspsSerializer::serializeGrasp(uint grasp_id, const rec_grasp grasp)
 
   trajectory_msgs::JointTrajectoryPoint traj_point;
   
-  ROS_WARN_STREAM("GraspsSerializer::serialize_data : considering hand synergy from 0.0 (open) to 1.0 (close) -- change when this value is recorded as well");
+  ROS_WARN_STREAM("GraspsSerializer::serializeGrasp : considering hand synergy from 0.0 (open) to 1.0 (close) -- change when this value is recorded as well");
   // hand: only open to closed
   traj_point.positions.push_back( 0.0 );
   grasp_trajectory.points.push_back( traj_point );
@@ -296,7 +296,7 @@ bool GraspsSerializer::serializeGrasp(uint grasp_id, const rec_grasp grasp)
   }
   else
   {
-    ROS_FATAL_STREAM("GraspsSerializer::serialize_data : only considering left_hand, right_hand, and table for now - check the code for correctness if more end-effectors are added!!!");
+    ROS_FATAL_STREAM("GraspsSerializer::serializeGrasp : only considering left_hand, right_hand, and table for now - check the code for correctness if more end-effectors are added!!!");
     abort();
   }
 
