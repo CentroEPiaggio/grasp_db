@@ -136,6 +136,10 @@ bool GraspsSerializer::updateDatabase()
   // traverse all grasps
   for( unsigned int i = 0; i < rec_grasps_.size(); ++i)
   {
+
+    // clear the tf tree
+    transformer_.clear();
+
     // open bag file
     rosbag::Bag bag;
     rec_grasp my_grasp;

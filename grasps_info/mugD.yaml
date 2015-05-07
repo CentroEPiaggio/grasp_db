@@ -51,11 +51,10 @@ grasps:
 # NO BAG FILE
 
 # inspect: roslaunch pacman_wp2_db playExperiment.launch name:=mugD_y-_top
-  # - name: "y-_top"
-  #   waypoints: [1429198088.447685, 1429198089.532627]
-  #   post: 1429198091.589760
-  #   end_effector_id: 2
-# TD_OLF error
+  - name: "y-_top"
+    waypoints: [1429198088.447685, 1429198089.532627]
+    post: 1429198091.589760
+    end_effector_id: 2
 
 # inspect: roslaunch pacman_wp2_db playExperiment.launch name:=mugD_z-_bottom
   - name: "z-_bottom"
