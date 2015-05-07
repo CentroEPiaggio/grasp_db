@@ -33,8 +33,8 @@ int main(int argc, char **argv)
   
   // copy empty.db to a new full_{NOW}.db
   std::string path = ros::package::getPath("dual_manipulation_grasp_db");
-  std::string new_db_name("full_" + std::string(buffer,15) + ".db");
-  std::string command = "cp " + path + "/empty.db " + path + "/" + new_db_name;
+  std::string new_db_name("full_" + std::string(buffer,15));
+  std::string command = "cp " + path + "/empty.db " + path + "/" + new_db_name + "\n";
   system(command.c_str());
   
   databaseWriter db_writer(new_db_name);
@@ -76,10 +76,11 @@ int main(int argc, char **argv)
     }
   }
 
+  // this is not working, so doing it manually
   // copy the full database with no timestamp
-  std::string full = "full.db";
-  command = "cp " + path + new_db_name + " " + path + "/" + full;
-  system(command.c_str());
+  // command = "cp " + path + "/" + new_db_name + " " + path + "/full";
+  // std::cout << command << std::endl;
+  // system(command.c_str());
 
   return 0;
 }
