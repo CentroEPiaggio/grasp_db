@@ -121,15 +121,19 @@ bool namedAutomaticTransitions::write_transitions()
 	  {
 	    uint pref_grasp_id = grasp_id_from_prefix.at(pref).at(i1);
 	    uint corr_grasp_id = grasp_id_from_prefix.at(corr).at(i2);
-#if DEBUG
+
 	    int write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id);
+	    int write_res2 = db_writer_->writeNewTransition(corr_grasp_id,pref_grasp_id);
+
 	    std::string pref_to_corr(std::to_string(pref_grasp_id) + " > " + std::to_string(corr_grasp_id));
-	    if(write_res < 0)
-	      ROS_ERROR_STREAM("Unable to write transition " << pref_to_corr);
-	    else if(write_res == 0)
-	      ROS_WARN_STREAM("Transition " << pref_to_corr << " was already present in the DB - not added");
+	    std::string corr_to_pref(std::to_string(corr_grasp_id) + " > " + std::to_string(pref_grasp_id));
+	    if(write_res < 0 || write_res2 < 0)
+	      ROS_ERROR_STREAM("Unable to write transition " << (write_res<0?pref_to_corr:"") << (write_res*write_res2>0?" AND ":"") << (write_res2<0?corr_to_pref:""));
+	    else if(write_res == 0 || write_res2 == 0)
+	      ROS_WARN_STREAM("Transition " << (write_res==0?pref_to_corr:"") << (write_res+write_res2==0?" AND ":"") << (write_res2==0?corr_to_pref:"") << " was(were) already present in the DB - not added");
+#if DEBUG
 	    else
-	      ROS_INFO_STREAM("Written transition " << pref_to_corr << " in the DB with ID " << write_res);
+	      ROS_INFO_STREAM("Written transitions " << pref_to_corr << " and " << corr_to_pref << " in the DB with IDs " << write_res << " and " << write_res2);
 #endif
 	  }
 	}
