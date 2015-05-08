@@ -231,6 +231,7 @@ void GMU::clear()
     obj_pose = geometry_msgs::Pose();
     obj_pose.orientation.w=1;
     obj_final_pose = obj_pose;
+    obj_final_pose.position.x += FINAL_OFFSET_X;
     hand_final_pose = obj_pose;
     hand_poses.clear();
 }
