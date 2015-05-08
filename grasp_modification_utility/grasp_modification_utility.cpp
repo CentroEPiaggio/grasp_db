@@ -50,7 +50,7 @@ void GMU::publish_object()
     std::string path = "package://asus_scanner_models/";
     path.append(std::get<1>(db_mapper.Objects.at(obj_id)));
 
-    visualization_msgs::Marker marker;
+    visualization_msgs::Marker& marker(object_marker);
     marker.header.frame_id="world";
     marker.lifetime=ros::DURATION_MAX;
     marker.type=visualization_msgs::Marker::MESH_RESOURCE;
@@ -193,6 +193,11 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
     if(feedback.marker_name=="object")
     {
 	obj_pose = feedback.pose;
+	
+	// change orientation of the post-grasped object accordingly to the initial object...
+	obj_final_pose.orientation = obj_pose.orientation;
+	object_marker.pose = obj_final_pose;
+	object_marker_pub.publish(object_marker);
     }
     else if(feedback.marker_name=="final_object")
     {

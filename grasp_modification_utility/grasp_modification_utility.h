@@ -49,6 +49,8 @@ private:
     std::vector<geometry_msgs::Pose> hand_poses;
     geometry_msgs::Pose obj_final_pose;
     geometry_msgs::Pose hand_final_pose;
+    // this variable will store a marker for the post-grasp object position
+    visualization_msgs::Marker object_marker;
 
     tf::Transform transform_;
     tf::TransformBroadcaster tf_broadcaster_;
