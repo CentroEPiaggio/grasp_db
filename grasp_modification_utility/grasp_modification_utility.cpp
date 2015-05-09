@@ -6,11 +6,11 @@
 
 GMU::GMU():server("grasp_modification_utility_interactive_marker")
 {
-    obj_sub = node.subscribe("/grasp_modification_utility_object",2,&GMU::update_position,this);
-    hand_sub = node.subscribe("/grasp_modification_utility_hands",10,&GMU::update_position,this);
-    object_marker_pub = node.advertise<visualization_msgs::Marker>( "/grasp_modification_utility_object", 0 );
-    hands_marker_pub = node.advertise<visualization_msgs::Marker>( "/grasp_modification_utility_hands", 0 );
-    im_sub_obj = node.subscribe("/grasp_modification_utility_interactive_marker/feedback",1,&GMU::im_callback,this);
+    obj_sub = node.subscribe("grasp_modification_utility_object",2,&GMU::update_position,this);
+    hand_sub = node.subscribe("grasp_modification_utility_hands",10,&GMU::update_position,this);
+    object_marker_pub = node.advertise<visualization_msgs::Marker>( "grasp_modification_utility_object", 0 );
+    hands_marker_pub = node.advertise<visualization_msgs::Marker>( "grasp_modification_utility_hands", 0 );
+    im_sub_obj = node.subscribe("grasp_modification_utility_interactive_marker/feedback",1,&GMU::im_callback,this);
     js_sub = node.subscribe("joint_states", 1, &GMU::publishTF, this);
 
     transform_.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
@@ -207,7 +207,7 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
     {
       static tf::TransformListener tf;
       tf::StampedTransform hand_palm;
-      double timeout = 1.0;
+      double timeout = 5.0;
       if(!tf.waitForTransform("gmu_right_hand_palm_link","hand",ros::Time(0), ros::Duration(timeout)))
 	hand_palm.setIdentity();
       else
