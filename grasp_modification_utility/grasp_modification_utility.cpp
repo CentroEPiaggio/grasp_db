@@ -11,7 +11,7 @@ GMU::GMU():server("grasp_modification_utility_interactive_marker")
     object_marker_pub = node.advertise<visualization_msgs::Marker>( "/grasp_modification_utility_object", 0 );
     hands_marker_pub = node.advertise<visualization_msgs::Marker>( "/grasp_modification_utility_hands", 0 );
     im_sub_obj = node.subscribe("/grasp_modification_utility_interactive_marker/feedback",1,&GMU::im_callback,this);
-    js_sub = node.subscribe("/joint_states", 1, &GMU::publishTF, this);
+    js_sub = node.subscribe("joint_states", 1, &GMU::publishTF, this);
 
     transform_.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
     transform_.setRotation( tf::Quaternion( 0.0, 0.0, 0.0, 1.0) );
@@ -208,10 +208,10 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
       static tf::TransformListener tf;
       tf::StampedTransform hand_palm;
       double timeout = 1.0;
-      if(!tf.waitForTransform("right_hand_palm_link","hand",ros::Time(0), ros::Duration(timeout)))
+      if(!tf.waitForTransform("gmu_right_hand_palm_link","hand",ros::Time(0), ros::Duration(timeout)))
 	hand_palm.setIdentity();
       else
-	tf.lookupTransform("right_hand_palm_link","hand", ros::Time(0), hand_palm);
+	tf.lookupTransform("gmu_right_hand_palm_link","hand", ros::Time(0), hand_palm);
       transform_.setOrigin( tf::Vector3(feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z) );
       transform_.setRotation( tf::Quaternion( feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w) );
       transform_.mult(transform_,hand_palm);
