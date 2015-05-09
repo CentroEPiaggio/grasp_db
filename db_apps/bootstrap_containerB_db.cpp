@@ -7,8 +7,7 @@
 #include "grasp_creation_utilities/named_automatic_transitions.h"
 
 #define EE_ID 1
-#define EE_FRAME "left_hand_palm_link"
-#define JOINTS {"left_hand_synergy_joint"}
+
 #define DB_NAME "containerB.db"
 #define OBJECT_ID 2
 
@@ -16,6 +15,10 @@
 // TO VALIDATE GRASPS; GENERATE TABLE GRASPS AND TRANSITIONS
 // AFTER TEST; SPECULARIZE GRASPS AND TRANSITIONS
 #define SPECULARIZE false
+
+// ONLY USFUL FOR SPECULARIZATION
+#define EE_FRAME "left_hand_palm_link"
+#define JOINTS {"left_hand_synergy_joint"}
 
 int main(int argc, char **argv)
 {
