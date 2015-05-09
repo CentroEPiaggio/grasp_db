@@ -37,6 +37,7 @@ int main(int argc, char **argv)
   std::vector<std::string> new_joint_names = JOINTS;
   std::string db_name = DB_NAME;
   
+  // JUST CREATE SPECULAR GRASPS AND TRANSITIONS
   if(SPECULARIZE)
   {
     databaseMapper db_mapper( db_name );
@@ -94,6 +95,7 @@ int main(int argc, char **argv)
     }
   }
   
+  // JUST CREATE TABLE GRASPS AND TRANSITIONS
   if(!SPECULARIZE)
   {
     // NOTE: STEP 1 > make table grasps
