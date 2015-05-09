@@ -11,7 +11,7 @@
 // default values
 #define END_EFFECTOR_ID 3		// the ID of the end-effector (table) to consider
 #define END_EFFECTOR_FRAME "world"	// the frame to be used in the request
-#define YAW_STEPS 8 			// how many steps to use when rotating the grasp
+#define YAW_STEPS 16			// how many steps to use when rotating the grasp
 #define WAYPOINT_HEIGHT 0.1		// height of the waypoint used for pre-ungrasp and post-grasp
 
 class tableGraspMaker
