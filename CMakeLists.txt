@@ -56,19 +56,19 @@ target_link_libraries(grasp_creation_utilities
 # add_dependencies(create_iros_db grasp_creation_utilities)
 
 # DB APPs
-add_executable(add_table_grasps
-	db_apps/add_table_grasps.cpp)
-add_dependencies(add_table_grasps
+add_executable(create_containerB_db
+	db_apps/create_containerB_db.cpp)
+add_dependencies(create_containerB_db
 	grasp_creation_utilities
 )
-target_link_libraries(add_table_grasps 
+target_link_libraries(create_containerB_db
 	${catkin_LIBRARIES}
 	sqlite3 
 	grasp_creation_utilities
 )
 
 # THIS GROUPS AVAILABLE DATABASES INTO A SINGLE ONE
-add_executable(create_full_db 
+add_executable(create_full_db
 	db_apps/create_full_db.cpp
 )
 add_dependencies(create_full_db
