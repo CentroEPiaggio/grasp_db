@@ -132,16 +132,26 @@ bool GeometricAutomaticTransitions::isGraspTransitionValid(const dual_manipulati
         return false;
       }
     }
-    if( (ee1_mobility == 1 && ee2_mobility == 0) || (ee1_mobility == 0 && ee2_mobility == 1) )
+    if( ee1_mobility == 1 && ee2_mobility == 0 )
     {
-      // std::cout << "Possible MOVABLE-FIX / FIX-MOVABLE transition in object #" << object1d << ", grasp " << grasp1.first << " by ee " << ee1 << " -> " << " grasp " << grasp2.first << " by ee " << ee2 << std::endl;
+      // std::cout << "Possible MOVABLE-FIX transition in object #" << object1d << ", grasp " << grasp1.first << " by ee " << ee1 << " -> " << " grasp " << grasp2.first << " by ee " << ee2 << std::endl;
 
-      if( !(isHandTableConfigValid( G1_kdl*G_kdl )) )
+      if( !(isHandTableConfigValid( (G1_kdl*G_kdl).Inverse() )) )
       {
         // only one that is not valid make the whole transition invalid
         // std::cout << "Post-grasp filter not passed"
         return false;
       }
+    }
+    if( ee1_mobility == 0 && ee2_mobility == 1 )
+    {
+        // std::cout << "Possible FIX-MOVABLE transition in object #" << object1d << ", grasp " << grasp1.first << " by ee " << ee1 << " -> " << " grasp " << grasp2.first << " by ee " << ee2 << std::endl;
+        if( !(isHandTableConfigValid( G1_kdl*G_kdl )) )
+        {
+          // only one that is not valid make the whole transition invalid
+          // std::cout << "Post-grasp filter not passed"
+          return false;
+        }
     }
     if( (ee1_mobility == 0 && ee2_mobility == 0) )
     {
@@ -156,16 +166,16 @@ bool GeometricAutomaticTransitions::isGraspTransitionValid(const dual_manipulati
 
 // config conditions
 
-bool GeometricAutomaticTransitions::isHandTableConfigValid(const KDL::Frame palm_inObject)
+bool GeometricAutomaticTransitions::isHandTableConfigValid(const KDL::Frame palm_inTable)
 {
   // this are points expressed in the palm
   KDL::Vector p1_inPalm(0.01, 0.1, 0.1);
   KDL::Vector p2_inPalm(0.01, 0.0, 0.0);
   KDL::Vector p3_inPalm(0.01, -0.1, 0.1);
 
-  KDL::Vector p1_inTable = palm_inObject*p1_inPalm;
-  KDL::Vector p2_inTable = palm_inObject*p2_inPalm;
-  KDL::Vector p3_inTable = palm_inObject*p3_inPalm;
+  KDL::Vector p1_inTable = palm_inTable*p1_inPalm;
+  KDL::Vector p2_inTable = palm_inTable*p2_inPalm;
+  KDL::Vector p3_inTable = palm_inTable*p3_inPalm;
 
   if( p1_inTable.z() > 0.0 && p2_inTable.z() > 0.0 && p3_inTable.z() > 0.0 )
   {
@@ -173,7 +183,7 @@ bool GeometricAutomaticTransitions::isHandTableConfigValid(const KDL::Frame palm
   }
   else
   {
-    // std::cout << "One of the 3 points defining the hand ws collision geometry with the table is below the table
+    std::cout << "One of the 3 points defining the hand ws collision geometry with the table is below the table" << std::endl;
     return false;
   }
 }
