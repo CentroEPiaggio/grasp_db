@@ -55,7 +55,7 @@ target_link_libraries(grasp_creation_utilities
 # target_link_libraries(create_iros_db ${catkin_LIBRARIES} sqlite3 grasp_creation_utilities)
 # add_dependencies(create_iros_db grasp_creation_utilities)
 
-# DB APPs
+# BOOTSTRAP APPs
 add_executable(bootstrap_containerB_db
 	db_apps/bootstrap_containerB_db.cpp)
 add_dependencies(bootstrap_containerB_db
@@ -63,11 +63,22 @@ add_dependencies(bootstrap_containerB_db
 )
 target_link_libraries(bootstrap_containerB_db
 	${catkin_LIBRARIES}
-	sqlite3 
+	sqlite3
 	grasp_creation_utilities
 )
 
-# THIS GROUPS AVAILABLE DATABASES INTO A SINGLE ONE
+add_executable(bootstrap_mugD_db
+	db_apps/bootstrap_mugD_db.cpp)
+add_dependencies(bootstrap_mugD_db
+	grasp_creation_utilities
+)
+target_link_libraries(bootstrap_mugD_db
+	${catkin_LIBRARIES}
+	sqlite3
+	grasp_creation_utilities
+)
+
+# CREATE FULL DATABASE APP
 add_executable(create_full_db
 	db_apps/create_full_db.cpp
 )
@@ -79,7 +90,7 @@ target_link_libraries(create_full_db
 	sqlite3
 )
 
-# GRASPS SERIALIZER
+# GRASPS SERIALIZER APP
 add_library(grasps_serializer
 	grasps_serializer/grasps_serializer.cpp
 )
@@ -99,7 +110,7 @@ target_link_libraries(grasps_serializer_node
 	${catkin_LIBRARIES}
 )
 
-# MODIFICATION UTILIY FOR REFINEMENT
+# GRASP MODIFICATION UTILITY (GMU)
 add_executable(grasp_modification_utility
 	grasp_modification_utility/grasp_modification_utility.cpp
 	grasp_modification_utility/main.cpp)
