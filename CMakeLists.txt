@@ -78,6 +78,17 @@ target_link_libraries(bootstrap_mugD_db
 	grasp_creation_utilities
 )
 
+add_executable(bootstrap_bowlA_db
+	db_apps/bootstrap_bowlA_db.cpp)
+add_dependencies(bootstrap_bowlA_db
+	grasp_creation_utilities
+)
+target_link_libraries(bootstrap_bowlA_db
+	${catkin_LIBRARIES}
+	sqlite3
+	grasp_creation_utilities
+)
+
 # CREATE FULL DATABASE APP
 add_executable(create_full_db
 	db_apps/create_full_db.cpp
