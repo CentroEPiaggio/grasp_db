@@ -42,7 +42,8 @@ include_directories(grasp_creation_utilities/include)
 add_library(grasp_creation_utilities
 	grasp_creation_utilities/table_grasp_maker.cpp
 	grasp_creation_utilities/specular_grasp_maker.cpp
-	grasp_creation_utilities/named_automatic_transitions.cpp
+        # grasp_creation_utilities/named_automatic_transitions.cpp DEPRECATED
+	grasp_creation_utilities/geometric_automatic_transitions.cpp
 )
 target_link_libraries(grasp_creation_utilities
 	${catkin_LIBRARIES}
@@ -110,6 +111,18 @@ add_dependencies(create_full_db
 target_link_libraries(create_full_db
 	${catkin_LIBRARIES}
 	sqlite3
+)
+
+# APPLY BASIC GEOMETRIC FILTER FOR ALL TO ALL TRANSITIONS
+add_executable(apply_geometric_transitions
+	db_apps/applyGeometricTransitions.cpp)
+add_dependencies(apply_geometric_transitions
+	grasp_creation_utilities
+)
+target_link_libraries(apply_geometric_transitions
+	${catkin_LIBRARIES}
+	sqlite3
+	grasp_creation_utilities
 )
 
 # GRASPS SERIALIZER APP

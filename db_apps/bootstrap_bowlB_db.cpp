@@ -40,7 +40,7 @@ int main(int argc, char **argv)
   std::vector<std::string> new_joint_names = JOINTS;
   std::string db_name = DB_NAME;
   
-  // JUST CREATE SPECULAR GRASPS AND TRANSITIONS
+  // JUST CREATE SPECULAR GRASPS
   if(SPECULARIZE)
   {
     databaseMapper db_mapper( db_name );
@@ -81,6 +81,7 @@ int main(int argc, char **argv)
     }
 
     // NOTE: STEP 2 > make transitions for specular grasps
+    /* THIS IS NOW DONE WITH THE GEOMETRIC FILTER
     std::vector<std::string> prefixes({"bottom","x+y-_top","x+y+_top","y+_top"});
     std::map<std::string,std::vector<std::string>> correspondences;
     correspondences["bottom"] = {"x","y"};
@@ -96,9 +97,10 @@ int main(int argc, char **argv)
       ROS_FATAL_STREAM("Unable to write transitions!!!");
       return -1;
     }
+    */
   }
   
-  // JUST CREATE TABLE GRASPS AND TRANSITIONS
+  // JUST CREATE TABLE GRASPS
   if(!SPECULARIZE)
   {
     // NOTE: STEP 1 > make table grasps
@@ -112,6 +114,7 @@ int main(int argc, char **argv)
     }
 
     // NOTE: STEP 2 > make transitions for table grasps
+    /* THIS IS NOW DONE WITH THE GEOMETRIC FILTER
     std::vector<std::string> prefixes({"bottom"});
     std::map<std::string,std::vector<std::string>> correspondences;
     correspondences["bottom"] = {"x","y"};
@@ -124,6 +127,7 @@ int main(int argc, char **argv)
       ROS_FATAL_STREAM("Unable to write transitions!!!");
       return -1;
     }
+    */
   }
 
   // ros::spinOnce();
