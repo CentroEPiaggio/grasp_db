@@ -5,7 +5,7 @@
 
 		<link name="hand"/>
 
-		<xacro:soft_hand parent="hand" name="gmu_right_hand" withAdaptiveTransmission="true" useMimicTag="true" left="false">
+		<xacro:soft_hand parent="hand" name="gmu_hand" withAdaptiveTransmission="true" useMimicTag="true" left="$(arg leftness)">
 				<origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
 		</xacro:soft_hand>
  

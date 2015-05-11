@@ -10,6 +10,7 @@
 #include "visualization_msgs/Marker.h"
 #include "sensor_msgs/JointState.h"
 #include "dual_manipulation_shared/databasemapper.h"
+#include "dual_manipulation_shared/databasewriter.h"
 #include <interactive_markers/interactive_marker_server.h>
 #include <string>
 
@@ -26,7 +27,9 @@ public:
     void get_hands(std::vector<geometry_msgs::Pose>& hands, geometry_msgs::Pose& final_hand);
     void clear();
 
-    databaseMapper db_mapper;
+    boost::shared_ptr<databaseMapper> db_mapper;
+    boost::shared_ptr<databaseWriter> db_writer;
+    
 private:
     void thread_body();
     void update_position(const visualization_msgs::Marker &marker_);
@@ -54,4 +57,7 @@ private:
 
     tf::Transform transform_;
     tf::TransformBroadcaster tf_broadcaster_;
+
+    bool leftness_;
+    std::string db_name_;
 };

@@ -1,7 +1,7 @@
 <launch>
 
 	<!-- LAUNCH INTERFACE -->
-	<arg name="hand" default="right_hand" doc=" Decide if you want to inspect grasps by the left_hand or right_hand" />
+    <arg name="leftness" default="false" doc="Decide if you want to inspect grasps by the left_hand (leftness:=true) or right_hand (leftness:=false)"/>
 
 	<!-- LAUNHC IMPLEMENTATION -->
     <group ns="GMU">
@@ -9,13 +9,14 @@
         <include file="$(find dual_manipulation_shared)/launch/dual_manipulation.launch"/>
 
         <!-- this is to have a nice visualization of the hand (left/right) with the joint slide -->
-        <param name="robot_description" command="$(find xacro)/xacro.py $(find dual_manipulation_grasp_db)/urdf/$(arg hand).urdf.xacro" />
+        <param name="robot_description" command="$(find xacro)/xacro.py $(find dual_manipulation_grasp_db)/urdf/hand.urdf.xacro leftness:=$(arg leftness)" />
 
         <param name="use_gui" value="true"/>
         <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
 
         <node name="hand_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
+        <param name="leftness" value="$(arg leftness)"/>
         <node pkg="dual_manipulation_grasp_db" type="grasp_modification_utility" name="grasp_modification_utility" respawn="false" output="screen"/>
 
         <node name="grasp_modification_utility_rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find dual_manipulation_grasp_db)/launch/grasp_modification_utility.rviz"/>

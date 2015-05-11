@@ -1,6 +1,7 @@
 #include "grasp_modification_utility.h"
 #include "tf_conversions/tf_kdl.h"
 #include "tf/tf.h"
+#include <dual_manipulation_shared/parsing_utils.h>
 
 #define FINAL_OFFSET_X 1.0
 
@@ -16,6 +17,16 @@ GMU::GMU():server("grasp_modification_utility_interactive_marker")
     transform_.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
     transform_.setRotation( tf::Quaternion( 0.0, 0.0, 0.0, 1.0) );
 
+    node.getParam("leftness", leftness_);
+
+    XmlRpc::XmlRpcValue params;
+    std::string database_name;
+    if( node.getParam("dual_manipulation_parameters", params) )
+      parseSingleParameter(params, database_name, "database_name");
+
+    //std::string db_name("full");
+    db_writer = boost::shared_ptr<databaseWriter>( new databaseWriter( database_name ) );
+    db_mapper = boost::shared_ptr<databaseMapper>( new databaseMapper( database_name ) );
 }
 
 void GMU::set_object(int id)
@@ -48,7 +59,7 @@ void GMU::get_hands(std::vector< geometry_msgs::Pose >& hands, geometry_msgs::Po
 void GMU::publish_object()
 {
     std::string path = "package://asus_scanner_models/";
-    path.append(std::get<1>(db_mapper.Objects.at(obj_id)));
+    path.append(std::get<1>(db_mapper->Objects.at(obj_id)));
 
     visualization_msgs::Marker& marker(object_marker);
     marker.header.frame_id="world";
@@ -79,7 +90,15 @@ void GMU::publish_object()
 
 void GMU::publish_hands()
 {
-    std::string path = "package://soft_hand_description/meshes/palm_right.stl";
+    std::string path;
+    if( leftness_ )
+    {
+        path = "package://soft_hand_description/meshes/palm_left.stl";
+    }
+    else
+    {
+        path = "package://soft_hand_description/meshes/palm_right.stl";
+    }
     int i=0;
     visualization_msgs::Marker marker;
     marker.header.frame_id="world";
@@ -208,10 +227,10 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
       static tf::TransformListener tf;
       tf::StampedTransform hand_palm;
       double timeout = 5.0;
-      if(!tf.waitForTransform("gmu_right_hand_palm_link","hand",ros::Time(0), ros::Duration(timeout)))
+      if(!tf.waitForTransform("gmu_hand_palm_link","hand",ros::Time(0), ros::Duration(timeout)))
 	hand_palm.setIdentity();
       else
-	tf.lookupTransform("gmu_right_hand_palm_link","hand", ros::Time(0), hand_palm);
+    tf.lookupTransform("gmu_hand_palm_link","hand", ros::Time(0), hand_palm);
       transform_.setOrigin( tf::Vector3(feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z) );
       transform_.setRotation( tf::Quaternion( feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w) );
       transform_.mult(transform_,hand_palm);
