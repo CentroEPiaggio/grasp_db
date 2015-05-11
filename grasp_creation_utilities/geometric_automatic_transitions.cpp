@@ -49,7 +49,7 @@ bool GeometricAutomaticTransitions::writeTransitions()
         if( ee1 == ee2 )
         {
           std::cout << "Same ee, discarded: " << ee1 << " " << ee2 << std::endl;
-          break;
+          continue;
         }
 
         int is_ee1_movable = std::get<1>( db_mapper_->EndEffectors.at( ee1 ));
