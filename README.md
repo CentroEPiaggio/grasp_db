@@ -18,6 +18,6 @@
 	- Inspect visually: `roslaunch dual_manipulation_grasp_db grasp_modification_utility.launch`
 	- Inspect with the robot: run the demo with the fake planner to test a specific grasp id.
 
-7. IF another object? GOTO 1, ELSE create the full database `roslaunch dual_manipulation_grasp_db createFullDatabase.launch`
+7. IF another object? GOTO 1, ELSE create the full database `rosrun dual_manipulation_grasp_db create_full_db`
 
 8. #sigh
