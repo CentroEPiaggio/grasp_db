@@ -57,6 +57,7 @@ target_link_libraries(grasp_creation_utilities
 # add_dependencies(create_iros_db grasp_creation_utilities)
 
 # BOOTSTRAP APPs
+# ToDO: create a loop with source names
 add_executable(bootstrap_containerB_db
 	db_apps/bootstrap_containerB_db.cpp)
 add_dependencies(bootstrap_containerB_db
@@ -96,6 +97,17 @@ add_dependencies(bootstrap_bowlB_db
 	grasp_creation_utilities
 )
 target_link_libraries(bootstrap_bowlB_db
+	${catkin_LIBRARIES}
+	sqlite3
+	grasp_creation_utilities
+)
+
+add_executable(bootstrap_containerA_db
+	db_apps/bootstrap_containerA_db.cpp)
+add_dependencies(bootstrap_containerA_db
+	grasp_creation_utilities
+)
+target_link_libraries(bootstrap_containerA_db
 	${catkin_LIBRARIES}
 	sqlite3
 	grasp_creation_utilities
