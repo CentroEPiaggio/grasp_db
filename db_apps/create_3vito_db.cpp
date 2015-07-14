@@ -114,7 +114,7 @@ int main(int argc, char **argv)
     }
     for (auto grasp:db_cylinder.Grasps)
         if (std::get<1>(grasp.second)==3)
-        db_writer.writeNewGrasp(grasp.first,object_id,std::get<1>(grasp.second),std::get<2>(grasp.second));
+        db_writer.writeNewGrasp(grasp.first,object_id,7,std::get<2>(grasp.second));
     //Transitions
     for (auto transition:db_cylinder.Grasp_transitions)
     {
