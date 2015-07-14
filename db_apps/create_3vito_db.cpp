@@ -5,6 +5,8 @@
 #include <ctime>
 
 #define OBJ_GRASP_FACTOR 1000
+#define NUM_VITO 3
+#define GRASPS_OFFSET 200
 
 int main(int argc, char **argv)
 {
@@ -18,15 +20,12 @@ int main(int argc, char **argv)
     *  - a file named cylinder_grasps.db exists with table grasps:
     *    - EE id = 1 (left)
     *    - Object id = 1
-    *    - Grasp id from 1 to 24 with short names
     *
     *    - EE id = 2 (right)
     *    - Object id = 1
-    *    - Grasp id from 25 to 48 with short names
     *
     *    - EE id = 3 (table)
     *    - Object id = 1
-    *    - Grasp id from 49 to 64 with short names
     *
     *    and with table transitions coherent with grasps
     */
@@ -48,21 +47,21 @@ int main(int argc, char **argv)
     databaseWriter db_writer(new_db_name);
     databaseMapper db_cylinder("cylinder_grasps.db");
     //Workspaces
-    for (int i=1;i<8;i++)
+    for (int i=1;i<2*(NUM_VITO+1);i++)
     {
         db_writer.writeNewWorkspace(i,"w"+std::to_string(i));
     }
     //Object
     db_writer.writeNewObject(1,"cylinder","../../grasp_db/object_meshes/cylinder.dae");
     //EndEffectors
-    for (int i=1;i<4;i++)
+    for (int i=1;i<(NUM_VITO+1);i++)
     {
         db_writer.writeNewEndEffectors((i-1)*2+1,"left"+std::to_string(i),true);
         db_writer.writeNewEndEffectors(i*2,"right"+std::to_string(i),true);
     }
-    db_writer.writeNewEndEffectors(4*2-1,"table",false);
+    db_writer.writeNewEndEffectors(2*NUM_VITO+1,"table",false);
     //Geometry
-    for (int i=1;i<8;i++)
+    for (int i=1;i<2*(NUM_VITO+1);i++)
     {
         std::string temp_geometry;
         temp_geometry.append(std::to_string(0));
@@ -84,7 +83,7 @@ int main(int argc, char **argv)
         db_writer.writeNewGeometry(i,temp_geometry);
     }
     //Reachability
-    for (int i=1;i<4;i++)
+    for (int i=1;i<NUM_VITO+1;i++)
     {
         db_writer.writeNewReachability((i-1)*2+1,2*i-1);
         db_writer.writeNewReachability((i-1)*2+1,2*i);
@@ -93,32 +92,32 @@ int main(int argc, char **argv)
         db_writer.writeNewReachability(i*2,2*i);
         db_writer.writeNewReachability(i*2,2*i+1);
     }
-    for (int i=1;i<8;i++)
-        db_writer.writeNewReachability(4*2-1,i);
+    for (int i=1;i<2*(NUM_VITO+1);i++)
+        db_writer.writeNewReachability(2*NUM_VITO+1,i);
     //Adjacency
-    for (int i=1;i<7;i++)
+    for (int i=1;i<2*NUM_VITO+1;i++)
     {
         db_writer.writeNewAdjacency(i,i+1);
     }
     const int object_id = 1;
     //Grasps
-    for (int i=1;i<4;i++)
+    for (int i=1;i<NUM_VITO+1;i++)
     {
         for (auto grasp:db_cylinder.Grasps)
         {
             if (std::get<1>(grasp.second)==1)
-                db_writer.writeNewGrasp(grasp.first+i*200,object_id,(i-1)*2+1,"left"+std::to_string((i-1)*2+1)+std::get<2>(grasp.second));
+                db_writer.writeNewGrasp(grasp.first+i*GRASPS_OFFSET,object_id,(i-1)*2+1,"left"+std::to_string((i-1)*2+1)+std::get<2>(grasp.second));
             else if (std::get<1>(grasp.second)==2)
-                db_writer.writeNewGrasp(grasp.first+i*200,object_id,i*2,"right"+std::to_string(i*2)+std::get<2>(grasp.second));
+                db_writer.writeNewGrasp(grasp.first+i*GRASPS_OFFSET,object_id,i*2,"right"+std::to_string(i*2)+std::get<2>(grasp.second));
         }
     }
     for (auto grasp:db_cylinder.Grasps)
         if (std::get<1>(grasp.second)==3)
-        db_writer.writeNewGrasp(grasp.first,object_id,7,std::get<2>(grasp.second));
+            db_writer.writeNewGrasp(grasp.first,object_id,2*NUM_VITO+1,std::get<2>(grasp.second));
     //Transitions
     for (auto transition:db_cylinder.Grasp_transitions)
     {
-        for (int i=1;i<4;i++)
+        for (int i=1;i<NUM_VITO+1;i++)
         {
             for (auto grasp:transition.second)
             {
@@ -126,21 +125,21 @@ int main(int argc, char **argv)
                 {
                     if (std::get<1>(db_cylinder.Grasps[grasp])==1 || std::get<1>(db_cylinder.Grasps[grasp])==2)
                     {
-                        for (int j=1;j<4;j++)
+                        for (int j=1;j<NUM_VITO+1;j++)
                         {
-                            db_writer.writeNewTransition(transition.first+(i)*200,grasp+(j)*200);
+                            db_writer.writeNewTransition(transition.first+(i)*GRASPS_OFFSET,grasp+(j)*GRASPS_OFFSET);
                         }
                     }
                     else
                     {
                         //some EE to Table
-                        db_writer.writeNewTransition(transition.first+(i)*200,grasp);
+                        db_writer.writeNewTransition(transition.first+(i)*GRASPS_OFFSET,grasp);
                     }
                 }
                 else
                 {
                     //Table to some EE
-                    db_writer.writeNewTransition(transition.first,grasp+(i)*200);
+                    db_writer.writeNewTransition(transition.first,grasp+(i)*GRASPS_OFFSET);
                 }
             }
         }
