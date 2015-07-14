@@ -17,7 +17,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "create_full_db");
 
   /* Assumptions
-  - a file named empty.db exists with tables workspace(s), end-effector, adjacency, and reachability all filled
+  - a file named basic.db exists with tables workspace(s), end-effector, adjacency, and reachability all filled
   - various different files of single object db's exist (cylinder.db, containerB.db, ...)
   - no object has more than 999 grasps
   */
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
   // copy empty.db to a new full_{NOW}.db
   std::string path = ros::package::getPath("dual_manipulation_grasp_db");
   std::string new_db_name("full_" + std::string(buffer,15));
-  std::string command = "cp " + path + "/empty.db " + path + "/" + new_db_name + "\n";
+  std::string command = "cp " + path + "/basic.db " + path + "/" + new_db_name + "\n";
   system(command.c_str());
   
   databaseWriter db_writer(new_db_name);
