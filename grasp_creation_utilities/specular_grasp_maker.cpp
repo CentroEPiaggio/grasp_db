@@ -10,7 +10,7 @@ specularGraspMaker::specularGraspMaker(uint ee_id, std::string ee_frame, const s
   db_name_ = db_name;
 }
 
-bool specularGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_name, bool top_bottom)
+bool specularGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_name, bool top_bottom, uint new_grasp_id)
 {
   dual_manipulation_shared::grasp_trajectory grasp_msg;
   
@@ -23,11 +23,15 @@ bool specularGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string
   assert(db_writer.unique());
   
   // write a new entry in the DB
-  int writer_ret = db_writer->writeNewGrasp(obj_id,end_effector_id_,new_grasp_name);
+  int writer_ret;
+  if(new_grasp_id == 0)
+    writer_ret = db_writer->writeNewGrasp(obj_id,end_effector_id_,new_grasp_name);
+  else
+    writer_ret = db_writer->writeNewGrasp(new_grasp_id,obj_id,end_effector_id_,new_grasp_name);
   if(writer_ret < 0)
     return false;
   
-  uint new_grasp_id = (uint)writer_ret;
+  new_grasp_id = (uint)writer_ret;
   
   transform_grasp_specularity(grasp_msg,obj_id,end_effector_frame_,joint_names_,top_bottom);
   

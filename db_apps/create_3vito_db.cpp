@@ -7,6 +7,9 @@
 #define OBJ_GRASP_FACTOR 1000
 #define NUM_VITO 3
 #define GRASPS_OFFSET 200
+#define OBJECT_ID 10
+
+int add_vitos_in_cylinder_db(std::string db_name, int num_vito);
 
 int main(int argc, char **argv)
 {
@@ -17,17 +20,10 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "create_3vito_db");
     /* Assumptions
     *  - a file named empty.db exists with tables already created but empty
-    *  - a file named cylinder_grasps.db exists with table grasps:
+    *  - a file named cylinder_grasps.db exists with right_hand grasps and end-effectors:
     *    - EE id = 1 (left)
-    *    - Object id = 1
-    *
     *    - EE id = 2 (right)
-    *    - Object id = 1
-    *
     *    - EE id = 3 (table)
-    *    - Object id = 1
-    *
-    *    and with table transitions coherent with grasps
     */
     // get current date/time to use in the naming of the full DB
     time_t rawtime;
@@ -37,6 +33,7 @@ int main(int argc, char **argv)
     timeinfo = std::localtime(&rawtime);
     std::strftime(buffer,15,"%Y%m%d_%H%M",timeinfo);
     // std::cout << buffer << std::endl;
+    const int object_id = OBJECT_ID;
 
     // copy empty.db to a new full_{NOW}.db
     std::string path = ros::package::getPath("dual_manipulation_grasp_db");
@@ -52,7 +49,7 @@ int main(int argc, char **argv)
         db_writer.writeNewWorkspace(i,"w"+std::to_string(i));
     }
     //Object
-    db_writer.writeNewObject(1,"cylinder","../../grasp_db/object_meshes/cylinder.dae");
+    db_writer.writeNewObject(object_id,"cylinder","../../grasp_db/object_meshes/cylinder.dae");
     //EndEffectors
     for (int i=1;i<(NUM_VITO+1);i++)
     {
@@ -99,51 +96,64 @@ int main(int argc, char **argv)
     {
         db_writer.writeNewAdjacency(i,i+1);
     }
-    const int object_id = 1;
-    //Grasps
-    for (int i=1;i<NUM_VITO+1;i++)
-    {
-        for (auto grasp:db_cylinder.Grasps)
-        {
-            if (std::get<1>(grasp.second)==1)
-                db_writer.writeNewGrasp(grasp.first+i*GRASPS_OFFSET,object_id,(i-1)*2+1,"left"+std::to_string((i-1)*2+1)+std::get<2>(grasp.second));
-            else if (std::get<1>(grasp.second)==2)
-                db_writer.writeNewGrasp(grasp.first+i*GRASPS_OFFSET,object_id,i*2,"right"+std::to_string(i*2)+std::get<2>(grasp.second));
-        }
-    }
+    // Grasps - copy all and do nothing about it
     for (auto grasp:db_cylinder.Grasps)
-        if (std::get<1>(grasp.second)==3)
-            db_writer.writeNewGrasp(grasp.first,object_id,2*NUM_VITO+1,std::get<2>(grasp.second));
-    //Transitions
-    for (auto transition:db_cylinder.Grasp_transitions)
     {
-        for (int i=1;i<NUM_VITO+1;i++)
-        {
-            for (auto grasp:transition.second)
-            {
-                if (std::get<1>(db_cylinder.Grasps[transition.first])==1 || std::get<1>(db_cylinder.Grasps[transition.first])==2)
-                {
-                    if (std::get<1>(db_cylinder.Grasps[grasp])==1 || std::get<1>(db_cylinder.Grasps[grasp])==2)
-                    {
-                        for (int j=1;j<NUM_VITO+1;j++)
-                        {
-                            db_writer.writeNewTransition(transition.first+(i)*GRASPS_OFFSET,grasp+(j)*GRASPS_OFFSET);
-                        }
-                    }
-                    else
-                    {
-                        //some EE to Table
-                        db_writer.writeNewTransition(transition.first+(i)*GRASPS_OFFSET,grasp);
-                    }
-                }
-                else
-                {
-                    //Table to some EE
-                    db_writer.writeNewTransition(transition.first,grasp+(i)*GRASPS_OFFSET);
-                }
-            }
-        }
+        db_writer.writeNewGrasp(grasp.first,std::get<0>(grasp.second),std::get<1>(grasp.second),std::get<2>(grasp.second));
     }
+
+    // call an externally implemented function to do the rest of the job
+    int ret;
+    ret = add_vitos_in_cylinder_db(new_db_name, NUM_VITO);
+
+    if(ret<0)
+        std::cout << "Something wrong happened inside \'add_vitos_in_cylinder_db\' function!!!" << std::endl;
+
+    // //Grasps
+    // for (int i=1;i<NUM_VITO+1;i++)
+    // {
+    //     for (auto grasp:db_cylinder.Grasps)
+    //     {
+    //         if (std::get<1>(grasp.second)==1)
+    //             db_writer.writeNewGrasp(grasp.first+i*GRASPS_OFFSET,object_id,(i-1)*2+1,"left"+std::to_string((i-1)*2+1)+std::get<2>(grasp.second));
+    //         else if (std::get<1>(grasp.second)==2)
+    //             db_writer.writeNewGrasp(grasp.first+i*GRASPS_OFFSET,object_id,i*2,"right"+std::to_string(i*2)+std::get<2>(grasp.second));
+    //     }
+    // }
+    // for (auto grasp:db_cylinder.Grasps)
+    //     if (std::get<1>(grasp.second)==3)
+    //         db_writer.writeNewGrasp(grasp.first,object_id,2*NUM_VITO+1,std::get<2>(grasp.second));
+    // //Transitions
+    // for (auto transition:db_cylinder.Grasp_transitions)
+    // {
+    //     for (int i=1;i<NUM_VITO+1;i++)
+    //     {
+    //         for (auto grasp:transition.second)
+    //         {
+    //             if (std::get<1>(db_cylinder.Grasps[transition.first])==1 || std::get<1>(db_cylinder.Grasps[transition.first])==2)
+    //             {
+    //                 if (std::get<1>(db_cylinder.Grasps[grasp])==1 || std::get<1>(db_cylinder.Grasps[grasp])==2)
+    //                 {
+    //                     for (int j=1;j<NUM_VITO+1;j++)
+    //                     {
+    //                         db_writer.writeNewTransition(transition.first+(i)*GRASPS_OFFSET,grasp+(j)*GRASPS_OFFSET);
+    //                     }
+    //                 }
+    //                 else
+    //                 {
+    //                     //some EE to Table
+    //                     db_writer.writeNewTransition(transition.first+(i)*GRASPS_OFFSET,grasp);
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 //Table to some EE
+    //                 db_writer.writeNewTransition(transition.first,grasp+(i)*GRASPS_OFFSET);
+    //             }
+    //         }
+    //     }
+    // }
+
     // this is not working, so doing it manually
     // copy the full database with no timestamp
     // command = "cp " + path + "/" + new_db_name + " " + path + "/full";
