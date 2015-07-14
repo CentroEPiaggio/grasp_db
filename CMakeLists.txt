@@ -169,6 +169,18 @@ target_link_libraries(grasp_modification_utility
 	sqlite3
 )
 
+add_executable(create_3vito_db
+        db_apps/create_3vito_db.cpp
+)
+add_dependencies(create_3vito_db
+        dual_manipulation_shared
+)
+target_link_libraries(create_3vito_db
+        ${catkin_LIBRARIES}
+        sqlite3
+)
+
+
 
 #########
 # TESTS #
