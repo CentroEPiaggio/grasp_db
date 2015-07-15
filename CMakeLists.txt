@@ -42,7 +42,7 @@ include_directories(grasp_creation_utilities/include)
 add_library(grasp_creation_utilities
 	grasp_creation_utilities/table_grasp_maker.cpp
 	grasp_creation_utilities/specular_grasp_maker.cpp
-        # grasp_creation_utilities/named_automatic_transitions.cpp DEPRECATED
+        grasp_creation_utilities/named_automatic_transitions.cpp #DEPRECATED
 	grasp_creation_utilities/geometric_automatic_transitions.cpp
 )
 target_link_libraries(grasp_creation_utilities
@@ -170,14 +170,18 @@ target_link_libraries(grasp_modification_utility
 )
 
 add_executable(create_3vito_db
-        db_apps/create_3vito_db.cpp
+        db_apps/create_3vito_db.cpp db_apps/multi_arm_cylinder_db.cpp
 )
 add_dependencies(create_3vito_db
         dual_manipulation_shared
+        apply_geometric_transitions
+        grasp_creation_utilities
 )
+
 target_link_libraries(create_3vito_db
         ${catkin_LIBRARIES}
         sqlite3
+        grasp_creation_utilities
 )
 
 

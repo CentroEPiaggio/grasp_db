@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     {
         db_writer.writeNewGrasp(grasp.first,std::get<0>(grasp.second),std::get<1>(grasp.second),std::get<2>(grasp.second));
     }
-
+    std::cout<<__LINE__<<std::endl;
     // call an externally implemented function to do the rest of the job
     int ret;
     ret = add_vitos_in_cylinder_db(new_db_name, NUM_VITO);

@@ -5,7 +5,8 @@
 
 namedAutomaticTransitions::namedAutomaticTransitions(std::string db_name):db_name_(db_name)
 {
-  if (node.getParam("dual_manipulation_grasp_db", params))
+  node = new ros::NodeHandle();
+  if (node->getParam("dual_manipulation_grasp_db", params))
     parseParameters(params);
   
   db_mapper_ = boost::shared_ptr<databaseMapper>(new databaseMapper(db_name_));
@@ -106,7 +107,7 @@ bool namedAutomaticTransitions::write_transitions()
     std::cout << std::endl;
   }
 #endif
-  
+  db_writer_->open_global();
   for(auto pref:prefixes_)
     for(auto corr:correspondences_.at(pref))
       for(int i1=0; i1<ee_id_from_prefix.at(pref).size(); i1++)
@@ -122,8 +123,9 @@ bool namedAutomaticTransitions::write_transitions()
 	    uint pref_grasp_id = grasp_id_from_prefix.at(pref).at(i1);
 	    uint corr_grasp_id = grasp_id_from_prefix.at(corr).at(i2);
 
-	    int write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id);
-	    int write_res2 = db_writer_->writeNewTransition(corr_grasp_id,pref_grasp_id);
+	    int write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,true);
+// 	    int write_res2 = db_writer_->writeNewTransition(corr_grasp_id,pref_grasp_id);
+            int write_res2 = write_res;
 
 	    std::string pref_to_corr(std::to_string(pref_grasp_id) + " > " + std::to_string(corr_grasp_id));
 	    std::string corr_to_pref(std::to_string(corr_grasp_id) + " > " + std::to_string(pref_grasp_id));
@@ -138,6 +140,6 @@ bool namedAutomaticTransitions::write_transitions()
 	  }
 	}
       }
-  
+  db_writer_->close_global();
   return true;
 }

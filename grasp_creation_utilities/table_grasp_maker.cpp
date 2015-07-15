@@ -105,7 +105,7 @@ void tableGraspMaker::build_grasp_msg(dual_manipulation_shared::grasp_trajectory
   ee_pose.push_back(obj_ee_final);
 }
 
-bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KDL::Frame obj_ee)
+bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KDL::Frame obj_ee, uint64_t new_grasp_id)
 {
   dual_manipulation_shared::grasp_trajectory grasp_msg;
   
@@ -124,18 +124,22 @@ bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KD
     build_grasp_msg(grasp_msg, obj_ee_rotated, obj_id, end_effector_frame_);
 
     // write its entry in the database
-    int grasp_id = db_writer.writeNewGrasp(obj_id,end_effector_id_,grasp_name_rotated);
-    if(grasp_id == -1)
+    int writer_ret;
+    if(new_grasp_id == 0)
+       writer_ret = db_writer.writeNewGrasp(obj_id,end_effector_id_,grasp_name_rotated);
+    else
+       writer_ret = db_writer.writeNewGrasp(new_grasp_id+i,obj_id,end_effector_id_,grasp_name_rotated);
+    if(writer_ret == -1)
     {
       ROS_ERROR_STREAM("Unable to write entry in the grasp DB - returning");
       return false;
     }
 
     // serialize it (using the id just obtained)
-    if(!serialize_data(grasp_msg, obj_id, grasp_id))
+    if(!serialize_data(grasp_msg, obj_id, writer_ret))
     {
       ROS_ERROR_STREAM("Unable to serialize grasp message - returning...");
-      if(!db_writer.deleteGrasp(grasp_id))
+      if(!db_writer.deleteGrasp(writer_ret))
       {
 	ROS_ERROR_STREAM("Unable to delete entry from DB: consider deleting it by hand!");
       }

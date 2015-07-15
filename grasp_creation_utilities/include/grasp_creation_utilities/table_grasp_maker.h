@@ -30,7 +30,7 @@ public:
   tableGraspMaker(std::string db_name = "test.db", uint yaw_steps = YAW_STEPS, uint ee_id = END_EFFECTOR_ID, double wp_height = WAYPOINT_HEIGHT, std::string ee_frame = END_EFFECTOR_FRAME);
   
   bool read_data_from_file(std::string& obj_name, std::string& grasp_name, KDL::Frame& obj_ee_final, std::string filename = "/test/table_grasp_data.txt");
-  bool create_table_grasps(int obj_id, std::string grasp_name, KDL::Frame obj_ee);
+  bool create_table_grasps(int obj_id, std::string grasp_name, KDL::Frame obj_ee, uint64_t new_grasp_id=0);
   
 private:
   bool serialize_data(const dual_manipulation_shared::grasp_trajectory& grasp_msg, int object_id, int grasp_id);

@@ -39,7 +39,7 @@ public:
 private:
   void parseParameters(XmlRpc::XmlRpcValue& params);
   
-  ros::NodeHandle node;
+  ros::NodeHandle* node;
   
   boost::shared_ptr<databaseMapper> db_mapper_;
   boost::shared_ptr<databaseWriter> db_writer_;
