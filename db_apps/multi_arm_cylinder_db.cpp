@@ -23,7 +23,7 @@ Assumptions >>> the database already contains:
 - the object Cylinder with id OBJECT_ID
 - 3 end effectors, [left_hand(1) right_hand(2) table(3)]
 - right_hand bottom and side_low grasps, which are also already serialized, with HOW_MANY_VAR variations each
-  >> and IDs starting at 101
+  >> and IDs starting at 201
 */
 
 bool specularize_grasps(uint new_ee_id,std::string new_link_name,std::vector<std::string> new_joint_names,std::vector<uint> specularized_grasps,std::vector<uint> new_grasp_ids,std::vector<std::string> specularized_grasp_names,bool top_bottom,std::string db_name)
@@ -191,8 +191,8 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
         old_ee_id = old_hand_ids.at(i);
         // check wether the new hand is a right or left one (opposite of the old one!)
         std::string left_right = (old_ee_id%3 == 1)?"right":"left";
-        new_link_name =  left_right + "_hand_palm_link";
-        new_joint_names=std::vector<std::string>({left_right + "_hand_synergy_joint"});
+        new_link_name =  left_right + std::to_string(new_ee_id) + "_hand_palm_link";
+        new_joint_names=std::vector<std::string>({left_right + std::to_string(new_ee_id) + "_hand_synergy_joint"});
         std::iota(specularized_grasps.begin(),specularized_grasps.end(),SINGLE_HAND_GRASP_LIMIT*old_ee_id + 1);
         std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*new_ee_id + 1);
         if(!specularize_grasps(new_ee_id,new_link_name,new_joint_names,specularized_grasps,new_grasp_ids,specularized_grasp_names,top_bottom,db_name))
