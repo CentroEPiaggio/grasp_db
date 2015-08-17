@@ -68,9 +68,9 @@ bool specularize_grasps(uint new_ee_id,std::string new_link_name,std::vector<std
 int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_VITO)
 {
     // CONDITIONS:
-        // - table grasps: top and bottom; 8 each
-        // - belt grasps: top and bottom; 8 each
-        // - [MUST BE DONE OUTSIDE] right-hand grasps: bottom, sidelow; 8 each
+        // - table grasps: top and bottom; HOW_MANY_ROT each
+        // - belt grasps: top and bottom; HOW_MANY_ROT each
+        // - [MUST BE DONE OUTSIDE] right-hand grasps: bottom, sidelow; HOW_MANY_VAR each
         // - specularize left-hand, complete with top and sidehigh also for right hand
         // - specularize also other right-hands and left-hands (up to NUM_VITO)
         // - named automatic transitions between top -> {bottom, sidelow};
@@ -158,8 +158,7 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     specularized_grasp_names.clear();
     specularized_grasp_names.insert(specularized_grasp_names.end(),top_vector.begin(),top_vector.end());
     specularized_grasp_names.insert(specularized_grasp_names.end(),sidehigh_vector.begin(),sidehigh_vector.end());
-    top_bottom = false;
-    // I use ids NOT starting from 1 as I'm not using top_bottom
+    top_bottom = true;
     std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*new_ee_id + 1 + HOW_MANY_VAR*2);
 
     if(!specularize_grasps(new_ee_id,new_link_name,new_joint_names,specularized_grasps,new_grasp_ids,specularized_grasp_names,top_bottom,db_name))
