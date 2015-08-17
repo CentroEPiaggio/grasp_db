@@ -2,6 +2,9 @@
 #include <kdl_conversions/kdl_msg.h>
 #include "dual_manipulation_shared/serialization_utils.h"
 
+#define CLASS_NAMESPACE "specularGraspMaker::"
+#define DEBUG 1
+
 specularGraspMaker::specularGraspMaker(uint ee_id, std::string ee_frame, const std::vector< std::string >& new_joint_names, std::string db_name)
 {
   end_effector_id_ = ee_id;
@@ -33,6 +36,10 @@ bool specularGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string
   
   new_grasp_id = (uint)writer_ret;
   
+#if DEBUG
+  std::cout << CLASS_NAMESPACE << __func__ << " : transforming grasp #" << grasp_id << " >> #" << new_grasp_id << " (object " << obj_id << ")" << std::endl;
+#endif
+  
   transform_grasp_specularity(grasp_msg,obj_id,end_effector_frame_,joint_names_,top_bottom);
   
   bool write_ok = write_grasp_msg(obj_id,new_grasp_id,grasp_msg);
@@ -50,19 +57,16 @@ bool specularGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string
   return (write_ok && delete_ok);
 }
 
-void specularGraspMaker::transform_specular_y(geometry_msgs::Pose& pose)
+void specularGraspMaker::transform_specular_y(KDL::Frame& pose)
 {
-    KDL::Frame pose_tmp;
-    tf::poseMsgToKDL(pose,pose_tmp);
-    pose_tmp.p.data[1] = -pose_tmp.p.data[1];
-    pose_tmp.M.data[1] = -pose_tmp.M.data[1];
-    pose_tmp.M.data[3] = -pose_tmp.M.data[3];
-    pose_tmp.M.data[5] = -pose_tmp.M.data[5];
-    pose_tmp.M.data[7] = -pose_tmp.M.data[7];
-    tf::poseKDLToMsg(pose_tmp,pose);
+    pose.p.data[1] = -pose.p.data[1];
+    pose.M.data[1] = -pose.M.data[1];
+    pose.M.data[3] = -pose.M.data[3];
+    pose.M.data[5] = -pose.M.data[5];
+    pose.M.data[7] = -pose.M.data[7];
 }
 
-void specularGraspMaker::transform_specular_y(std::vector< geometry_msgs::Pose >& poses)
+void specularGraspMaker::transform_specular_y(std::vector< KDL::Frame >& poses)
 {
   for(int i=0; i<poses.size(); i++)
   {
@@ -70,14 +74,10 @@ void specularGraspMaker::transform_specular_y(std::vector< geometry_msgs::Pose >
   }
 }
 
-void specularGraspMaker::transform_premultiply(std::vector<geometry_msgs::Pose>& poses, KDL::Frame frame)
+void specularGraspMaker::transform_premultiply(std::vector<KDL::Frame>& poses, KDL::Frame frame)
 {
-  KDL::Frame pose_tmp;
   for(int i=0; i<poses.size(); i++)
-  {
-    tf::poseMsgToKDL(poses.at(i),pose_tmp);
-    tf::poseKDLToMsg(frame*pose_tmp,poses.at(i));
-  }
+      poses.at(i) = frame*poses.at(i);
 }
 
 bool specularGraspMaker::read_grasp_msg(uint obj_id, uint grasp_id, dual_manipulation_shared::grasp_trajectory& grasp_msg)
@@ -106,31 +106,60 @@ bool specularGraspMaker::write_grasp_msg(uint obj_id, uint grasp_id, const dual_
 
 void specularGraspMaker::transform_grasp_specularity(dual_manipulation_shared::grasp_trajectory& grasp_msg, uint obj_id, std::string new_link_name, const std::vector< std::string >& new_joint_names, bool top_bottom)
 {
-  // transform using specularity on x|z plane (y is the orthogonal axis we consider)
-  transform_specular_y(grasp_msg.ee_pose);
+    // first of all, convert all poses to KDL, renormalizing the quaternion
+    std::vector<KDL::Frame> grasp_frames;
+    for(auto& p:grasp_msg.ee_pose)
+    {
+        geometry_msgs::Quaternion& q(p.orientation);
+        double q_norm;
+        q_norm = std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
+        if(q_norm < 0.99 || q_norm > 1.01)
+            ROS_WARN_STREAM(CLASS_NAMESPACE << __func__ << " : quaternion needed normalization (norm was " << q_norm << " | out of allowed range [0.98,1.02])");
+        KDL::Frame tmp;
+        tmp.p.x(p.position.x);
+        tmp.p.y(p.position.y);
+        tmp.p.z(p.position.z);
+        tmp.M = KDL::Rotation::Quaternion(q.x/q_norm,q.y/q_norm,q.z/q_norm,q.w/q_norm);
+        grasp_frames.push_back(tmp);
+    }
+    KDL::Frame postgrasp_frame;
+    geometry_msgs::Pose& obj_pose(grasp_msg.attObject.object.mesh_poses.front());
+    postgrasp_frame.p.x(obj_pose.position.x);
+    postgrasp_frame.p.y(obj_pose.position.y);
+    postgrasp_frame.p.z(obj_pose.position.z);
+    geometry_msgs::Quaternion& q(obj_pose.orientation);
+    double q_norm;
+    q_norm = std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
+    if(q_norm < 0.99 || q_norm > 1.01)
+        ROS_WARN_STREAM(CLASS_NAMESPACE << __func__ << " : quaternion needed normalization (norm was " << q_norm << " | out of allowed range [0.98,1.02])");
+    postgrasp_frame.M = KDL::Rotation::Quaternion(q.x/q_norm,q.y/q_norm,q.z/q_norm,q.w/q_norm);
+    postgrasp_frame = postgrasp_frame.Inverse();
+    
+    // transform using specularity on x|z plane (y is the orthogonal axis we consider)
+    transform_specular_y(grasp_frames);
+    transform_specular_y(postgrasp_frame);
   
-  // NOTE: transform top to bottom and side_low to side_high
-  if(top_bottom)
-    transform_premultiply(grasp_msg.ee_pose,KDL::Frame(KDL::Rotation::RotX(M_PI)));
+    // NOTE: transform top to bottom and side_low to side_high
+    if(top_bottom)
+    {
+        KDL::Frame rot_pi(KDL::Rotation::RotX(M_PI));
+        transform_premultiply(grasp_frames,rot_pi);
+        std::vector<KDL::Frame> v({postgrasp_frame});
+        transform_premultiply(v,rot_pi);
+        postgrasp_frame = v.front();
+    }
   
-  KDL::Frame obj_frame;
-  geometry_msgs::Pose obj_pose;
-  tf::poseMsgToKDL(grasp_msg.attObject.object.mesh_poses.front(),obj_frame);
-  obj_frame = obj_frame.Inverse();
-  tf::poseKDLToMsg(obj_frame,obj_pose);
-  transform_specular_y(obj_pose);
+    // convert back to geometry_msgs
+    grasp_msg.ee_pose.clear();
+    for(auto& f:grasp_frames)
+    {
+        geometry_msgs::Pose p;
+        tf::poseKDLToMsg(f,p);
+        grasp_msg.ee_pose.push_back(p);
+    }
+    postgrasp_frame = postgrasp_frame.Inverse();
+    tf::poseKDLToMsg(postgrasp_frame,obj_pose);
   
-  // NOTE: transform top to bottom and side_low to side_high
-  if(top_bottom)
-  {
-    std::vector<geometry_msgs::Pose> poses_vec = {obj_pose};
-    transform_premultiply(poses_vec,KDL::Frame(KDL::Rotation::RotX(M_PI)));
-    obj_pose = poses_vec.front();
-  }
-  
-  tf::poseMsgToKDL(obj_pose,obj_frame);
-  obj_frame = obj_frame.Inverse();
-  tf::poseKDLToMsg(obj_frame,obj_pose);
   grasp_msg.attObject.object.mesh_poses.clear();
   grasp_msg.attObject.object.mesh_poses.push_back(obj_pose);
   grasp_msg.attObject.link_name = new_link_name;

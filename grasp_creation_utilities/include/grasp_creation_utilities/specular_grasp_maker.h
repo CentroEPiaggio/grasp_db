@@ -41,9 +41,9 @@ public:
   
 private:
   
-  void transform_specular_y(geometry_msgs::Pose& pose);
-  void transform_specular_y(std::vector<geometry_msgs::Pose>& poses);
-  void transform_premultiply(std::vector<geometry_msgs::Pose>& poses, KDL::Frame frame);
+  void transform_specular_y(KDL::Frame& pose);
+  void transform_specular_y(std::vector< KDL::Frame >& poses);
+  void transform_premultiply(std::vector< KDL::Frame >& poses, KDL::Frame frame);
   bool read_grasp_msg(uint obj_id, uint grasp_id, dual_manipulation_shared::grasp_trajectory& grasp_msg);
   bool write_grasp_msg(uint obj_id, uint grasp_id, const dual_manipulation_shared::grasp_trajectory& grasp_msg);
   

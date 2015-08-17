@@ -5,6 +5,9 @@
 #include "dual_manipulation_shared/serialization_utils.h"
 #include "tf_conversions/tf_kdl.h"
 
+bool normalizePoses(std::vector<geometry_msgs::Pose>& poses);
+bool normalizePose(geometry_msgs::Pose& pose);
+
 int main(int argc, char** argv)
 {
 	sleep(1);
@@ -65,7 +68,7 @@ int main(int argc, char** argv)
 			if( deserialize_ik( grasp_msg, file_name ) )
 			{
 				ROS_INFO_STREAM("Deserialization object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id ) << " OK! ... You can modify the grasp in Rviz");
-				// std::cout << "grasp_msg" << grasp_msg << std::endl;
+				std::cout << "grasp_msg" << grasp_msg << std::endl;
 				if( !gmu.db_mapper->Objects.count( obj_id ) )
 				{
 					ROS_WARN_STREAM("Object " << grasp_msg.object_db_id << " is not in the database! . . . Retry!");
@@ -80,6 +83,10 @@ int main(int argc, char** argv)
 			}
 		}
 	
+        // normalize all the poses in the message (to be sure everything will work in KDL)
+        normalizePoses(grasp_msg.ee_pose);
+        normalizePoses(grasp_msg.attObject.object.mesh_poses);
+        
 		gmu.set_object(obj_id);
 		KDL::Frame obj_hand_postGrasp;
 		tf::poseMsgToKDL( grasp_msg.attObject.object.mesh_poses.front(), obj_hand_postGrasp );
@@ -117,6 +124,12 @@ int main(int argc, char** argv)
 			geometry_msgs::Pose object,final_object, final_hand;
 			gmu.get_object(object, final_object);
 			gmu.get_hands(grasp_msg.ee_pose, final_hand);
+            
+            // normalize again all poses
+            normalizePose(object);
+            normalizePose(final_object);
+            normalizePose(final_hand);
+            normalizePoses(grasp_msg.ee_pose);
 
 			KDL::Frame world_object, world_hand;
 			tf::poseMsgToKDL(object, world_object);
@@ -174,3 +187,30 @@ int main(int argc, char** argv)
 	ROS_INFO_STREAM("Bye! Thanks for using this terrific program.");
 	return 0;
 }
+
+bool normalizePose(geometry_msgs::Pose& pose)
+{
+    geometry_msgs::Quaternion& q(pose.orientation);
+    double q_norm = std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
+    q.x = q.x/q_norm;
+    q.y = q.y/q_norm;
+    q.z = q.z/q_norm;
+    q.w = q.w/q_norm;
+    
+    bool ok = (q_norm < 1.01 && q_norm > 0.99);
+    
+    if(!ok)
+        ROS_WARN_STREAM("Pose not properly normalized, quaternion norm was " << q_norm);
+    
+    return ok;
+}
+
+bool normalizePoses(std::vector< geometry_msgs::Pose >& poses)
+{
+    bool ok = true;
+    for (auto& p:poses)
+        ok = ok & normalizePose(p);
+    
+    return ok;
+}
+
