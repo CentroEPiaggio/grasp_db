@@ -2,11 +2,14 @@
 
 	<!-- LAUNCH INTERFACE -->
     <arg name="leftness" default="false" doc="Decide if you want to inspect grasps by the left_hand (leftness:=true) or right_hand (leftness:=false)"/>
+    <arg name="robot_name" default="vito" doc="Decide which robot to consider (to load appropriate parameters)"/>
 
 	<!-- LAUNHC IMPLEMENTATION -->
     <group ns="GMU">
 
-        <include file="$(find dual_manipulation_shared)/launch/dual_manipulation.launch"/>
+        <include file="$(find dual_manipulation_shared)/launch/dual_manipulation.launch">
+            <arg name="robot_name" value="$(arg robot_name)"/>
+        </include>
 
         <!-- this is to have a nice visualization of the hand (left/right) with the joint slide -->
         <param name="robot_description" command="$(find xacro)/xacro.py $(find dual_manipulation_grasp_db)/urdf/hand.urdf.xacro leftness:=$(arg leftness)" />
