@@ -23,7 +23,7 @@ std::map<int,std::vector<int>> reachability={
     // there is no 5 in the final urdf {5,{8,9,10}},
     {6,{10,11,12}},         // also 11, but it's a hole: neglect it?
     // table reachability
-    {7,{1,3,4,5,6,12}},
+    {7,{1,2,3,4,5,12}},
     // belt reachability
     {8,{8,9,10}}            // also 9, but it's on the belt: neglect it?
 };
