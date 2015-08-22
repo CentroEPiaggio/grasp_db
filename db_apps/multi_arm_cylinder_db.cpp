@@ -13,10 +13,10 @@
 #define OBJECT_ID 10
 #define DB_NAME "multi_arm_cylinder.db"
 #define NAMED_TRANSITIONS true
-#define CYLINDER_HEIGHT 0.2
+#define CYLINDER_HEIGHT 0.235
 #define SINGLE_HAND_GRASP_LIMIT 100
 #define NUM_VITO 3
-#define BELT_WP_HEIGHT 0.01
+#define BELT_WP_HEIGHT 0.0
 #define BELT_EE_ID 8
 
 /*
@@ -91,10 +91,14 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     
     // Belt grasps: Bottom and Top, as the table
     tableGraspMaker belt_grasps(db_name,HOW_MANY_ROT,BELT_EE_ID,BELT_WP_HEIGHT,"belt0_p");
-    for(int i=0; i<table_grasp_names.size(); i++)
-        if(!belt_grasps.create_table_grasps(OBJECT_ID, table_grasp_names.at(i), table_grasp_frames.at(i),BELT_EE_ID*100+1+i*HOW_MANY_ROT))
+    std::vector<KDL::Frame> belt_grasp_frames;
+    belt_grasp_frames.emplace_back(KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-0.01)));
+    belt_grasp_frames.emplace_back(KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+0.01)));
+    std::vector<std::string> belt_grasp_names({"bottom","top"});
+    for(int i=0; i<belt_grasp_names.size(); i++)
+        if(!belt_grasps.create_table_grasps(OBJECT_ID, belt_grasp_names.at(i), belt_grasp_frames.at(i),BELT_EE_ID*100+1+i*HOW_MANY_ROT))
         {
-            ROS_FATAL_STREAM("Unable to create \'" << table_grasp_names.at(i) << "\' belt grasps!!!");
+            ROS_FATAL_STREAM("Unable to create \'" << belt_grasp_names.at(i) << "\' belt grasps!!!");
             return -1;
         }
 
