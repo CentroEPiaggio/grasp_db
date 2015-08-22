@@ -23,10 +23,10 @@
 int main(int argc, char **argv)
 {
   std::cout<<std::endl;
-  std::cout<<"|Grasp db| -> create mugD db "<<std::endl;
+  std::cout<<"|Grasp db| -> create pot db "<<std::endl;
   std::cout<<std::endl;
 
-  ros::init(argc, argv, "create_mugD_db");
+  ros::init(argc, argv, "create_pot_db");
 
   /* Assumptions
   - workspaces, geometry, adjacencies, reachability
