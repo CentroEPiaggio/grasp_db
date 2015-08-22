@@ -104,14 +104,25 @@ target_link_libraries(bootstrap_bowlB_db
 )
 
 add_executable(bootstrap_containerA_db
-	db_apps/bootstrap_containerA_db.cpp)
+    db_apps/bootstrap_containerA_db.cpp)
 add_dependencies(bootstrap_containerA_db
-	grasp_creation_utilities
+    grasp_creation_utilities
 )
 target_link_libraries(bootstrap_containerA_db
-	${catkin_LIBRARIES}
-	sqlite3
-	grasp_creation_utilities
+    ${catkin_LIBRARIES}
+    sqlite3
+    grasp_creation_utilities
+)
+
+add_executable(bootstrap_cylinder_db
+    db_apps/bootstrap_cylinder_db.cpp)
+add_dependencies(bootstrap_cylinder_db
+    grasp_creation_utilities
+)
+target_link_libraries(bootstrap_cylinder_db
+    ${catkin_LIBRARIES}
+    sqlite3
+    grasp_creation_utilities
 )
 
 # CREATE FULL DATABASE APP
