@@ -45,7 +45,9 @@ bool symmetricGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::strin
         
         // write a new entry in the DB
         int writer_ret;
-        uint new_grasp_id = new_grasp_ids.at(i-1);
+        uint new_grasp_id = 0;
+        if(!new_grasp_ids.empty())
+            new_grasp_id = new_grasp_ids.at(i-1);
         if(new_grasp_id == 0)
             writer_ret = db_writer->writeNewGrasp(obj_id,end_effector_id_,new_grasp_name);
         else
