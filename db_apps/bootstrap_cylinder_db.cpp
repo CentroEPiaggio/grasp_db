@@ -6,6 +6,7 @@
 #include "grasp_creation_utilities/specular_grasp_maker.h"
 #include "grasp_creation_utilities/symmetric_grasp_maker.h"
 #include "grasp_creation_utilities/named_automatic_transitions.h"
+#include "grasp_creation_utilities/geometric_automatic_transitions.h"
 
 /* Assumptions
  * - *workspaces, geometry, adjacencies, reachability
@@ -27,8 +28,9 @@
 #define SOURCE_JOINTS {"right_hand_synergy_joint"}
 #define TARGET_EE_FRAME "left_hand_palm_link"
 #define TARGET_JOINTS {"left_hand_synergy_joint"}
-#define EE_GRASP_NR 8
+#define EE_GRASP_NR 16
 #define DO_SIDE_GRASPS 0
+#define NAMED_TRANSITIONS 1
 
 #if DO_SIDE_GRASPS
 #define FIRST_FREE_GRASP 3
@@ -39,7 +41,7 @@
 #define CYLINDER_HEIGHT 0.255
 #define CYLINDER_RADIUS 0.031
 #define TABLE_WP_HEIGHT 0.1
-#define HOW_MANY_TABLE_ROT 8
+#define HOW_MANY_TABLE_ROT 16
 #define TABLE_EE_ID 3
 // a small additional height
 #define EPS 0.001
@@ -139,8 +141,8 @@ int main(int argc, char **argv)
         table_grasp_frames.emplace_back(KDL::Frame(KDL::Rotation::RPY(-M_PI/2.0,0.0,0.0),KDL::Vector(0.0,CYLINDER_RADIUS+EPS,0.0)));
         std::vector<std::string> table_grasp_names({"bottom","top"});
 #if DO_SIDE_GRASPS
-        table_grasp_names.push_back("side_A");
-        table_grasp_names.push_back("side_B");
+        table_grasp_names.push_back("table_side_A");
+        table_grasp_names.push_back("table_side_B");
 #endif
         for(int i=0; i<table_grasp_names.size(); i++)
             if(!table_grasps.create_table_grasps(OBJECT_ID, table_grasp_names.at(i), table_grasp_frames.at(i),0))
@@ -150,6 +152,7 @@ int main(int argc, char **argv)
             }
     }
 
+#if NAMED_TRANSITIONS
     // make named transitions
 #if DO_SIDE_GRASPS
     std::vector<std::string> prefixes({"bottom","top","side_low","side_high","table_side"});
@@ -175,6 +178,16 @@ int main(int argc, char **argv)
         ROS_FATAL_STREAM("Unable to write transitions!!!");
         return -1;
     }
+#else
+    // make geometric transitions
+    double hand_sphere_size = 0.1;
+    GeometricAutomaticTransitions transitioner(db_name,hand_sphere_size);
+    if(!transitioner.writeTransitions())
+    {
+        ROS_FATAL_STREAM("Unable to write transitions!!!");
+        return -1;
+    }
+#endif
 
   return 0;
 }
