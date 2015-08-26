@@ -4,28 +4,34 @@
 #include <dual_manipulation_shared/databasewriter.h>
 #include "grasp_creation_utilities/table_grasp_maker.h"
 #include <grasp_creation_utilities/specular_grasp_maker.h>
+#include <grasp_creation_utilities/symmetric_grasp_maker.h>
 #include <grasp_creation_utilities/named_automatic_transitions.h>
 #include <algorithm>
 
 #define HOW_MANY_ROT 8 // how many rotations for table grasps
 #define HOW_MANY_VAR 8 // how many variations for each of the hand grasps
 #define STARTING_EE_ID 2
+#define SOURCE_EE_FRAME "right_hand_palm_link"
+#define SOURCE_JOINTS {"right_hand_synergy_joint"}
 #define OBJECT_ID 10
 #define DB_NAME "multi_arm_cylinder.db"
 #define NAMED_TRANSITIONS true
-#define CYLINDER_HEIGHT 0.235
+#define CYLINDER_HEIGHT 0.255
 #define SINGLE_HAND_GRASP_LIMIT 100
 #define NUM_VITO 3
 #define BELT_WP_HEIGHT 0.0
+#define TABLE_WP_HEIGHT 0.05
 #define BELT_EE_ID 8
+// a small additional height
+#define EPS 0.01
 
 /*
 Assumptions >>> the database already contains:
 - workspaces, geometry, adjacencies, reachability
 - the object Cylinder with id OBJECT_ID
 - 3 end effectors, [left_hand(1) right_hand(2) table(3)]
-- right_hand bottom and sidelow grasps, which are also already serialized, with HOW_MANY_VAR variations each
-  >> and IDs starting at 201
+- right_hand bottom and sidelow grasps, 1 each, which are also already serialized
+  >> and IDs which are 201(bottom) and 201+how_many_var(sidelow)
 */
 
 bool specularize_grasps(uint new_ee_id,std::string new_link_name,std::vector<std::string> new_joint_names,std::vector<uint> specularized_grasps,std::vector<uint> new_grasp_ids,std::vector<std::string> specularized_grasp_names,bool top_bottom,std::string db_name)
@@ -65,22 +71,22 @@ bool specularize_grasps(uint new_ee_id,std::string new_link_name,std::vector<std
     return true;
 }
 
-int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_VITO)
+int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_VITO, int how_many_var = HOW_MANY_VAR)
 {
     // CONDITIONS:
         // - table grasps: top and bottom; HOW_MANY_ROT each
         // - belt grasps: top and bottom; HOW_MANY_ROT each
-        // - [MUST BE DONE OUTSIDE] right-hand grasps: bottom, sidelow; HOW_MANY_VAR each
+        // - [MUST BE DONE OUTSIDE] right-hand grasps: bottom, sidelow; how_many_var each
         // - specularize left-hand, complete with top and sidehigh also for right hand
         // - specularize also other right-hands and left-hands (up to NUM_VITO)
         // - named automatic transitions between top -> {bottom, sidelow};
         //   bottom -> {top, sidehigh}; sidehigh -> {bottom, sidelow}; sidelow -> {bottom, sidehigh}
 
     // Table grasps: Bottom and Top, with HOW_MANY_ROT rotation steps
-    tableGraspMaker table_grasps(db_name,HOW_MANY_ROT,num_vito*2+1);
+    tableGraspMaker table_grasps(db_name,HOW_MANY_ROT,num_vito*2+1,TABLE_WP_HEIGHT);
     std::vector<KDL::Frame> table_grasp_frames;
-    table_grasp_frames.emplace_back(KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0)));
-    table_grasp_frames.emplace_back(KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0)));
+    table_grasp_frames.emplace_back(KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-EPS)));
+    table_grasp_frames.emplace_back(KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+EPS)));
     std::vector<std::string> table_grasp_names({"bottom","top"});
     for(int i=0; i<table_grasp_names.size(); i++)
         if(!table_grasps.create_table_grasps(OBJECT_ID, table_grasp_names.at(i), table_grasp_frames.at(i),1+i*HOW_MANY_ROT))
@@ -92,8 +98,8 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     // Belt grasps: Bottom and Top, as the table
     tableGraspMaker belt_grasps(db_name,HOW_MANY_ROT,BELT_EE_ID,BELT_WP_HEIGHT,"belt0_p");
     std::vector<KDL::Frame> belt_grasp_frames;
-    belt_grasp_frames.emplace_back(KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-0.01)));
-    belt_grasp_frames.emplace_back(KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+0.01)));
+    belt_grasp_frames.emplace_back(KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-2.0*EPS)));
+    belt_grasp_frames.emplace_back(KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+2.0*EPS)));
     std::vector<std::string> belt_grasp_names({"bottom","top"});
     for(int i=0; i<belt_grasp_names.size(); i++)
         if(!belt_grasps.create_table_grasps(OBJECT_ID, belt_grasp_names.at(i), belt_grasp_frames.at(i),BELT_EE_ID*100+1+i*HOW_MANY_ROT))
@@ -102,11 +108,29 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
             return -1;
         }
 
+    // PART 0
+    // Generate via symmetry how_many_var-1 new grasps for the right hand
+    {
+        KDL::Vector z_axis(0,0,1);
+        KDL::Frame rotFrame_obj(KDL::Frame::Identity());
+        symmetricGraspMaker sgm(STARTING_EE_ID,SOURCE_EE_FRAME,SOURCE_JOINTS,db_name);
+        std::vector<uint> new_grasp_ids(how_many_var - 1);
+
+        // rotate bottom grasp
+        std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 2);
+        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 1,"bottom",new_grasp_ids,how_many_var,z_axis,rotFrame_obj))
+            return -1;
+        // rotate sidelow grasp
+        std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + how_many_var + 2);
+        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + how_many_var + 1,"sidelow",new_grasp_ids,how_many_var,z_axis,rotFrame_obj))
+            return -1;
+    }
+
     // some useful definitions
-    std::vector<std::string> top_vector(HOW_MANY_VAR,"top");
-    std::vector<std::string> bottom_vector(HOW_MANY_VAR,"bottom");
-    std::vector<std::string> sidehigh_vector(HOW_MANY_VAR,"sidehigh");
-    std::vector<std::string> sidelow_vector(HOW_MANY_VAR,"sidelow");
+    std::vector<std::string> top_vector(how_many_var,"top");
+    std::vector<std::string> bottom_vector(how_many_var,"bottom");
+    std::vector<std::string> sidehigh_vector(how_many_var,"sidehigh");
+    std::vector<std::string> sidelow_vector(how_many_var,"sidelow");
 
     // PART 1
     // Specularize right_hand bottom and sidelow into left_hand top and sidehigh
@@ -114,7 +138,7 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     uint old_ee_id = STARTING_EE_ID;
     std::string new_link_name = "left_hand_palm_link";
     std::vector<std::string> new_joint_names = {"left_hand_synergy_joint"};
-    std::vector<uint> specularized_grasps(HOW_MANY_VAR*2);
+    std::vector<uint> specularized_grasps(how_many_var*2);
     std::iota(specularized_grasps.begin(),specularized_grasps.end(),SINGLE_HAND_GRASP_LIMIT*old_ee_id + 1);
 
     std::vector<std::string> specularized_grasp_names;
@@ -125,7 +149,7 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
 
     std::vector<uint> new_grasp_ids(specularized_grasps.size());
     // as I'm specularizing top_bottom, I use higher ids
-    std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*new_ee_id + 1 + HOW_MANY_VAR*2);
+    std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*new_ee_id + 1 + how_many_var*2);
 
     if(!specularize_grasps(new_ee_id,new_link_name,new_joint_names,specularized_grasps,new_grasp_ids,specularized_grasp_names,top_bottom,db_name))
     {
@@ -163,7 +187,7 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     specularized_grasp_names.insert(specularized_grasp_names.end(),top_vector.begin(),top_vector.end());
     specularized_grasp_names.insert(specularized_grasp_names.end(),sidehigh_vector.begin(),sidehigh_vector.end());
     top_bottom = true;
-    std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*new_ee_id + 1 + HOW_MANY_VAR*2);
+    std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*new_ee_id + 1 + how_many_var*2);
 
     if(!specularize_grasps(new_ee_id,new_link_name,new_joint_names,specularized_grasps,new_grasp_ids,specularized_grasp_names,top_bottom,db_name))
     {
@@ -235,9 +259,9 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     {
         std::vector<std::string> prefixes({"bottom","top","sidehigh","sidelow"});
         std::map<std::string,std::vector<std::string>> correspondences;
-        correspondences["bottom"]    = {"top",      "sidehigh"};
+        correspondences["bottom"]    = {"top"}; //,      "sidehigh"};
         correspondences["sidelow"]  = {"top",      "sidehigh"};
-        correspondences["top"]       = {"bottom",   "sidelow"};
+        correspondences["top"]       = {"bottom"}; //,   "sidelow"};
         correspondences["sidehigh"] = {"bottom",   "sidelow"};
 
         namedAutomaticTransitions nat( prefixes, correspondences, db_name );

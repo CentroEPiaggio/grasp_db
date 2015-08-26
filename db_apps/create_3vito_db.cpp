@@ -7,13 +7,15 @@
 #define OBJ_GRASP_FACTOR 1000
 #define NUM_KUKAS 6
 #define NUM_WORKSPACES 12
-#define GRASPS_OFFSET 200
+#define SOURCE_EE_ID 2
+#define GRASPS_OFFSET (100*SOURCE_EE_ID)
 #define OBJECT_ID 10
 #define WS_Y_MAX 0.0
 #define WS_Y_MIN -1.3
 #define NUM_END_EFFECTORS NUM_KUKAS+2
+#define HOW_MANY_HAND_GRASPS 8
 
-int add_vitos_in_cylinder_db(std::string db_name, int num_vito);
+int add_vitos_in_cylinder_db(std::string db_name, int num_vito, int how_many_var);
 
 std::map<int,std::vector<int>> reachability={
     {1,{1,2}},
@@ -43,10 +45,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "create_6kuka_db");
     /* Assumptions
     *  - a file named empty.db exists with tables already created but empty
-    *  - a file named cylinder_grasps.db exists with right_hand grasps and end-effectors:
-    *    - EE id = 1 (left)
-    *    - EE id = 2 (right)
-    *    - EE id = 3 (table)
+    *  - two right_hand grasps (bottom and sidelow) already serialized in the folder "object($OBJECT_ID)", with IDs (GRASPS_OFFSET+1) and (GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1)
     */
     // get current date/time to use in the naming of the full DB
     time_t rawtime;
@@ -65,7 +64,6 @@ int main(int argc, char **argv)
     system(command.c_str());
 
     databaseWriter db_writer(new_db_name);
-    databaseMapper db_cylinder("cylinder_grasps.db");
     //Workspaces
     for (int i=1;i<NUM_WORKSPACES+1;i++)
     {
@@ -119,15 +117,13 @@ int main(int argc, char **argv)
     {
         db_writer.writeNewAdjacency(i,i+1);
     }
-    // Grasps - copy all and do nothing about it
-    for (auto grasp:db_cylinder.Grasps)
-    {
-        db_writer.writeNewGrasp(grasp.first,std::get<0>(grasp.second),std::get<1>(grasp.second),std::get<2>(grasp.second));
-    }
-    std::cout<<__LINE__<<std::endl;
+    // Grasps - there have to be only two
+    db_writer.writeNewGrasp(GRASPS_OFFSET+1,OBJECT_ID,SOURCE_EE_ID,"bottom");
+    db_writer.writeNewGrasp(GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1,OBJECT_ID,SOURCE_EE_ID,"sidelow");
+
     // call an externally implemented function to do the rest of the job
     int ret;
-    ret = add_vitos_in_cylinder_db(new_db_name, NUM_KUKAS/2);
+    ret = add_vitos_in_cylinder_db(new_db_name, NUM_KUKAS/2,HOW_MANY_HAND_GRASPS);
 
     if(ret<0)
         std::cout << "Something wrong happened inside \'add_vitos_in_cylinder_db\' function!!!" << std::endl;
