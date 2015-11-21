@@ -23,6 +23,10 @@ catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
+find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+include(${QT_USE_FILE})
+add_definitions(-DQT_NO_KEYWORDS)
+
 #########
 # BUILD #
 #########
@@ -181,14 +185,21 @@ target_link_libraries(grasps_serializer_node
 )
 
 # GRASP MODIFICATION UTILITY (GMU)
-add_executable(grasp_modification_utility
+qt4_wrap_cpp(GMU_GUI_MOC_FILES
+grasp_modification_utility/GMU_gui.h)
+
+set(GMU_GUI_SRC
+${GMU_GUI_MOC_FILES}
+grasp_modification_utility/GMU_gui.cpp)
+
+add_executable(grasp_modification_utility ${GMU_GUI_SRC}
 	grasp_modification_utility/grasp_modification_utility.cpp
 	grasp_modification_utility/main.cpp)
 add_dependencies(grasp_modification_utility
 	dual_manipulation_shared
 )
 target_link_libraries(grasp_modification_utility
-	${catkin_LIBRARIES}
+	${catkin_LIBRARIES} ${QT_LIBRARIES}
 	sqlite3
 )
 

@@ -2,8 +2,11 @@
 #include "ros/ros.h"
 #include <string>
 #include "grasp_modification_utility.h"
+#include "GMU_gui.h"
 #include "dual_manipulation_shared/serialization_utils.h"
 #include "tf_conversions/tf_kdl.h"
+#include <QApplication>
+#include <thread>
 
 bool normalizePoses(std::vector<geometry_msgs::Pose>& poses);
 bool normalizePose(geometry_msgs::Pose& pose);
@@ -20,6 +23,11 @@ int main(int argc, char** argv)
 	ros::AsyncSpinner spin(1);
 	spin.start();
     GMU gmu;
+    
+    QApplication app(argc,argv);
+    gmu_gui gui(gmu);
+    gui.show();
+    app.exec();
 
 	ROS_INFO_STREAM("This is a utility to modify one serialized grasp (post grasp pose is with the blue object - grasp trajectory with the green one)");
 
