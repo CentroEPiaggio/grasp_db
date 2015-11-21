@@ -1,3 +1,6 @@
+#ifndef GMU_H
+#define GMU_H
+
 #include <iostream>
 #include "ros/ros.h"
 #include "tf/tf.h"
@@ -61,3 +64,5 @@ private:
     bool leftness_;
     std::string db_name_;
 };
+
+#endif //GMU_H
