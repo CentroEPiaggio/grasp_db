@@ -25,9 +25,25 @@ private Q_SLOTS:
     void on_delete_button_clicked();
     void on_add_before_button_clicked();
     void on_add_last_button_clicked();
+    void on_edit_button_clicked();
+    void on_copy_button_clicked();
+    void on_save_button_clicked();
+    void on_abort_button_clicked();
 
 private:
     GMU& gmu;
+
+    void toggle_top_layout(bool enable);
+    void toggle_middle_layouts(bool enable);
+    void toggle_bottom_layout(bool enable);
+    void starting_mode(bool starting);
+    bool initialize_gmu();
+
+    bool editing; //false means copying
+    dual_manipulation_shared::grasp_trajectory grasp_msg;
+    int obj_id;
+    int grasp_id;
+    std::string file_name;
 
     QVBoxLayout main_layout;
 
@@ -36,6 +52,10 @@ private:
     QComboBox waypoint_selection;
     QLabel object_label;
     QLineEdit object_text;
+    QLabel grasp_id_label;
+    QLineEdit grasp_id_text;
+    QPushButton edit;
+    QPushButton copy;
 
     QHBoxLayout layout2;
     QPushButton delete_button;
@@ -50,6 +70,10 @@ private:
     QHBoxLayout layout4;
     QLabel synergy_label;
     QSlider synergy_slider;
+
+    QHBoxLayout layout5;
+    QPushButton save;
+    QPushButton abort;
 };
 
 #endif //GMU_GUI_H
