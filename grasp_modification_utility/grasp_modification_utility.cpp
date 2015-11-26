@@ -39,6 +39,7 @@ void GMU::set_hands(std::vector< geometry_msgs::Pose > hands, geometry_msgs::Pos
     for(auto hand:hands) hand_poses.push_back(hand);
     hand_final_pose = final_hand;
     hand_final_pose.position.x += FINAL_OFFSET_X;
+    number_of_waypoints = hand_poses.size()+1;
 }
 
 void GMU::get_object(geometry_msgs::Pose& obj, geometry_msgs::Pose& final_obj)
@@ -54,6 +55,11 @@ void GMU::get_hands(std::vector< geometry_msgs::Pose >& hands, geometry_msgs::Po
     for(int i=0;i<hand_poses.size();i++) hands.push_back(hand_poses.at(i));
     final_hand = hand_final_pose;
     final_hand.position.x -= FINAL_OFFSET_X;
+}
+
+void GMU::setCurrentWaypoint(int wp)
+{
+    current_waypoint=wp;
 }
 
 void GMU::publish_object()
@@ -152,7 +158,12 @@ void GMU::update_position(const visualization_msgs::Marker &marker_)
 {
     visualization_msgs::InteractiveMarker int_marker;
     int_marker.header.frame_id = "/world";
-    int_marker.name = (marker_.ns=="hands")?std::to_string(marker_.id):marker_.ns;
+
+    if( (marker_.ns=="object" || marker_.ns=="final_object")  ||
+	(marker_.ns=="hands" && current_waypoint==marker_.id) ||
+	(marker_.ns=="final_hand" && current_waypoint==number_of_waypoints-1) )
+    int_marker.name = marker_.ns;
+
     int_marker.description = "";
     int_marker.scale=0.2;
 
@@ -240,7 +251,8 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
       }
       else
       {
-	hand_poses.at(std::stoi(feedback.marker_name))=feedback.pose;
+	hand_poses.at(current_waypoint)=feedback.pose;
+	publish_hands();
       }
     }
 }

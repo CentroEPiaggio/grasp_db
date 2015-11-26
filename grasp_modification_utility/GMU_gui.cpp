@@ -155,6 +155,10 @@ bool gmu_gui::initialize_gmu()
     tf::poseKDLToMsg( obj_hand_postGrasp, postGrasp_pose );
     gmu.set_hands( grasp_msg.ee_pose, postGrasp_pose );
 
+    waypoint_selection.clear();
+    waypoint_selection.addItem(QString::number(0));
+    for(int i=1;i<grasp_msg.ee_pose.size();i++) waypoint_selection.addItem(QString::number(i));
+
     gmu.publish_object();
     gmu.publish_hands();
 
@@ -177,7 +181,8 @@ void gmu_gui::on_copy_button_clicked()
 
 void gmu_gui::on_waypoint_selection_changed()
 {
-
+    gmu.setCurrentWaypoint(waypoint_selection.currentText().toInt());
+    gmu.publish_hands();
 }
 
 void gmu_gui::on_delete_button_clicked()

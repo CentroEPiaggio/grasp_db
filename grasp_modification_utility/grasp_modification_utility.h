@@ -29,12 +29,12 @@ public:
     void get_object(geometry_msgs::Pose& obj,geometry_msgs::Pose& final_obj);
     void get_hands(std::vector<geometry_msgs::Pose>& hands, geometry_msgs::Pose& final_hand);
     void clear();
+    void setCurrentWaypoint(int wp);
 
     boost::shared_ptr<databaseMapper> db_mapper;
     boost::shared_ptr<databaseWriter> db_writer;
     
 private:
-    void thread_body();
     void update_position(const visualization_msgs::Marker &marker_);
     void im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback);
     void publishTF(const sensor_msgs::JointState &msg);
@@ -52,6 +52,8 @@ private:
     
     geometry_msgs::Pose obj_pose;
     int obj_id;
+    int current_waypoint=0;
+    int number_of_waypoints=0;
     std::vector<geometry_msgs::Pose> hand_poses;
     geometry_msgs::Pose obj_final_pose;
     geometry_msgs::Pose hand_final_pose;

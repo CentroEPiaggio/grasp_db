@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /InteractiveMarkers1
-        - /RobotModel1
+        - /Marker1
       Splitter Ratio: 0.514377
     Tree Height: 463
   - Class: rviz/Selection
@@ -68,181 +68,181 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        gmu_right_hand_clamp:
+        gmu_hand_clamp:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_index_distal_link:
+        gmu_hand_index_distal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_index_fake_link1:
+        gmu_hand_index_fake_link1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        gmu_right_hand_index_fake_link2:
+        gmu_hand_index_fake_link2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        gmu_right_hand_index_fake_link3:
+        gmu_hand_index_fake_link3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        gmu_right_hand_index_knuckle_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        gmu_right_hand_index_middle_link:
+        gmu_hand_index_knuckle_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_index_proximal_link:
+        gmu_hand_index_middle_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_invisible_wire_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_kuka_coupler:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_kuka_coupler_bottom:
+        gmu_hand_index_proximal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_little_distal_link:
+        gmu_hand_invisible_wire_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_kuka_coupler:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_kuka_coupler_bottom:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_little_fake_link1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_little_fake_link2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_little_fake_link3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_little_knuckle_link:
+        gmu_hand_little_distal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_little_middle_link:
+        gmu_hand_little_fake_link1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_little_fake_link2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_little_fake_link3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_little_knuckle_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_little_proximal_link:
+        gmu_hand_little_middle_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_middle_distal_link:
+        gmu_hand_little_proximal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_middle_fake_link1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_middle_fake_link2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_middle_fake_link3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_middle_knuckle_link:
+        gmu_hand_middle_distal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_middle_middle_link:
+        gmu_hand_middle_fake_link1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_middle_fake_link2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_middle_fake_link3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_middle_knuckle_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_middle_proximal_link:
+        gmu_hand_middle_middle_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_palm_link:
+        gmu_hand_middle_proximal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_ring_distal_link:
+        gmu_hand_palm_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_ring_fake_link1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_ring_fake_link2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_ring_fake_link3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_ring_knuckle_link:
+        gmu_hand_ring_distal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_ring_middle_link:
+        gmu_hand_ring_fake_link1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_ring_fake_link2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_ring_fake_link3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_ring_knuckle_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_ring_proximal_link:
+        gmu_hand_ring_middle_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_softhand_base:
+        gmu_hand_ring_proximal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_thumb_distal_link:
+        gmu_hand_softhand_base:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_thumb_fake_link1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_thumb_fake_link3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gmu_right_hand_thumb_knuckle_link:
+        gmu_hand_thumb_distal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gmu_right_hand_thumb_proximal_link:
+        gmu_hand_thumb_fake_link1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_thumb_fake_link3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gmu_hand_thumb_knuckle_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gmu_hand_thumb_proximal_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -257,6 +257,14 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /GMU/grasp_modification_utility_hands
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -281,22 +289,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.808327
+      Distance: 1.27192
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.000543815
-        Y: -0.0732883
-        Z: 0.123023
+        X: 0.261392
+        Y: 0.0330425
+        Z: 0.114588
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.294797
+      Pitch: 0.389797
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.19539
+      Yaw: 1.97039
     Saved: ~
 Window Geometry:
   Displays:
@@ -314,5 +322,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1301
-  X: 45
+  X: 55
   Y: 14
