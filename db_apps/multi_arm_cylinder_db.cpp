@@ -8,7 +8,7 @@
 #include <grasp_creation_utilities/named_automatic_transitions.h>
 #include <algorithm>
 
-#define HOW_MANY_ROT 8 // how many rotations for table grasps
+#define HOW_MANY_ROT 16 // how many rotations for table grasps
 #define HOW_MANY_VAR 8 // how many variations for each of the hand grasps
 #define STARTING_EE_ID 2
 #define SOURCE_EE_FRAME "right_hand_palm_link"
@@ -259,9 +259,9 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     {
         std::vector<std::string> prefixes({"bottom","top","sidehigh","sidelow"});
         std::map<std::string,std::vector<std::string>> correspondences;
-        correspondences["bottom"]    = {"top"}; //,      "sidehigh"};
+        correspondences["bottom"]    = {"top",      "sidehigh"};
         correspondences["sidelow"]  = {"top",      "sidehigh"};
-        correspondences["top"]       = {"bottom"}; //,   "sidelow"};
+        correspondences["top"]       = {"bottom",   "sidelow"};
         correspondences["sidehigh"] = {"bottom",   "sidelow"};
 
         namedAutomaticTransitions nat( prefixes, correspondences, db_name );
