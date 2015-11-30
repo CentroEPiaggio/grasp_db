@@ -161,8 +161,10 @@ void GMU::update_position(const visualization_msgs::Marker &marker_)
 
     if( (marker_.ns=="object" || marker_.ns=="final_object")  ||
 	(marker_.ns=="hands" && current_waypoint==marker_.id) ||
-	(marker_.ns=="final_hand" && current_waypoint==number_of_waypoints-1) )
-    int_marker.name = marker_.ns;
+	(marker_.ns=="final_hand") )
+      int_marker.name = marker_.ns;
+    else
+      return;
 
     int_marker.description = "";
     int_marker.scale=0.2;
@@ -248,6 +250,7 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
       if(feedback.marker_name=="final_hand")
       {
 	hand_final_pose = feedback.pose;
+	publish_hands();
       }
       else
       {
