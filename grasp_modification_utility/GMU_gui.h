@@ -12,6 +12,7 @@
 #include <QSlider>
 #include <map>
 #include "grasp_modification_utility.h"
+#include "ros/ros.h"
 
 class gmu_gui: public QWidget
 {
@@ -38,7 +39,10 @@ private:
     void toggle_bottom_layout(bool enable);
     void starting_mode(bool starting);
     bool initialize_gmu();
+    void im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback);
+    void update_coords(geometry_msgs::Pose wp);
 
+    int current_wp=0;
     bool editing; //false means copying
     dual_manipulation_shared::grasp_trajectory grasp_msg;
     int obj_id;
@@ -74,6 +78,9 @@ private:
     QHBoxLayout layout5;
     QPushButton save;
     QPushButton abort;
+
+    ros::NodeHandle node;
+    ros::Subscriber sub;
 };
 
 #endif //GMU_GUI_H

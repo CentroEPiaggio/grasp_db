@@ -2,6 +2,7 @@
 #include "normalization_utils.cpp"
 #include "dual_manipulation_shared/serialization_utils.h"
 #include "tf_conversions/tf_kdl.h"
+#include "tf/tf.h"
 
 void insertSeparator(QVBoxLayout* tab)
 {
@@ -17,6 +18,7 @@ void insertSeparator(QVBoxLayout* tab)
 
 gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
 {
+    sub = node.subscribe("grasp_modification_utility_interactive_marker/feedback",1,&gmu_gui::im_callback,this);
     object_label.setText("obj_id");
     grasp_id_label.setText("grasp_id");
     edit.setText("EDIT");
@@ -181,8 +183,49 @@ void gmu_gui::on_copy_button_clicked()
 
 void gmu_gui::on_waypoint_selection_changed()
 {
-    gmu.setCurrentWaypoint(waypoint_selection.currentText().toInt());
+    current_wp = waypoint_selection.currentText().toInt();
+    gmu.setCurrentWaypoint(current_wp);
     gmu.publish_hands();
+
+    update_coords(gmu.get_wp(current_wp));
+}
+
+void gmu_gui::update_coords(geometry_msgs::Pose wp)
+{
+    coord_text.at(0)->setText(QString::number(wp.position.x));
+    coord_text.at(1)->setText(QString::number(wp.position.y));
+    coord_text.at(2)->setText(QString::number(wp.position.z));
+    
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(wp.orientation,q);
+    tf::Matrix3x3 M(q);
+    double roll,pitch,yaw;
+    M.getRPY(roll,pitch,yaw);
+
+    coord_text.at(3)->setText(QString::number(roll));
+    coord_text.at(4)->setText(QString::number(pitch));
+    coord_text.at(5)->setText(QString::number(yaw));
+}
+
+void gmu_gui::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback)
+{
+    if(feedback.marker_name!="hands") return;
+
+    static tf::TransformListener tf;
+    static tf::Transform transform_;
+
+    tf::StampedTransform hand_palm;
+    double timeout = 5.0;
+    if(!tf.waitForTransform("gmu_hand_palm_link","hand",ros::Time(0), ros::Duration(timeout)))
+	hand_palm.setIdentity();
+    else
+	tf.lookupTransform("gmu_hand_palm_link","hand", ros::Time(0), hand_palm);
+
+    transform_.setOrigin( tf::Vector3(feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z) );
+    transform_.setRotation( tf::Quaternion( feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w) );
+    transform_.mult(transform_,hand_palm);
+
+    update_coords(feedback.pose);
 }
 
 void gmu_gui::on_delete_button_clicked()

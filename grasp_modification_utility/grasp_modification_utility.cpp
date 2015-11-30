@@ -49,6 +49,17 @@ void GMU::get_object(geometry_msgs::Pose& obj, geometry_msgs::Pose& final_obj)
     final_obj.position.x -= FINAL_OFFSET_X;
 }
 
+geometry_msgs::Pose GMU::get_wp(int i)
+{
+    if(i<hand_poses.size())
+	return hand_poses.at(i);
+    else
+    {
+      ROS_ERROR_STREAM("Error in getting wp @ "<<__FILE__<<": "<<__LINE__);
+      return geometry_msgs::Pose();
+    }
+}
+
 void GMU::get_hands(std::vector< geometry_msgs::Pose >& hands, geometry_msgs::Pose& final_hand)
 {
     hands.clear();
