@@ -48,12 +48,18 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
     coord_label[3]=new QLabel("r");
     coord_label[4]=new QLabel("p");
     coord_label[5]=new QLabel("y");
+    
     for(int i=0;i<6;i++)
     {
 	coord_text[i]=new QLineEdit();
 	layout3.addWidget(coord_label.at(i),i%3,1+3*(i/3));
 	layout3.addWidget(coord_text.at(i),i%3,2+3*(i/3));
+
+	connect(coord_text.at(i), SIGNAL(textEdited(QString)),&signalMapper, SLOT(map())) ;
+	signalMapper.setMapping(coord_text.at(i), i) ;
     }
+    connect(&signalMapper, SIGNAL(mapped(int)), this, SLOT(on_text_changed(int))) ; 
+
     layout3.addWidget(&pos_label,0,0);
     layout3.addWidget(&or_label,0,3);
 
@@ -167,6 +173,33 @@ bool gmu_gui::initialize_gmu()
     return true;
 }
 
+void gmu_gui::on_text_changed(const int& id)
+{
+    geometry_msgs::Pose hand = gmu.get_wp(current_wp);
+
+    if(id==0) hand.position.x = coord_text.at(id)->text().toDouble();
+    if(id==1) hand.position.y = coord_text.at(id)->text().toDouble();
+    if(id==2) hand.position.z = coord_text.at(id)->text().toDouble();
+
+    if(id>2)
+    {
+	double ro,pi,ya;
+	tf::Quaternion q;
+	tf::quaternionMsgToTF(hand.orientation,q);
+	tf::Matrix3x3(q).getRPY(ro,pi,ya);
+
+	if(id==3) q.setRPY(coord_text.at(id)->text().toDouble(),pi,ya);
+	if(id==4) q.setRPY(ro,coord_text.at(id)->text().toDouble(),ya);
+	if(id==5) q.setRPY(ro,pi,coord_text.at(id)->text().toDouble());
+
+	tf::quaternionTFToMsg(q,hand.orientation);
+    }
+
+    normalizePose(hand);
+    gmu.set_wp(current_wp,hand);
+    gmu.publish_hands();
+}
+
 void gmu_gui::on_edit_button_clicked()
 {
     starting_mode(false);
@@ -192,9 +225,9 @@ void gmu_gui::on_waypoint_selection_changed()
 
 void gmu_gui::update_coords(geometry_msgs::Pose wp)
 {
-    coord_text.at(0)->setText(QString::number(wp.position.x));
-    coord_text.at(1)->setText(QString::number(wp.position.y));
-    coord_text.at(2)->setText(QString::number(wp.position.z));
+    coord_text.at(0)->setText(QString::number(wp.position.x, 'f', 2));
+    coord_text.at(1)->setText(QString::number(wp.position.y, 'f', 2));
+    coord_text.at(2)->setText(QString::number(wp.position.z, 'f', 2));
     
     tf::Quaternion q;
     tf::quaternionMsgToTF(wp.orientation,q);
@@ -202,9 +235,9 @@ void gmu_gui::update_coords(geometry_msgs::Pose wp)
     double roll,pitch,yaw;
     M.getRPY(roll,pitch,yaw);
 
-    coord_text.at(3)->setText(QString::number(roll));
-    coord_text.at(4)->setText(QString::number(pitch));
-    coord_text.at(5)->setText(QString::number(yaw));
+    coord_text.at(3)->setText(QString::number(roll, 'f', 2));
+    coord_text.at(4)->setText(QString::number(pitch, 'f', 2));
+    coord_text.at(5)->setText(QString::number(yaw, 'f', 2));
 }
 
 void gmu_gui::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback)

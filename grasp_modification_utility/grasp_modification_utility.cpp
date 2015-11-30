@@ -60,6 +60,17 @@ geometry_msgs::Pose GMU::get_wp(int i)
     }
 }
 
+void GMU::set_wp(int i, geometry_msgs::Pose wp)
+{
+    if(i<hand_poses.size())
+	hand_poses.at(i)=wp;
+    else
+    {
+      ROS_ERROR_STREAM("Error in setting wp @ "<<__FILE__<<": "<<__LINE__);
+      return;
+    }
+}
+
 void GMU::get_hands(std::vector< geometry_msgs::Pose >& hands, geometry_msgs::Pose& final_hand)
 {
     hands.clear();

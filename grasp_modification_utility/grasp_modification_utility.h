@@ -29,6 +29,7 @@ public:
     void get_object(geometry_msgs::Pose& obj,geometry_msgs::Pose& final_obj);
     void get_hands(std::vector<geometry_msgs::Pose>& hands, geometry_msgs::Pose& final_hand);
     geometry_msgs::Pose get_wp(int i);
+    void set_wp(int i, geometry_msgs::Pose wp);
     void clear();
     void setCurrentWaypoint(int wp);
 

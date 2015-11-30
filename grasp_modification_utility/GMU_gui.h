@@ -10,6 +10,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSlider>
+#include <QSignalMapper>
 #include <map>
 #include "grasp_modification_utility.h"
 #include "ros/ros.h"
@@ -30,6 +31,7 @@ private Q_SLOTS:
     void on_copy_button_clicked();
     void on_save_button_clicked();
     void on_abort_button_clicked();
+    void on_text_changed(const int& id);
 
 private:
     GMU& gmu;
@@ -81,6 +83,8 @@ private:
 
     ros::NodeHandle node;
     ros::Subscriber sub;
+
+    QSignalMapper signalMapper;
 };
 
 #endif //GMU_GUI_H
