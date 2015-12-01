@@ -71,6 +71,29 @@ void GMU::set_wp(int i, geometry_msgs::Pose wp)
     }
 }
 
+void GMU::delete_wp(int i)
+{
+    std::vector<geometry_msgs::Pose> new_hand_poses;
+
+    for(int j=0;j<hand_poses.size();j++)
+	if(j!=i) new_hand_poses.push_back(hand_poses.at(j));
+
+    hand_poses=new_hand_poses;
+}
+
+void GMU::add_extra_wp(int i)
+{
+    std::vector<geometry_msgs::Pose> new_hand_poses;
+
+    for(int j=0;j<hand_poses.size();j++)
+    {
+        new_hand_poses.push_back(hand_poses.at(j));
+	if(j==i) new_hand_poses.push_back(hand_poses.at(j));
+    }
+
+    hand_poses=new_hand_poses;
+}
+
 void GMU::get_hands(std::vector< geometry_msgs::Pose >& hands, geometry_msgs::Pose& final_hand)
 {
     hands.clear();
@@ -132,6 +155,10 @@ void GMU::publish_hands()
     marker.header.frame_id="world";
     marker.lifetime=ros::DURATION_MAX;
 
+    marker.action=3; //clearing the display
+    hands_marker_pub.publish(marker);
+
+    marker.action=visualization_msgs::Marker::ADD;
     marker.type=visualization_msgs::Marker::MESH_RESOURCE;
     marker.mesh_resource=path.c_str();
     marker.scale.x=0.001;

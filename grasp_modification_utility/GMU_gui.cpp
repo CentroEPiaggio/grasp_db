@@ -167,6 +167,7 @@ bool gmu_gui::initialize_gmu()
     waypoint_selection.addItem(QString::number(0));
     for(int i=1;i<grasp_msg.ee_pose.size();i++) waypoint_selection.addItem(QString::number(i));
 
+    if(waypoint_selection.count()==1) delete_button.setEnabled(false);
     gmu.publish_object();
     gmu.publish_hands();
 
@@ -263,17 +264,30 @@ void gmu_gui::im_callback(const visualization_msgs::InteractiveMarkerFeedback& f
 
 void gmu_gui::on_delete_button_clicked()
 {
+    gmu.delete_wp(current_wp);
+    int last = waypoint_selection.count()-1;
+    waypoint_selection.removeItem(last);
+    gmu.publish_hands();
 
+    if(last==1) delete_button.setEnabled(false);
 }
 
 void gmu_gui::on_add_before_button_clicked()
 {
-
+    gmu.add_extra_wp(current_wp);
+    int last = waypoint_selection.count()-1;
+    waypoint_selection.addItem(QString::number(last+1));
+    delete_button.setEnabled(true);
+    gmu.publish_hands();
 }
 
 void gmu_gui::on_add_last_button_clicked()
 {
-
+    int last = waypoint_selection.count()-1;
+    gmu.add_extra_wp(last);
+    waypoint_selection.addItem(QString::number(last+1));
+    delete_button.setEnabled(true);
+    gmu.publish_hands();
 }
 
 void gmu_gui::on_save_button_clicked()
