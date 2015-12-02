@@ -16,6 +16,7 @@
 #include "dual_manipulation_shared/databasewriter.h"
 #include <interactive_markers/interactive_marker_server.h>
 #include <string>
+#include <atomic>
 
 class GMU
 {
@@ -34,6 +35,7 @@ public:
     void add_extra_wp(int i);
     void clear();
     void setCurrentWaypoint(int wp);
+    void toggle_objects_interaction(bool on);
 
     boost::shared_ptr<databaseMapper> db_mapper;
     boost::shared_ptr<databaseWriter> db_writer;
@@ -69,6 +71,7 @@ private:
 
     bool leftness_;
     std::string db_name_;
+    std::atomic_bool objects_active;
 };
 
 #endif //GMU_H

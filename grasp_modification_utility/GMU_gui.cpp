@@ -68,6 +68,11 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
     layout4.addWidget(&synergy_label);
     layout4.addWidget(&synergy_slider);
 
+    check_label.setText("object interaction");
+    check_box.setCheckState(Qt::Checked);
+    layout4a.addWidget(&check_label);
+    layout4a.addWidget(&check_box,0,Qt::AlignLeft);
+
     save.setText("SAVE");
     abort.setText("ABORT");
     layout5.addWidget(&save);
@@ -78,6 +83,7 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
     main_layout.addLayout(&layout2);
     main_layout.addLayout(&layout3);
     main_layout.addLayout(&layout4);
+    main_layout.addLayout(&layout4a);
     insertSeparator(&main_layout);
     main_layout.addLayout(&layout5);
 
@@ -90,6 +96,8 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
     connect(&delete_button,SIGNAL(clicked(bool)),this,SLOT(on_delete_button_clicked()));
     connect(&add_before_button,SIGNAL(clicked(bool)),this,SLOT(on_add_before_button_clicked()));
     connect(&add_last_button,SIGNAL(clicked(bool)),this,SLOT(on_add_last_button_clicked()));
+
+    connect(&check_box,SIGNAL(stateChanged(int)),this,SLOT(on_check_box_changed()));
 
     connect(&save,SIGNAL(clicked(bool)),this,SLOT(on_save_button_clicked()));
     connect(&abort,SIGNAL(clicked(bool)),this,SLOT(on_abort_button_clicked()));
@@ -114,6 +122,7 @@ void gmu_gui::toggle_middle_layouts(bool enable)
     add_last_button.setEnabled(enable);
     for(auto text:coord_text) text.second->setEnabled(enable);
     synergy_slider.setEnabled(enable);
+    check_box.setEnabled(enable);
 }
 
 void gmu_gui::toggle_bottom_layout(bool enable)
@@ -288,6 +297,21 @@ void gmu_gui::on_add_last_button_clicked()
     waypoint_selection.addItem(QString::number(last+1));
     delete_button.setEnabled(true);
     gmu.publish_hands();
+}
+
+void gmu_gui::on_check_box_changed()
+{
+    if(check_box.checkState() == Qt::Checked)
+    {
+	gmu.toggle_objects_interaction(true);
+    }
+
+    if(check_box.checkState() == Qt::Unchecked)
+    {
+	gmu.toggle_objects_interaction(false);
+    }
+
+    gmu.publish_object();
 }
 
 void gmu_gui::on_save_button_clicked()

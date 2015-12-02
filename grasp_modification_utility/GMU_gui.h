@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QSignalMapper>
+#include <QCheckBox>
 #include <map>
 #include "grasp_modification_utility.h"
 #include "ros/ros.h"
@@ -32,6 +33,7 @@ private Q_SLOTS:
     void on_save_button_clicked();
     void on_abort_button_clicked();
     void on_text_changed(const int& id);
+    void on_check_box_changed();
 
 private:
     GMU& gmu;
@@ -76,6 +78,10 @@ private:
     QHBoxLayout layout4;
     QLabel synergy_label;
     QSlider synergy_slider;
+
+    QHBoxLayout layout4a;
+    QLabel check_label;
+    QCheckBox check_box;
 
     QHBoxLayout layout5;
     QPushButton save;

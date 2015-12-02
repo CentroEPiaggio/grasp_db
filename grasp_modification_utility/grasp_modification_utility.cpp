@@ -7,6 +7,8 @@
 
 GMU::GMU():server("grasp_modification_utility_interactive_marker")
 {
+    objects_active.store(true);
+
     obj_sub = node.subscribe("grasp_modification_utility_object",2,&GMU::update_position,this);
     hand_sub = node.subscribe("grasp_modification_utility_hands",10,&GMU::update_position,this);
     object_marker_pub = node.advertise<visualization_msgs::Marker>( "grasp_modification_utility_object", 0 );
@@ -203,6 +205,11 @@ void GMU::publish_hands()
     hands_marker_pub.publish(marker);
 }
 
+void GMU::toggle_objects_interaction(bool on)
+{
+    objects_active.store(on);
+}
+
 void GMU::update_position(const visualization_msgs::Marker &marker_)
 {
     visualization_msgs::InteractiveMarker int_marker;
@@ -219,12 +226,19 @@ void GMU::update_position(const visualization_msgs::Marker &marker_)
     int_marker.scale=0.2;
 
     int_marker.controls.clear();
-
+    
     visualization_msgs::InteractiveMarkerControl box_control;
     box_control.always_visible = true;
     box_control.markers.push_back( marker_);
 
     int_marker.controls.push_back( box_control );
+
+    if((int_marker.name=="object" || int_marker.name=="final_object") && !objects_active.load())
+    {
+        server.insert(int_marker);
+	server.applyChanges();
+	return;
+    }
 
     visualization_msgs::InteractiveMarkerControl control;
     
