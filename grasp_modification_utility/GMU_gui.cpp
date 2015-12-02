@@ -3,6 +3,8 @@
 #include "dual_manipulation_shared/serialization_utils.h"
 #include "tf_conversions/tf_kdl.h"
 #include "tf/tf.h"
+#include <QLayoutItem>
+#include "ros/duration.h"
 
 void insertSeparator(QVBoxLayout* tab)
 {
@@ -19,6 +21,8 @@ void insertSeparator(QVBoxLayout* tab)
 gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
 {
     sub = node.subscribe("grasp_modification_utility_interactive_marker/feedback",1,&gmu_gui::im_callback,this);
+    joint_pub = node.advertise<sensor_msgs::JointState>("gui_joint_state_publisher",1);
+
     object_label.setText("obj_id");
     grasp_id_label.setText("grasp_id");
     edit.setText("EDIT");
@@ -55,18 +59,17 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
 	layout3.addWidget(coord_label.at(i),i%3,1+3*(i/3));
 	layout3.addWidget(coord_text.at(i),i%3,2+3*(i/3));
 
-	connect(coord_text.at(i), SIGNAL(textEdited(QString)),&signalMapper, SLOT(map())) ;
-	signalMapper.setMapping(coord_text.at(i), i) ;
+	connect(coord_text.at(i), SIGNAL(textEdited(QString)),&coord_mapper, SLOT(map())) ;
+	coord_mapper.setMapping(coord_text.at(i), i) ;
     }
-    connect(&signalMapper, SIGNAL(mapped(int)), this, SLOT(on_text_changed(int))) ; 
+    connect(&coord_mapper, SIGNAL(mapped(int)), this, SLOT(on_text_changed(int))) ; 
 
     layout3.addWidget(&pos_label,0,0);
     layout3.addWidget(&or_label,0,3);
 
-    synergy_label.setText("synergy joint");
-    synergy_slider.setOrientation(Qt::Horizontal);
-    layout4.addWidget(&synergy_label);
-    layout4.addWidget(&synergy_slider);
+    time_from_start_label.setText("time from start [s]: ");
+    time_from_start_text.setText(QString::number(0, 'f', 2));
+    connect(&time_from_start_text, SIGNAL(textEdited(QString)),this, SLOT(on_time_from_start_changed())) ;
 
     check_label.setText("object interaction");
     check_box.setCheckState(Qt::Checked);
@@ -106,6 +109,48 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
     gmu.clear();
 }
 
+void gmu_gui::update_sliders(int number_of_joints)
+{
+    QLayoutItem* child;
+    while((child = layout4.takeAt(0)) != 0) delete child;
+    synergy_label.clear();
+    synergy_slider.clear();
+
+    for(int i=0;i<number_of_joints;i++)
+    {
+        std::string lab = grasp_msg.grasp_trajectory.joint_names.at(i);
+        if(lab=="right_hand_synergy_joint") lab="gmu_hand_synergy_joint"; //HACK
+
+	QLabel* label = new QLabel(QString::fromStdString(lab));
+	QSlider* slider = new QSlider();
+	slider->setOrientation(Qt::Horizontal);
+	slider->setRange(0,100);
+	slider->setSliderPosition(grasp_msg.grasp_trajectory.points.at(current_wp).positions.at(i)*100);
+    
+	synergy_label.push_back(label);
+	synergy_slider.push_back(slider);
+
+	QHBoxLayout* layout = new QHBoxLayout();
+	layout->addWidget(label);
+	layout->addWidget(slider);
+	layout4.addLayout(layout);
+
+	connect(synergy_slider.at(i), SIGNAL(valueChanged(int)),&slider_mapper, SLOT(map())) ;
+	slider_mapper.setMapping(synergy_slider.at(i), i) ;
+    }
+
+    if(number_of_joints!=0)
+    {
+	connect(&slider_mapper, SIGNAL(mapped(int)), this, SLOT(on_slider_moved(int))) ;
+	QHBoxLayout* layout = new QHBoxLayout();
+	layout->addWidget(&time_from_start_label);
+	layout->addWidget(&time_from_start_text);
+	time_from_start_text.setText(QString::number(grasp_msg.grasp_trajectory.points.at(current_wp).time_from_start.toSec(), 'f', 2));
+	layout4.addLayout(layout);
+	on_slider_moved(0);
+    }
+}
+
 void gmu_gui::toggle_top_layout(bool enable)
 {
     object_text.setEnabled(enable);
@@ -121,7 +166,8 @@ void gmu_gui::toggle_middle_layouts(bool enable)
     add_before_button.setEnabled(enable);
     add_last_button.setEnabled(enable);
     for(auto text:coord_text) text.second->setEnabled(enable);
-    synergy_slider.setEnabled(enable);
+    for(auto slid:synergy_slider) slid->setEnabled(enable);
+    time_from_start_text.setEnabled(enable);
     check_box.setEnabled(enable);
 }
 
@@ -163,6 +209,8 @@ bool gmu_gui::initialize_gmu()
     // normalize all the poses in the message (to be sure everything will work in KDL)
     normalizePoses(grasp_msg.ee_pose);
     normalizePoses(grasp_msg.attObject.object.mesh_poses);
+
+    update_sliders(grasp_msg.grasp_trajectory.joint_names.size());
     
     gmu.set_object(obj_id);
     KDL::Frame obj_hand_postGrasp;
@@ -231,6 +279,17 @@ void gmu_gui::on_waypoint_selection_changed()
     gmu.publish_hands();
 
     update_coords(gmu.get_wp(current_wp));
+    update_joints_info();
+}
+
+void gmu_gui::update_joints_info()
+{
+    for(int i=0;i<grasp_msg.grasp_trajectory.joint_names.size();i++)
+    {
+	synergy_slider.at(i)->setSliderPosition(grasp_msg.grasp_trajectory.points.at(current_wp).positions.at(i)*100);
+    }
+    time_from_start_text.setText(QString::number(grasp_msg.grasp_trajectory.points.at(current_wp).time_from_start.toSec(), 'f', 2));
+    publish_joint_state();
 }
 
 void gmu_gui::update_coords(geometry_msgs::Pose wp)
@@ -274,6 +333,7 @@ void gmu_gui::im_callback(const visualization_msgs::InteractiveMarkerFeedback& f
 void gmu_gui::on_delete_button_clicked()
 {
     gmu.delete_wp(current_wp);
+    delete_joint_wp();
     int last = waypoint_selection.count()-1;
     waypoint_selection.removeItem(last);
     gmu.publish_hands();
@@ -284,6 +344,7 @@ void gmu_gui::on_delete_button_clicked()
 void gmu_gui::on_add_before_button_clicked()
 {
     gmu.add_extra_wp(current_wp);
+    add_joint_wp();
     int last = waypoint_selection.count()-1;
     waypoint_selection.addItem(QString::number(last+1));
     delete_button.setEnabled(true);
@@ -294,6 +355,7 @@ void gmu_gui::on_add_last_button_clicked()
 {
     int last = waypoint_selection.count()-1;
     gmu.add_extra_wp(last);
+    add_joint_wp();
     waypoint_selection.addItem(QString::number(last+1));
     delete_button.setEnabled(true);
     gmu.publish_hands();
@@ -312,6 +374,53 @@ void gmu_gui::on_check_box_changed()
     }
 
     gmu.publish_object();
+}
+
+void gmu_gui::delete_joint_wp()
+{
+    grasp_msg.grasp_trajectory.points.erase(grasp_msg.grasp_trajectory.points.begin()+current_wp);
+}
+
+void gmu_gui::add_joint_wp()
+{
+    trajectory_msgs::JointTrajectory new_traj =  grasp_msg.grasp_trajectory;
+    new_traj.points.clear();
+
+    for(int i=0;i<grasp_msg.grasp_trajectory.points.size();i++)
+    {
+	new_traj.points.push_back(grasp_msg.grasp_trajectory.points.at(i));
+	if(i==current_wp) new_traj.points.push_back(grasp_msg.grasp_trajectory.points.at(i));
+    }
+
+    grasp_msg.grasp_trajectory=new_traj;
+}
+
+void gmu_gui::publish_joint_state()
+{
+    joint_msg.name.clear();
+    joint_msg.position.clear();
+
+    for(auto name:grasp_msg.grasp_trajectory.joint_names)
+    {
+	if(name=="right_hand_synergy_joint") name="gmu_hand_synergy_joint"; //HACK
+	joint_msg.name.push_back(name);
+    }
+    for(auto q:grasp_msg.grasp_trajectory.points.at(current_wp).positions) joint_msg.position.push_back(q);
+
+    joint_pub.publish(joint_msg);
+}
+
+void gmu_gui::on_slider_moved(const int& id)
+{
+    grasp_msg.grasp_trajectory.points.at(current_wp).positions.at(id) = (double)(synergy_slider.at(id)->value()/100.0);
+
+    publish_joint_state();
+}
+
+void gmu_gui::on_time_from_start_changed()
+{
+    ros::Duration time(time_from_start_text.text().toDouble());
+    grasp_msg.grasp_trajectory.points.at(current_wp).time_from_start = time;
 }
 
 void gmu_gui::on_save_button_clicked()
@@ -374,7 +483,7 @@ void gmu_gui::on_save_button_clicked()
 
 void gmu_gui::on_abort_button_clicked() //this is also used to reset everything
 {
-    ROS_INFO_STREAM("Aborting, resetting everything.");
+    ROS_INFO_STREAM("Resetting everything.");
     starting_mode(true);
     gmu.clear();
 }

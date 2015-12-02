@@ -34,6 +34,8 @@ private Q_SLOTS:
     void on_abort_button_clicked();
     void on_text_changed(const int& id);
     void on_check_box_changed();
+    void on_slider_moved(const int& id);
+    void on_time_from_start_changed();
 
 private:
     GMU& gmu;
@@ -45,6 +47,11 @@ private:
     bool initialize_gmu();
     void im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback);
     void update_coords(geometry_msgs::Pose wp);
+    void update_sliders(int number_of_joints);
+    void publish_joint_state();
+    void update_joints_info();
+    void delete_joint_wp();
+    void add_joint_wp();
 
     int current_wp=0;
     bool editing; //false means copying
@@ -74,10 +81,14 @@ private:
     QLabel pos_label, or_label;
     std::map<int, QLabel*> coord_label;
     std::map<int, QLineEdit*> coord_text;
+    QSignalMapper coord_mapper;
 
-    QHBoxLayout layout4;
-    QLabel synergy_label;
-    QSlider synergy_slider;
+    QVBoxLayout layout4;
+    std::vector<QLabel*> synergy_label;
+    std::vector<QSlider*> synergy_slider;
+    QSignalMapper slider_mapper;
+    QLabel time_from_start_label;
+    QLineEdit time_from_start_text;
 
     QHBoxLayout layout4a;
     QLabel check_label;
@@ -89,8 +100,8 @@ private:
 
     ros::NodeHandle node;
     ros::Subscriber sub;
-
-    QSignalMapper signalMapper;
+    ros::Publisher joint_pub;
+    sensor_msgs::JointState joint_msg;
 };
 
 #endif //GMU_GUI_H

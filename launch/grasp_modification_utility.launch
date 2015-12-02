@@ -14,8 +14,10 @@
         <!-- this is to have a nice visualization of the hand (left/right) with the joint slide -->
         <param name="robot_description" command="$(find xacro)/xacro.py $(find dual_manipulation_grasp_db)/urdf/hand.urdf.xacro leftness:=$(arg leftness)" />
 
-        <param name="use_gui" value="true"/>
-        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+        <!--<param name="use_gui" value="true"/>-->
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+	  <rosparam param="source_list">["gui_joint_state_publisher"]</rosparam>
+	</node>
 
         <node name="hand_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
