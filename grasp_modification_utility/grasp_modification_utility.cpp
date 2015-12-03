@@ -15,6 +15,7 @@ GMU::GMU():server("grasp_modification_utility_interactive_marker")
     hands_marker_pub = node.advertise<visualization_msgs::Marker>( "grasp_modification_utility_hands", 0 );
     im_sub_obj = node.subscribe("grasp_modification_utility_interactive_marker/feedback",1,&GMU::im_callback,this);
     js_sub = node.subscribe("joint_states", 1, &GMU::publishTF, this);
+    fake_im_pub = node.advertise<visualization_msgs::InteractiveMarkerFeedback>("grasp_modification_utility_interactive_marker/feedback",0);
 
     transform_.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
     transform_.setRotation( tf::Quaternion( 0.0, 0.0, 0.0, 1.0) );
@@ -139,6 +140,20 @@ void GMU::publish_object()
     marker.color.g=0;
     marker.color.b=1;
     object_marker_pub.publish(marker);
+}
+
+void GMU::force_im_update()
+{
+    for(int i=0;i<hand_poses.size();i++)
+    {
+    	if(i==current_waypoint)
+	{
+	    visualization_msgs::InteractiveMarkerFeedback fake_fb;
+	    fake_fb.pose = hand_poses.at(i);
+	    fake_fb.marker_name = "hands";
+	    fake_im_pub.publish(fake_fb);
+	}
+    }
 }
 
 void GMU::publish_hands()

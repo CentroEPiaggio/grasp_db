@@ -276,6 +276,7 @@ void gmu_gui::on_waypoint_selection_changed()
 {
     current_wp = waypoint_selection.currentText().toInt();
     gmu.setCurrentWaypoint(current_wp);
+    gmu.force_im_update();
     gmu.publish_hands();
 
     update_coords(gmu.get_wp(current_wp));
@@ -337,6 +338,7 @@ void gmu_gui::on_delete_button_clicked()
     int last = waypoint_selection.count()-1;
     waypoint_selection.removeItem(last);
     gmu.publish_hands();
+    gmu.force_im_update();
 
     if(last==1) delete_button.setEnabled(false);
 }
@@ -349,6 +351,7 @@ void gmu_gui::on_add_before_button_clicked()
     waypoint_selection.addItem(QString::number(last+1));
     delete_button.setEnabled(true);
     gmu.publish_hands();
+    gmu.force_im_update();
 }
 
 void gmu_gui::on_add_last_button_clicked()
@@ -357,8 +360,10 @@ void gmu_gui::on_add_last_button_clicked()
     gmu.add_extra_wp(last);
     add_joint_wp();
     waypoint_selection.addItem(QString::number(last+1));
+    waypoint_selection.setCurrentIndex(last+1);
     delete_button.setEnabled(true);
     gmu.publish_hands();
+    gmu.force_im_update();
 }
 
 void gmu_gui::on_check_box_changed()

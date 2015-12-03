@@ -36,6 +36,7 @@ public:
     void clear();
     void setCurrentWaypoint(int wp);
     void toggle_objects_interaction(bool on);
+    void force_im_update();
 
     boost::shared_ptr<databaseMapper> db_mapper;
     boost::shared_ptr<databaseWriter> db_writer;
@@ -55,6 +56,7 @@ private:
     ros::Subscriber im_sub_obj;
     ros::Subscriber im_sub_hand;
     ros::Subscriber js_sub;
+    ros::Publisher fake_im_pub;
     
     geometry_msgs::Pose obj_pose;
     int obj_id;
