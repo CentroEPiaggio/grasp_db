@@ -112,8 +112,7 @@ void GMU::setCurrentWaypoint(int wp)
 
 void GMU::publish_object()
 {
-    std::string path = "package://asus_scanner_models/";
-    path.append(std::get<1>(db_mapper->Objects.at(obj_id)));
+    std::string path = std::get<1>(db_mapper->Objects.at(obj_id));
 
     visualization_msgs::Marker& marker(object_marker);
     marker.header.frame_id="world";
