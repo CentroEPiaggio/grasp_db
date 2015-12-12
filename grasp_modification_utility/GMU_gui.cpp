@@ -5,6 +5,7 @@
 #include "tf/tf.h"
 #include <QLayoutItem>
 #include "ros/duration.h"
+#include <algorithm>
 
 void insertSeparator(QVBoxLayout* tab)
 {
@@ -109,6 +110,48 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
     gmu.clear();
 }
 
+std::string gmu_gui::common_prefix( const std::string& a, const std::string& b )
+{
+    if( a.size() <= b.size() )
+        return std::string( a.begin(), std::mismatch( a.begin(), a.end(), b.begin() ).first ) ;
+    else
+        return std::string( b.begin(), std::mismatch( b.begin(), b.end(), a.begin() ).first ) ;
+}
+
+void gmu_gui::update_joint_names()
+{
+    joint_msg.name.clear();
+    
+    // find prefix
+    std::string prefix;
+    std::string new_prefix("gmu_hand_");
+    int number_of_joints = grasp_msg.grasp_trajectory.joint_names.size();
+    if(number_of_joints == 1)
+    {
+        std::string hand("hand_");
+        std::size_t end_prefix = grasp_msg.grasp_trajectory.joint_names.at(0).find(hand);
+        end_prefix += hand.length();
+        prefix = grasp_msg.grasp_trajectory.joint_names.at(0).substr(0,end_prefix);
+    }
+    else
+    {
+        prefix = grasp_msg.grasp_trajectory.joint_names.at(0);
+        for(int i=1;i<number_of_joints;i++)
+            prefix = common_prefix(prefix,grasp_msg.grasp_trajectory.joint_names.at(i));
+    }
+    
+    for(int i=0;i<number_of_joints;i++)
+    {
+        const std::string& lab = grasp_msg.grasp_trajectory.joint_names.at(i);
+        
+        // HACK: replace the prefix - still not fully general, but working better
+        std::string tmp(lab);
+        tmp.replace(0,prefix.length(),new_prefix);
+        
+        joint_msg.name.push_back(tmp);
+    }
+}
+
 void gmu_gui::update_sliders(int number_of_joints)
 {
     QLayoutItem* child;
@@ -118,8 +161,10 @@ void gmu_gui::update_sliders(int number_of_joints)
 
     for(int i=0;i<number_of_joints;i++)
     {
-        std::string lab = grasp_msg.grasp_trajectory.joint_names.at(i);
-        if(lab=="right_hand_synergy_joint") lab="gmu_hand_synergy_joint"; //HACK
+        const std::string& lab = grasp_msg.grasp_trajectory.joint_names.at(i);
+        // // NOTE: the label shows up as in the message, but the published joints are different;
+        // //       uncomment the next line to show in the label what gets published instead
+        // std::string lab = joint_msg.name.at(i);
 
 	QLabel* label = new QLabel(QString::fromStdString(lab));
 	QSlider* slider = new QSlider();
@@ -210,6 +255,20 @@ bool gmu_gui::initialize_gmu()
     normalizePoses(grasp_msg.ee_pose);
     normalizePoses(grasp_msg.attObject.object.mesh_poses);
 
+    // // TEST: see if everything works well if using completely different joint names
+    // grasp_msg.grasp_trajectory.joint_names.clear();
+    // grasp_msg.grasp_trajectory.joint_names.push_back("hamal_test_hand_joint1");
+    // grasp_msg.grasp_trajectory.joint_names.push_back("hamal_test_hand_joint2");
+    // grasp_msg.grasp_trajectory.joint_names.push_back("hamal_test_hand_some_other_joint_3");
+    // for(auto& pt:grasp_msg.grasp_trajectory.points)
+    // {
+    //     // add two more joints in each message
+    //     pt.positions.push_back(0.1);
+    //     pt.positions.push_back(0.9);
+    // }
+        
+    // HACK: change names to publish the right joints
+    update_joint_names();
     update_sliders(grasp_msg.grasp_trajectory.joint_names.size());
     
     gmu.set_object(obj_id);
@@ -402,14 +461,8 @@ void gmu_gui::add_joint_wp()
 
 void gmu_gui::publish_joint_state()
 {
-    joint_msg.name.clear();
     joint_msg.position.clear();
 
-    for(auto name:grasp_msg.grasp_trajectory.joint_names)
-    {
-	if(name=="right_hand_synergy_joint") name="gmu_hand_synergy_joint"; //HACK
-	joint_msg.name.push_back(name);
-    }
     for(auto q:grasp_msg.grasp_trajectory.points.at(current_wp).positions) joint_msg.position.push_back(q);
 
     joint_pub.publish(joint_msg);

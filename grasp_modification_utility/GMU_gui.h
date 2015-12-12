@@ -48,10 +48,12 @@ private:
     void im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedback);
     void update_coords(geometry_msgs::Pose wp);
     void update_sliders(int number_of_joints);
+    void update_joint_names();
     void publish_joint_state();
     void update_joints_info();
     void delete_joint_wp();
     void add_joint_wp();
+    std::string common_prefix(const std::string& a, const std::string& b);
 
     int current_wp=0;
     bool editing; //false means copying
