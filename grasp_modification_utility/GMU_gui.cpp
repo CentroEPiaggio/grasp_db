@@ -156,6 +156,10 @@ void gmu_gui::update_sliders(int number_of_joints)
 {
     QLayoutItem* child;
     while((child = layout4.takeAt(0)) != 0) delete child;
+
+    for(auto l:synergy_label) delete l;
+    for(auto s:synergy_slider) delete s;
+
     synergy_label.clear();
     synergy_slider.clear();
 
