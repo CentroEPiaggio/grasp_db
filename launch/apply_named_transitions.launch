@@ -1,0 +1,10 @@
+<launch>
+
+    <!-- <group ns="ant"> -->
+
+        <rosparam command="load" file="$(find dual_manipulation_grasp_db)/db_apps/apply_named_transitions.yaml" />
+
+        <node pkg="dual_manipulation_grasp_db" type="apply_named_transitions" name="ant"/>
+    <!-- </group> -->
+
+</launch>

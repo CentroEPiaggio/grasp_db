@@ -1,0 +1,10 @@
+apply_named_transitions_parameters:
+  db_name: multi_object_test.db
+  prefixes: [t1,b1,s1,t2,b2,s2] #,s1_2,s2_2,s3_2]
+  correspondences:
+    t1: [b1,s1]
+    b1: [t1,s1]
+    s1: [t1,b1,s1]
+    t2: [b2,s2]
+    b2: [t2,s2]
+    s2: [t2,b2]

@@ -218,6 +218,21 @@ target_link_libraries(create_3vito_db
         grasp_creation_utilities
 )
 
+add_executable(apply_named_transitions
+        db_apps/apply_named_transitions.cpp
+)
+add_dependencies(apply_named_transitions
+        dual_manipulation_shared
+        grasp_creation_utilities
+)
+
+target_link_libraries(apply_named_transitions
+        ${catkin_LIBRARIES}
+        sqlite3
+        grasp_creation_utilities
+        dual_manipulation_shared
+)
+
 
 
 #########
