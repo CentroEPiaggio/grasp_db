@@ -46,8 +46,6 @@ public:
 private:
     
     void transform_premultiply(std::vector< KDL::Frame >& poses, KDL::Frame frame);
-    bool read_grasp_msg(uint obj_id, uint grasp_id, dual_manipulation_shared::grasp_trajectory& grasp_msg);
-    bool write_grasp_msg(uint obj_id, uint grasp_id, const dual_manipulation_shared::grasp_trajectory& grasp_msg);
     
     /**
      * Given a grasp as input, performs the necessary operations on the same message to obtain a new, symmetric grasp w.r.t. a rotation around the axis applied to the rotFrame_obj frame, both specified in the transform_grasp function.

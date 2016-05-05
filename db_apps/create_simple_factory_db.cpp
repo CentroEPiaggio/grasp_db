@@ -21,7 +21,6 @@
 #define TABLE_WP_HEIGHT 0.05
 #define NAMED_TRANSITIONS 1
 
-#define OBJ_GRASP_FACTOR 1000
 #define EE_GRASP_FACTOR 100
 #define EPS 0.01 // a small additional height
 

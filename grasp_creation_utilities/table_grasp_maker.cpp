@@ -39,22 +39,6 @@ bool tableGraspMaker::read_data_from_file(std::string& obj_name, std::string& gr
   return true;
 }
 
-bool tableGraspMaker::serialize_data(const dual_manipulation_shared::grasp_trajectory& grasp_msg, int object_id, int grasp_id)
-{
-  // save the obtained grasp
-  if(serialize_ik(grasp_msg,"object" + std::to_string(object_id) + "/grasp" + std::to_string(grasp_id)))
-  {
-    ROS_INFO_STREAM("Serialization object" + std::to_string(object_id) << "/grasp" + std::to_string(grasp_id) << " OK!");
-  }
-  else
-  {
-    ROS_ERROR_STREAM("In serialization object" + std::to_string(object_id) << "/grasp" + std::to_string(grasp_id));
-    return false;
-  }
-  
-  return true;
-}
-
 void tableGraspMaker::build_grasp_msg(dual_manipulation_shared::grasp_trajectory& grasp_msg, const KDL::Frame& obj_ee_frame, int obj_id, std::string ee_frame_name)
 {
   // create an object for grasping
@@ -136,7 +120,7 @@ bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KD
     }
 
     // serialize it (using the id just obtained)
-    if(!serialize_data(grasp_msg, obj_id, writer_ret))
+    if(!write_grasp_msg(obj_id,writer_ret,grasp_msg))
     {
       ROS_ERROR_STREAM("Unable to serialize grasp message - returning...");
       if(!db_writer.deleteGrasp(writer_ret))

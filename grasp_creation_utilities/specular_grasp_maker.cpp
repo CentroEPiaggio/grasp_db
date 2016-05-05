@@ -80,30 +80,6 @@ void specularGraspMaker::transform_premultiply(std::vector<KDL::Frame>& poses, K
       poses.at(i) = frame*poses.at(i);
 }
 
-bool specularGraspMaker::read_grasp_msg(uint obj_id, uint grasp_id, dual_manipulation_shared::grasp_trajectory& grasp_msg)
-{
-  if(deserialize_ik(grasp_msg,"object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id)))
-    std::cout << "Deserialization object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id) << " OK!" << std::endl;
-  else
-  {
-    std::cout << "Error in deserialization object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id) << "!" << std::endl;
-    return false;
-  }
-  return true;
-}
-
-bool specularGraspMaker::write_grasp_msg(uint obj_id, uint grasp_id, const dual_manipulation_shared::grasp_trajectory& grasp_msg)
-{
-  if(serialize_ik(grasp_msg,"object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id)))
-    std::cout << "Serialization object" + std::to_string(obj_id) << "/grasp" << grasp_id << " OK!" << std::endl;
-  else
-  {
-    std::cout << "Error in serialization object" + std::to_string(obj_id) << "/grasp" << grasp_id << "!" << std::endl;
-    return false;
-  }
-  return true;
-}
-
 void specularGraspMaker::transform_grasp_specularity(dual_manipulation_shared::grasp_trajectory& grasp_msg, uint obj_id, std::string new_link_name, const std::vector< std::string >& new_joint_names, bool top_bottom)
 {
     // first of all, convert all poses to KDL, renormalizing the quaternion

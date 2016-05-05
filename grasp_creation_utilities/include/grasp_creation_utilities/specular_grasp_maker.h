@@ -44,8 +44,6 @@ private:
   void transform_specular_y(KDL::Frame& pose);
   void transform_specular_y(std::vector< KDL::Frame >& poses);
   void transform_premultiply(std::vector< KDL::Frame >& poses, KDL::Frame frame);
-  bool read_grasp_msg(uint obj_id, uint grasp_id, dual_manipulation_shared::grasp_trajectory& grasp_msg);
-  bool write_grasp_msg(uint obj_id, uint grasp_id, const dual_manipulation_shared::grasp_trajectory& grasp_msg);
   
   /**
    * Given a grasp as input, performs the necessary operations on the same message to obtain a new, specular grasp. Specularity is w.r.t. XZ plane or top-bottom depending on @p top_bottom flag (always transforming between right and left handed grasps)

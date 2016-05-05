@@ -89,30 +89,6 @@ void symmetricGraspMaker::transform_premultiply(std::vector<KDL::Frame>& poses, 
         poses.at(i) = frame*poses.at(i);
 }
 
-bool symmetricGraspMaker::read_grasp_msg(uint obj_id, uint grasp_id, dual_manipulation_shared::grasp_trajectory& grasp_msg)
-{
-    if(deserialize_ik(grasp_msg,"object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id)))
-        std::cout << "Deserialization object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id) << " OK!" << std::endl;
-    else
-    {
-        std::cout << "Error in deserialization object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id) << "!" << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool symmetricGraspMaker::write_grasp_msg(uint obj_id, uint grasp_id, const dual_manipulation_shared::grasp_trajectory& grasp_msg)
-{
-    if(serialize_ik(grasp_msg,"object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id)))
-        std::cout << "Serialization object" + std::to_string(obj_id) << "/grasp" << grasp_id << " OK!" << std::endl;
-    else
-    {
-        std::cout << "Error in serialization object" + std::to_string(obj_id) << "/grasp" << grasp_id << "!" << std::endl;
-        return false;
-    }
-    return true;
-}
-
 void symmetricGraspMaker::transform_grasp_symmetry(dual_manipulation_shared::grasp_trajectory& grasp_msg, uint obj_id, std::string new_link_name, const std::vector< std::string >& new_joint_names, KDL::Frame rotFrame_obj)
 {
     // first of all, convert all poses to KDL, renormalizing the quaternion
