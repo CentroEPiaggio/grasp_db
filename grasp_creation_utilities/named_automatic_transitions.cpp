@@ -68,6 +68,7 @@ bool namedAutomaticTransitions::write_transitions()
   // map on grasp prefix all associated pairs <ee_id,grasp_id> (using two vectors for clarity
   std::map<std::string,std::vector<uint>> grasp_id_from_prefix;
   std::map<std::string,std::vector<uint>> ee_id_from_prefix;
+  std::map<std::string,std::vector<uint>> obj_id_from_prefix;
   
   for(auto grasp:db_mapper_->Grasps)
   {
@@ -80,13 +81,19 @@ bool namedAutomaticTransitions::write_transitions()
     for(auto pref:prefixes_)
     {
       if(compare_and_store(grasp_name,pref,grasp_id_from_prefix,grasp_id))
-	ee_id_from_prefix[pref].push_back(ee_id);
+      {
+        ee_id_from_prefix[pref].push_back(ee_id);
+        obj_id_from_prefix[pref].push_back(obj_id);
+      }
       
       // do the same for each correspondence
       for(auto corr:correspondences_.at(pref))
       {
-	if(compare_and_store(grasp_name,corr,grasp_id_from_prefix,grasp_id))
-	  ee_id_from_prefix[corr].push_back(ee_id);
+        if(compare_and_store(grasp_name,corr,grasp_id_from_prefix,grasp_id))
+        {
+          ee_id_from_prefix[corr].push_back(ee_id);
+          obj_id_from_prefix[corr].push_back(obj_id);
+        }
       }
     }
   }
@@ -113,12 +120,14 @@ bool namedAutomaticTransitions::write_transitions()
       for(int i1=0; i1<ee_id_from_prefix.at(pref).size(); i1++)
       {
 	uint pref_ee_id = ee_id_from_prefix.at(pref).at(i1);
+    uint pref_obj_id = obj_id_from_prefix.at(pref).at(i1);
 	
 	for(int i2=0; i2<ee_id_from_prefix.at(corr).size(); i2++)
 	{
 	  uint corr_ee_id = ee_id_from_prefix.at(corr).at(i2);
+      uint corr_obj_id = obj_id_from_prefix.at(corr).at(i2);
 	
-	  if(pref_ee_id != corr_ee_id)
+	  if(pref_obj_id == corr_obj_id && pref_ee_id != corr_ee_id)
 	  {
 	    uint pref_grasp_id = grasp_id_from_prefix.at(pref).at(i1);
 	    uint corr_grasp_id = grasp_id_from_prefix.at(corr).at(i2);
