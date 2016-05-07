@@ -32,15 +32,20 @@
  */
 
 // DATA that will be stored in the database
+
+// OBJECTS
 std::map<int,std::pair<std::string,std::string>> object_list = {
     {51,{"cylinderA","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
-    {52,{"cylinderB","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}}
+    {52,{"cylinderB","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
+    {53,{"cylinderC","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}}
 };
 std::map<int,KDL::Frame> object_centers = {
     {51,KDL::Frame::Identity()},
-    {52,KDL::Frame::Identity()}
+    {52,KDL::Frame::Identity()},
+    {53,KDL::Frame::Identity()}
 };
 
+// END-EFFECTORS
 std::vector<uint> ee_ids = {1,2,3,4,5}; // to stay as generic as possible
 std::vector<std::string> ee_name = {"0_right_hand","1_right_hand","tinoBot_ee","table","table2"};
 std::vector<uint> ee_movable = {1,1,1,0,0}; // can move
@@ -53,7 +58,15 @@ std::vector<std::vector<std::string>> ee_prehension_joints = {
     {},
     {}
 };
+std::map<int,std::vector<int>> reachability={
+    {1,{1,2,6}}, // kuka1
+    {2,{4,5}}, // kuka2
+    {3,{2,3,4}}, // tinoBot
+    {4,{1,5,6}}, // table
+    {5,{6}} // table2
+};
 
+// NON-PREHENSILE END-EFFECTORS
 std::vector<std::vector<KDL::Frame>> ee_nonprehensile_grasps = {
     {},
     {},
@@ -64,7 +77,6 @@ std::vector<std::vector<KDL::Frame>> ee_nonprehensile_grasps = {
     {KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-EPS)), // table2 grasps
         KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+EPS))}
 };
-
 std::vector<std::vector<std::string>> ee_nonprehensile_grasp_names = {
     {},
     {},
@@ -73,20 +85,12 @@ std::vector<std::vector<std::string>> ee_nonprehensile_grasp_names = {
     {"bottom","top"}  // table2 grasps
 };
 
-std::map<int,std::vector<int>> reachability={
-    {1,{1,2,6}}, // kuka1
-    {2,{4,5}}, // kuka2
-    {3,{2,3,4}}, // tinoBot
-    {4,{1,5,6}}, // table
-    {5,{6}} // table2
-};
-
+// WORKSPACES
 // this vector and WS_Y_MIN, WS_Y_MAX define the workspaces geometry (only for rectangular workspaces all with the same Y bounds)
 std::vector<double> ws_x_max({2.25,2.0,1.5,-1.5,-2.0,2.5});
 std::vector<double> ws_x_min({2.0,1.5,-1.5,-2.0,-2.5,2.25});
 std::vector<double> ws_y_max({0.5,0.5,0.5,0.5,0.5,0.5});
 std::vector<double> ws_y_min({-0.5,-0.5,-0.5,-0.5,-0.5,-0.5});
-
 // adjacencies monolateral information is enough
 std::map<int,std::vector<int>> adjacency = {
     {1,{2}},
