@@ -250,6 +250,21 @@ target_link_libraries(create_simple_factory_db
 )
 
 
+add_executable(create_bi_tino_simple_factory_db
+        db_apps/create_bi_tino_simple_factory_db.cpp
+)
+add_dependencies(create_bi_tino_simple_factory_db
+        dual_manipulation_shared
+        apply_geometric_transitions
+        grasp_creation_utilities
+)
+target_link_libraries(create_bi_tino_simple_factory_db
+        ${catkin_LIBRARIES}
+        sqlite3
+        grasp_creation_utilities
+)
+
+
 
 #########
 # TESTS #
