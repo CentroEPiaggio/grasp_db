@@ -63,8 +63,8 @@ std::vector<std::vector<std::string>> ee_prehension_joints = {
     {}
 };
 std::map<int,std::vector<int>> reachability={
-    {1,{1,2,3,4,5}}, // kuka1
-    {2,{7,8,9,10,11}}, // kuka2
+    {2,{1,2,3,4,5}}, // kuka1
+    {1,{7,8,9,10,11}}, // kuka2
     {3,{5,6,7}}, // tinoBot1
     {4,{5,6,7}}, // tinoBot2
     {5,{1,2,3,4,8,9,10,11}} // table
