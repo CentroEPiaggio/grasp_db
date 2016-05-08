@@ -46,24 +46,22 @@ std::map<int,KDL::Frame> object_centers = {
 };
 
 // END-EFFECTORS
-std::vector<uint> ee_ids = {1,2,3,4,5}; // to stay as generic as possible
-std::vector<std::string> ee_name = {"0_right_hand","1_right_hand","tinoBot_ee","table","table2"};
-std::vector<uint> ee_movable = {1,1,1,0,0}; // can move
-std::vector<uint> ee_prehensile = {1,1,0,0,0}; // can be actuated during grasping
-std::vector<std::string> ee_link = {"0_right_hand_palm_link","1_right_hand_palm_link","tinoBot_ee","",""};
+std::vector<uint> ee_ids = {1,2,3,4}; // to stay as generic as possible
+std::vector<std::string> ee_name = {"0_right_hand","1_right_hand","tinoBot1_ee","table"};
+std::vector<uint> ee_movable = {1,1,1,0}; // can move
+std::vector<uint> ee_prehensile = {1,1,0,0}; // can be actuated during grasping
+std::vector<std::string> ee_link = {"0_right_hand_palm_link","1_right_hand_palm_link","tinoBot1_ee",""};
 std::vector<std::vector<std::string>> ee_prehension_joints = {
     {"0_right_hand_synergy_joint"},
     {"1_right_hand_synergy_joint"},
     {},
-    {},
     {}
 };
 std::map<int,std::vector<int>> reachability={
-    {1,{1,2,6}}, // kuka1
+    {1,{1,2}}, // kuka1
     {2,{4,5}}, // kuka2
     {3,{2,3,4}}, // tinoBot
-    {4,{1,5,6}}, // table
-    {5,{6}} // table2
+    {4,{1,5}}, // table
 };
 
 // NON-PREHENSILE END-EFFECTORS
@@ -81,23 +79,21 @@ std::vector<std::vector<std::string>> ee_nonprehensile_grasp_names = {
     {},
     {},
     {"bottom","top"}, // tinoBot grasps
-    {"bottom","top"}, // table grasps
-    {"bottom","top"}  // table2 grasps
+    {"bottom","top"}  // table grasps
 };
 
 // WORKSPACES
 // this vector and WS_Y_MIN, WS_Y_MAX define the workspaces geometry (only for rectangular workspaces all with the same Y bounds)
-std::vector<double> ws_x_max({2.25,2.0,1.5,-1.5,-2.0,2.5});
-std::vector<double> ws_x_min({2.0,1.5,-1.5,-2.0,-2.5,2.25});
-std::vector<double> ws_y_max({0.5,0.5,0.5,0.5,0.5,0.5});
-std::vector<double> ws_y_min({-0.5,-0.5,-0.5,-0.5,-0.5,-0.5});
+std::vector<double> ws_x_max({2.5,2.0,1.5,-1.5,-2.0});
+std::vector<double> ws_x_min({2.0,1.5,-1.5,-2.0,-2.5});
+std::vector<double> ws_y_max({0.5,0.5,0.5,0.5,0.5});
+std::vector<double> ws_y_min({-0.5,-0.5,-0.5,-0.5,-0.5});
 // adjacencies monolateral information is enough
 std::map<int,std::vector<int>> adjacency = {
     {1,{2}},
     {2,{3}},
     {3,{4}},
-    {4,{5}},
-    {6,{1}}
+    {4,{5}}
 };
 
 std::string convert_to_rectangular_geometry_string(double x_min, double x_max, double y_min, double y_max)

@@ -35,18 +35,18 @@
 
 // OBJECTS
 std::map<int,std::pair<std::string,std::string>> object_list = {
-    {51,{"cylinderA","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
-    {52,{"cylinderB","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
-    {53,{"cylinderC","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
-    {54,{"cylinderD","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
-    {55,{"cylinderE","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}}
+    {61,{"cylinderA","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
+    {62,{"cylinderB","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
+    {63,{"cylinderC","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
+    {64,{"cylinderD","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}},
+    {65,{"cylinderE","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae"}}
 };
 std::map<int,KDL::Frame> object_centers = {
-    {51,KDL::Frame::Identity()},
-    {52,KDL::Frame::Identity()},
-    {53,KDL::Frame::Identity()},
-    {54,KDL::Frame::Identity()},
-    {55,KDL::Frame::Identity()}
+    {61,KDL::Frame::Identity()},
+    {62,KDL::Frame::Identity()},
+    {63,KDL::Frame::Identity()},
+    {64,KDL::Frame::Identity()},
+    {65,KDL::Frame::Identity()}
 };
 
 // END-EFFECTORS
@@ -76,10 +76,10 @@ std::vector<std::vector<KDL::Frame>> ee_nonprehensile_grasps = {
     {},
     {KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-2.0*EPS)), // tinoBot1 grasps
         KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+2.0*EPS))},
-        {KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-EPS)), // tinoBot2 grasps
-            KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+EPS))},
-            {KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-EPS)), // table grasps
-                KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+EPS))}
+    {KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-2.0*EPS)), // tinoBot2 grasps
+        KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+2.0*EPS))},
+    {KDL::Frame(KDL::Vector(0.0,0.0,-1*CYLINDER_HEIGHT/2.0-EPS)), // table grasps
+        KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+EPS))}
 };
 std::vector<std::vector<std::string>> ee_nonprehensile_grasp_names = {
     {},
