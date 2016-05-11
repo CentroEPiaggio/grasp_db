@@ -65,7 +65,7 @@ bool symmetricGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::strin
         rot_mat = rot_mat*rotFrame_obj;
         transform_grasp_symmetry(grasp_msg,obj_id,end_effector_frame_,joint_names_,rot_mat);
         
-        write_ok = write_grasp_msg(obj_id,new_grasp_id,grasp_msg);
+        write_ok = (write_grasp_msg(obj_id,new_grasp_id,grasp_msg) > 0);
         if(!write_ok)
         {
             ROS_WARN_STREAM(CLASS_NAMESPACE << __func__ << " : Unable to serialize the new grasp - performing delete action on the DB entry just created...");
