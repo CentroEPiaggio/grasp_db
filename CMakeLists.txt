@@ -264,6 +264,20 @@ target_link_libraries(create_bi_tino_simple_factory_db
         grasp_creation_utilities
 )
 
+add_executable(create_house_db
+        db_apps/create_house_db.cpp
+)
+add_dependencies(create_house_db
+        dual_manipulation_shared
+        apply_geometric_transitions
+        grasp_creation_utilities
+)
+target_link_libraries(create_house_db
+        ${catkin_LIBRARIES}
+        sqlite3
+        grasp_creation_utilities
+)
+
 
 
 #########
