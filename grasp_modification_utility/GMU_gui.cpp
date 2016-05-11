@@ -126,6 +126,8 @@ void gmu_gui::update_joint_names()
     std::string prefix;
     std::string new_prefix("gmu_hand_");
     int number_of_joints = grasp_msg.grasp_trajectory.joint_names.size();
+    if(number_of_joints == 0)
+        return;
     if(number_of_joints == 1)
     {
         std::string hand("hand_");
