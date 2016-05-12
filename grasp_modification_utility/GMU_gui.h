@@ -15,6 +15,7 @@
 #include <map>
 #include "grasp_modification_utility.h"
 #include "ros/ros.h"
+#include <QSocketNotifier>
 
 class gmu_gui: public QWidget
 {
@@ -22,7 +23,11 @@ Q_OBJECT
 public:
     gmu_gui(GMU& gmu_);
     ~gmu_gui();
-
+    
+    //Unix signal handlers
+    static void intSignalHandler(int);
+public Q_SLOTS:
+    void handleSigInt();
 private Q_SLOTS:
     void on_waypoint_selection_changed();
     void on_delete_button_clicked();
@@ -104,6 +109,9 @@ private:
     ros::Subscriber sub;
     ros::Publisher joint_pub;
     sensor_msgs::JointState joint_msg;
+
+    static int sigintFd[2];
+    QSocketNotifier* snInt;
 };
 
 #endif //GMU_GUI_H

@@ -6,6 +6,30 @@
 #include <QLayoutItem>
 #include "ros/duration.h"
 #include <algorithm>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int gmu_gui::sigintFd[2];
+
+void gmu_gui::handleSigInt()
+{
+    snInt->setEnabled(false);
+    char tmp;
+    ::read(sigintFd[1], &tmp, sizeof(tmp));
+
+    std::string msg = "CTRL+C intercepted!";
+    ROS_INFO_STREAM(msg);
+
+    snInt->setEnabled(true);
+    
+    delete this;
+}
+
+void gmu_gui::intSignalHandler(int)
+{
+    char a = 1;
+    ::write(sigintFd[0], &a, sizeof(a));
+}
 
 void insertSeparator(QVBoxLayout* tab)
 {
@@ -21,6 +45,10 @@ void insertSeparator(QVBoxLayout* tab)
 
 gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
 {
+    if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigintFd)) ROS_WARN_STREAM("Couldn't create SIGINT socketpair");
+    snInt = new QSocketNotifier(sigintFd[1],QSocketNotifier::Read,this);
+    connect(snInt, SIGNAL(activated(int)), this, SLOT(handleSigInt()));
+
     sub = node.subscribe("grasp_modification_utility_interactive_marker/feedback",1,&gmu_gui::im_callback,this);
     joint_pub = node.advertise<sensor_msgs::JointState>("gui_joint_state_publisher",1);
 
