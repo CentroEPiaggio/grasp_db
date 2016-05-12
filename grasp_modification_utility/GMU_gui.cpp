@@ -237,6 +237,7 @@ void gmu_gui::toggle_top_layout(bool enable)
 {
     object_text.setEnabled(enable);
     grasp_id_text.setEnabled(enable);
+    create.setEnabled(enable);
     edit.setEnabled(enable);
     copy.setEnabled(enable);
 }
