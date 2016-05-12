@@ -35,6 +35,7 @@ private Q_SLOTS:
     void on_delete_button_clicked();
     void on_add_before_button_clicked();
     void on_add_last_button_clicked();
+    void on_create_button_clicked();
     void on_edit_button_clicked();
     void on_copy_button_clicked();
     void on_save_button_clicked();
@@ -63,7 +64,8 @@ private:
     std::string common_prefix(const std::string& a, const std::string& b);
 
     int current_wp=0;
-    bool editing; //false means copying
+    bool editing; //false means copying, checked is creating is false
+    bool creating=false;
     dual_manipulation_shared::grasp_trajectory grasp_msg;
     int obj_id;
     int grasp_id;
@@ -76,6 +78,7 @@ private:
     QLineEdit object_text;
     QLabel grasp_id_label;
     QLineEdit grasp_id_text;
+    QPushButton create;
     QPushButton edit;
     QPushButton copy;
 

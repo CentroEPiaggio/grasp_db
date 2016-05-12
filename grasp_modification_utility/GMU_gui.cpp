@@ -54,12 +54,14 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
 
     object_label.setText("obj_id");
     grasp_id_label.setText("grasp_id");
+    create.setText("CREATE");
     edit.setText("EDIT");
     copy.setText("COPY");
     layout1.addWidget(&object_label);
     layout1.addWidget(&object_text);
     layout1.addWidget(&grasp_id_label);
     layout1.addWidget(&grasp_id_text);
+    layout1.addWidget(&create);
     layout1.addWidget(&edit);
     layout1.addWidget(&copy);
 
@@ -121,6 +123,7 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
 
     setLayout(&main_layout);
 
+    connect(&create,SIGNAL(clicked(bool)),this,SLOT(on_create_button_clicked()));
     connect(&edit,SIGNAL(clicked(bool)),this,SLOT(on_edit_button_clicked()));
     connect(&copy,SIGNAL(clicked(bool)),this,SLOT(on_copy_button_clicked()));
 
@@ -268,7 +271,9 @@ bool gmu_gui::initialize_gmu()
     obj_id = object_text.text().toDouble();
     grasp_id = grasp_id_text.text().toDouble();
 //     file_name = "object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id );
-    
+
+    if(!creating)
+    {
 //     if( deserialize_ik( grasp_msg, file_name ) )
     if(read_grasp_msg(obj_id, grasp_id, grasp_msg))
     {
@@ -321,7 +326,63 @@ bool gmu_gui::initialize_gmu()
     if(waypoint_selection.count()==1) delete_button.setEnabled(false);
     gmu.publish_object();
     gmu.publish_hands();
+    }
+    else
+    {
+        XmlRpc::XmlRpcValue v;
 
+        if(node.hasParam("/GMU/grasp_modification_utility_rviz/actuated_joints")) //TODO: fix global namespace
+        {
+            node.param("/GMU/grasp_modification_utility_rviz/actuated_joints", v, v);
+        }
+        else
+        {
+            ROS_ERROR_STREAM("missing param: actuated_joints");
+            std::cout<<"available params:"<<std::endl;
+            std::vector<std::string> names;
+            node.getParamNames(names);
+            for(auto n:names)
+                std::cout<<" - " << n <<std::endl;
+            return false;
+        }
+
+        if(v.size()==0)
+        {
+            ROS_ERROR_STREAM("empty param: actuated_joints");
+            return false;
+        }
+
+        grasp_msg.grasp_trajectory.joint_names.clear();
+        grasp_msg.grasp_trajectory.points.clear();
+        std::cout<<" - actuated_joints: ";
+        for(int i =0; i < v.size(); i++)
+        {
+            grasp_msg.grasp_trajectory.joint_names.push_back(v[i]);
+            trajectory_msgs::JointTrajectoryPoint pp;
+            pp.positions.push_back(0);
+            grasp_msg.grasp_trajectory.points.push_back(pp);
+            std::cout << v[i];
+        }
+        std::cout << std::endl;
+        update_joint_names();
+        update_sliders(grasp_msg.grasp_trajectory.joint_names.size());
+        gmu.set_object(obj_id);
+
+        grasp_msg.attObject.object.mesh_poses.clear();
+        grasp_msg.ee_pose.clear();
+        geometry_msgs::Pose pose;
+        pose.orientation.w=1;
+        grasp_msg.ee_pose.push_back(pose);
+        grasp_msg.attObject.object.mesh_poses.push_back(pose);
+        gmu.set_hands( grasp_msg.ee_pose, pose );
+
+        waypoint_selection.clear();
+        waypoint_selection.addItem(QString::number(0));
+
+        if(waypoint_selection.count()==1) delete_button.setEnabled(false);
+        gmu.publish_object();
+        gmu.publish_hands();
+    }
     return true;
 }
 
@@ -352,10 +413,19 @@ void gmu_gui::on_text_changed(const int& id)
     gmu.publish_hands();
 }
 
+void gmu_gui::on_create_button_clicked()
+{
+    starting_mode(false);
+    editing = false;
+    creating = true;
+    if(!initialize_gmu()) on_abort_button_clicked();
+}
+
 void gmu_gui::on_edit_button_clicked()
 {
     starting_mode(false);
     editing = true;
+    creating = false;
     if(!initialize_gmu()) on_abort_button_clicked();
 }
 
@@ -363,6 +433,7 @@ void gmu_gui::on_copy_button_clicked()
 {
     starting_mode(false);
     editing = false;
+    creating = false;
     if(!initialize_gmu()) on_abort_button_clicked();
 }
 
@@ -545,10 +616,11 @@ void gmu_gui::on_save_button_clicked()
     int actual_grasp_id = compute_grasp_id(obj_id,grasp_id);
 
     int new_grasp_id = gmu.db_writer->checkGraspId(actual_grasp_id);
-    
-    if(!editing)
+
+    std::cout << "chosen grasp_id: " <<grasp_id<< ", actual grasp_id: " <<actual_grasp_id<< ", new grasp_id: " << new_grasp_id << std::endl;
+
+    if(!editing || creating)
     {
-        std::cout << "new grasp_id: " << new_grasp_id << std::endl;
         std::cout << "copying name: " << std::get<2>( gmu.db_mapper->Grasps.at(actual_grasp_id) ) << std::endl;
 
         std::string new_grasp_name = std::get<2>( gmu.db_mapper->Grasps.at( actual_grasp_id ) ) + " (copy)";
