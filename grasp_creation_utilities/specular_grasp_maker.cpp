@@ -42,7 +42,7 @@ bool specularGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string
   
   transform_grasp_specularity(grasp_msg,obj_id,end_effector_frame_,joint_names_,top_bottom);
   
-  bool write_ok = write_grasp_msg(obj_id,new_grasp_id,grasp_msg);
+  bool write_ok = (write_grasp_msg(obj_id,new_grasp_id,grasp_msg)>0);
   bool delete_ok = true;
   if(!write_ok)
   {

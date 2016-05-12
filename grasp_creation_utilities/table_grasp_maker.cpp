@@ -120,7 +120,7 @@ bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KD
     }
 
     // serialize it (using the id just obtained)
-    if(!write_grasp_msg(obj_id,writer_ret,grasp_msg))
+    if(write_grasp_msg(obj_id,writer_ret,grasp_msg)<=0)
     {
       ROS_ERROR_STREAM("Unable to serialize grasp message - returning...");
       if(!db_writer.deleteGrasp(writer_ret))
