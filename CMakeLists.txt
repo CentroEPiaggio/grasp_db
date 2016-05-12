@@ -203,6 +203,12 @@ target_link_libraries(grasp_modification_utility
 	sqlite3
 )
 
+add_library(rviz_gmu_panel grasp_modification_utility/rviz_gmu_panel.cpp grasp_modification_utility/grasp_modification_utility.cpp ${GMU_GUI_SRC})
+
+target_link_libraries(rviz_gmu_panel ${QT_LIBRARIES} ${catkin_LIBRARIES})
+
+install(FILES plugin_description.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
 add_executable(create_3vito_db
         db_apps/create_3vito_db.cpp db_apps/multi_arm_cylinder_db.cpp
 )
@@ -277,8 +283,6 @@ target_link_libraries(create_house_db
         sqlite3
         grasp_creation_utilities
 )
-
-
 
 #########
 # TESTS #

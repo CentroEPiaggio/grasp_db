@@ -1,0 +1,13 @@
+<library path="lib/librviz_gmu_panel">
+
+  <class name="Grasp Modification Utility"
+         type="rviz_gmu_panel"
+         base_class_type="rviz::Panel">
+
+    <description>
+        gmu panel
+    </description>
+
+  </class>
+
+</library>

@@ -26,6 +26,8 @@ public:
     
     //Unix signal handlers
     static void intSignalHandler(int);
+    
+    QVBoxLayout main_layout;
 public Q_SLOTS:
     void handleSigInt();
 private Q_SLOTS:
@@ -66,8 +68,6 @@ private:
     int obj_id;
     int grasp_id;
     std::string file_name;
-
-    QVBoxLayout main_layout;
 
     QHBoxLayout layout1;
     QLabel waypoint_label;
