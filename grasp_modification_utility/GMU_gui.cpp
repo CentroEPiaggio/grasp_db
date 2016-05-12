@@ -239,9 +239,10 @@ bool gmu_gui::initialize_gmu()
 {
     obj_id = object_text.text().toDouble();
     grasp_id = grasp_id_text.text().toDouble();
-    file_name = "object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id );
+//     file_name = "object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id );
     
-    if( deserialize_ik( grasp_msg, file_name ) )
+//     if( deserialize_ik( grasp_msg, file_name ) )
+    if(read_grasp_msg(obj_id, grasp_id, grasp_msg))
     {
 	ROS_INFO_STREAM("Deserialization object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id ) << " OK! ... You can modify the grasp in Rviz");
 	std::cout << "grasp_msg" << grasp_msg << std::endl;
@@ -489,26 +490,6 @@ void gmu_gui::on_time_from_start_changed()
 
 void gmu_gui::on_save_button_clicked()
 {
-    if(!editing)
-    {
-	std::cout << "grasp_id: " << grasp_id << std::endl;
-	std::cout << "copying name: " << std::get<2>( gmu.db_mapper->Grasps.at(grasp_id) ) << std::endl;
-
-	std::string new_grasp_name = std::get<2>( gmu.db_mapper->Grasps.at( grasp_id ) ) + " (copy)";
-	std::cout << "new name is: " << new_grasp_name << std::endl;
-
-	int ee_id = std::get<1>( gmu.db_mapper->Grasps.at( grasp_id ) );
-	std::cout << "copying ee_id: " << ee_id << std::endl;
-	std::cout << "writing to database..." << std::endl;
-
-	grasp_id = gmu.db_writer->writeNewGrasp( obj_id, ee_id, new_grasp_name);
-
-	if(!(grasp_id > 0) )
-	    ROS_ERROR_STREAM("Couldn't write the database");
-
-	file_name = "object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id );
-    }
-
     geometry_msgs::Pose object,final_object, final_hand;
     gmu.get_object(object, final_object);
     gmu.get_hands(grasp_msg.ee_pose, final_hand);
@@ -533,9 +514,36 @@ void gmu_gui::on_save_button_clicked()
     tf::poseMsgToKDL(final_hand,world_hand);
     tf::poseKDLToMsg(world_hand.Inverse()*world_object,grasp_msg.attObject.object.mesh_poses.front());
 
-    if( !serialize_ik( grasp_msg, file_name ) )
+    int actual_grasp_id = compute_grasp_id(obj_id,grasp_id);
+
+    int new_grasp_id = gmu.db_writer->checkGraspId(actual_grasp_id);
+    
+    if(!editing)
     {
-	ROS_ERROR_STREAM("Error in serialization object" + std::to_string(obj_id) + "/grasp" + std::to_string(grasp_id) << "! . . . Aborting!");
+        std::cout << "new grasp_id: " << new_grasp_id << std::endl;
+        std::cout << "copying name: " << std::get<2>( gmu.db_mapper->Grasps.at(actual_grasp_id) ) << std::endl;
+
+        std::string new_grasp_name = std::get<2>( gmu.db_mapper->Grasps.at( actual_grasp_id ) ) + " (copy)";
+        std::cout << "new name is: " << new_grasp_name << std::endl;
+
+        int ee_id = std::get<1>( gmu.db_mapper->Grasps.at( actual_grasp_id ) );
+        std::cout << "copying ee_id: " << ee_id << std::endl;
+        std::cout << "writing to database..." << std::endl;
+
+        if(gmu.db_writer->writeNewGrasp( new_grasp_id, obj_id, ee_id, new_grasp_name) <= 0)
+        {
+            ROS_ERROR_STREAM("Couldn't write the database");
+            return;
+        }
+
+    }
+    
+    if(write_grasp_msg(obj_id, new_grasp_id, grasp_msg) < 0)
+    {
+	ROS_ERROR_STREAM("Error in serialization object" + std::to_string(obj_id) + "/grasp" + std::to_string(new_grasp_id) << "! . . . Aborting!");
+        gmu.db_writer->deleteGrasp(new_grasp_id);
+        on_abort_button_clicked();
+        return;
     }
     else
     {
