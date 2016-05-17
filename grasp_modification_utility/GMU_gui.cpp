@@ -614,14 +614,16 @@ void gmu_gui::on_save_button_clicked()
     tf::poseMsgToKDL(final_hand,world_hand);
     tf::poseKDLToMsg(world_hand.Inverse()*world_object,grasp_msg.attObject.object.mesh_poses.front());
 
-    int actual_grasp_id = compute_grasp_id(obj_id,grasp_id);
-
-    int new_grasp_id = gmu.db_writer->checkGraspId(actual_grasp_id);
-
-    std::cout << "chosen grasp_id: " <<grasp_id<< ", actual grasp_id: " <<actual_grasp_id<< ", new grasp_id: " << new_grasp_id << std::endl;
+    int new_grasp_id = grasp_id;
 
     if(!editing || creating)
     {
+        int actual_grasp_id = compute_grasp_id(obj_id,grasp_id);
+
+        new_grasp_id = gmu.db_writer->checkGraspId(actual_grasp_id);
+        
+        std::cout << "chosen grasp_id: " <<grasp_id<< ", actual grasp_id: " <<actual_grasp_id<< ", new grasp_id: " << new_grasp_id << std::endl;
+        
         std::cout << "copying name: " << std::get<2>( gmu.db_mapper->Grasps.at(actual_grasp_id) ) << std::endl;
 
         std::string new_grasp_name = std::get<2>( gmu.db_mapper->Grasps.at( actual_grasp_id ) ) + " (copy)";
