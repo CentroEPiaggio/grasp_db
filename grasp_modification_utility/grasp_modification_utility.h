@@ -109,6 +109,7 @@ private:
     bool leftness_;
     std::string db_name_;
     std::atomic_bool objects_active;
+    std::string hand_mesh_path_;
 };
 
 #endif //GMU_H

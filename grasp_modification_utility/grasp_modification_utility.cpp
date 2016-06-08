@@ -54,8 +54,8 @@ GMU::GMU():server("grasp_modification_utility_interactive_marker")
 
     transform_.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
     transform_.setRotation( tf::Quaternion( 0.0, 0.0, 0.0, 1.0) );
-
-    node.getParam("leftness", leftness_);
+    
+    node.getParam("hand_mesh_path", hand_mesh_path_);
 
     XmlRpc::XmlRpcValue params;
     std::string database_name;
@@ -192,15 +192,6 @@ void GMU::force_im_update()
 
 void GMU::publish_hands()
 {
-    std::string path;
-    if( leftness_ )
-    {
-        path = "package://soft_hand_description/meshes/palm_left.stl";
-    }
-    else
-    {
-        path = "package://soft_hand_description/meshes/palm_right.stl";
-    }
     int i=0;
     visualization_msgs::Marker marker;
     marker.header.frame_id="world";
@@ -211,7 +202,7 @@ void GMU::publish_hands()
 
     marker.action=visualization_msgs::Marker::ADD;
     marker.type=visualization_msgs::Marker::MESH_RESOURCE;
-    marker.mesh_resource=path.c_str();
+    marker.mesh_resource=hand_mesh_path_.c_str();
     marker.scale.x=0.001;
     marker.scale.y=0.001;
     marker.scale.z=0.001;
