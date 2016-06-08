@@ -390,15 +390,15 @@ bool gmu_gui::initialize_gmu()
 
         grasp_msg.grasp_trajectory.joint_names.clear();
         grasp_msg.grasp_trajectory.points.clear();
-        std::cout<<" - actuated_joints: ";
+        std::cout<<" - actuated_joints: | ";
+        trajectory_msgs::JointTrajectoryPoint pp;
         for(int i =0; i < v.size(); i++)
         {
             grasp_msg.grasp_trajectory.joint_names.push_back(v[i]);
-            trajectory_msgs::JointTrajectoryPoint pp;
             pp.positions.push_back(0);
-            grasp_msg.grasp_trajectory.points.push_back(pp);
-            std::cout << v[i];
+            std::cout << v[i] << " | ";
         }
+        grasp_msg.grasp_trajectory.points.push_back(pp);
         std::cout << std::endl;
         update_joint_names();
         update_sliders(grasp_msg.grasp_trajectory.joint_names.size());
