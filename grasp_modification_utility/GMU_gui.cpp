@@ -197,36 +197,30 @@ void gmu_gui::update_joint_names()
 {
     joint_msg.name.clear();
     
-    // find prefix
-    std::string prefix;
-    std::string new_prefix("gmu_hand_");
-    int number_of_joints = grasp_msg.grasp_trajectory.joint_names.size();
-    if(number_of_joints == 0)
-        return;
-    if(number_of_joints == 1)
+    bool joints_equal = true;
+    if(actuated_joints.size() != grasp_msg.grasp_trajectory.joint_names.size())
+        joints_equal = false;
+    for(int i=0; joints_equal && i<actuated_joints.size(); i++)
+        joints_equal = (actuated_joints.at(i).compare(grasp_msg.grasp_trajectory.joint_names.at(i)) == 0);
+        
+    if(!joints_equal)
     {
-        std::string hand("hand_");
-        std::size_t end_prefix = grasp_msg.grasp_trajectory.joint_names.at(0).find(hand);
-        end_prefix += hand.length();
-        prefix = grasp_msg.grasp_trajectory.joint_names.at(0).substr(0,end_prefix);
-    }
-    else
-    {
-        prefix = grasp_msg.grasp_trajectory.joint_names.at(0);
-        for(int i=1;i<number_of_joints;i++)
-            prefix = common_prefix(prefix,grasp_msg.grasp_trajectory.joint_names.at(i));
+        std::string aj_str;
+        for(auto aj:actuated_joints)
+        {
+            aj_str += aj;
+            aj_str += " ";
+        }
+        std::string gj_str;
+        for(auto gj:grasp_msg.grasp_trajectory.joint_names)
+        {
+            gj_str += gj;
+            gj_str += " ";
+        }
+        ROS_WARN_STREAM(__func__ << " : actuated_joints parameter [" << aj_str << "] and deserialized grasp joint_names  [" << gj_str << "] differ, and this won't let you see the hand updated in Rviz!");
     }
     
-    for(int i=0;i<number_of_joints;i++)
-    {
-        const std::string& lab = grasp_msg.grasp_trajectory.joint_names.at(i);
-        
-        // HACK: replace the prefix - still not fully general, but working better
-        std::string tmp(lab);
-        tmp.replace(0,prefix.length(),new_prefix);
-        
-        joint_msg.name.push_back(tmp);
-    }
+    joint_msg.name = grasp_msg.grasp_trajectory.joint_names;
 }
 
 void gmu_gui::update_sliders(int number_of_joints)
@@ -243,7 +237,7 @@ void gmu_gui::update_sliders(int number_of_joints)
     for(int i=0;i<number_of_joints;i++)
     {
         const std::string& lab = grasp_msg.grasp_trajectory.joint_names.at(i);
-        // // NOTE: the label shows up as in the message, but the published joints are different;
+        // // NOTE: the label shows up as in the message, but the published joints may be different;
         // //       uncomment the next line to show in the label what gets published instead
         // std::string lab = joint_msg.name.at(i);
 
@@ -315,11 +309,9 @@ bool gmu_gui::initialize_gmu()
 {
     obj_id = object_text.text().toDouble();
     grasp_id = grasp_id_text.text().toDouble();
-//     file_name = "object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id );
 
     if(!creating)
     {
-//     if( deserialize_ik( grasp_msg, file_name ) )
     if(read_grasp_msg(obj_id, grasp_id, grasp_msg))
     {
 	ROS_INFO_STREAM("Deserialization object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id ) << " OK! ... You can modify the grasp in Rviz");
@@ -340,19 +332,7 @@ bool gmu_gui::initialize_gmu()
     normalizePoses(grasp_msg.ee_pose);
     normalizePoses(grasp_msg.attObject.object.mesh_poses);
 
-    // // TEST: see if everything works well if using completely different joint names
-    // grasp_msg.grasp_trajectory.joint_names.clear();
-    // grasp_msg.grasp_trajectory.joint_names.push_back("hamal_test_hand_joint1");
-    // grasp_msg.grasp_trajectory.joint_names.push_back("hamal_test_hand_joint2");
-    // grasp_msg.grasp_trajectory.joint_names.push_back("hamal_test_hand_some_other_joint_3");
-    // for(auto& pt:grasp_msg.grasp_trajectory.points)
-    // {
-    //     // add two more joints in each message
-    //     pt.positions.push_back(0.1);
-    //     pt.positions.push_back(0.9);
-    // }
-        
-    // HACK: change names to publish the right joints
+    // check which are the right joint_names to publish
     update_joint_names();
     update_sliders(grasp_msg.grasp_trajectory.joint_names.size());
     
