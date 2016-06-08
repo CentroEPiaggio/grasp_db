@@ -97,6 +97,7 @@ private:
     void delete_joint_wp();
     void add_joint_wp();
     std::string common_prefix(const std::string& a, const std::string& b);
+    std::vector<std::string> actuated_joints;
 
     int current_wp=0;
     bool editing; //false means copying, checked is creating is false

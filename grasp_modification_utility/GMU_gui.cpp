@@ -174,6 +174,15 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
 
     starting_mode(true);
     gmu.clear();
+    
+    // read parameters from server
+    actuated_joints.clear();
+    node.getParam("actuated_joints",actuated_joints);
+    
+    std::cout << "actuated_joints: |";
+    for(auto jn:actuated_joints)
+        std::cout << jn << " | ";
+    std::cout << std::endl;
 }
 
 std::string gmu_gui::common_prefix( const std::string& a, const std::string& b )
@@ -365,41 +374,12 @@ bool gmu_gui::initialize_gmu()
     }
     else
     {
-        XmlRpc::XmlRpcValue v;
-
-        if(node.hasParam("/GMU/grasp_modification_utility_rviz/actuated_joints")) //TODO: fix global namespace
-        {
-            node.param("/GMU/grasp_modification_utility_rviz/actuated_joints", v, v);
-        }
-        else
-        {
-            ROS_ERROR_STREAM("missing param: actuated_joints");
-            std::cout<<"available params:"<<std::endl;
-            std::vector<std::string> names;
-            node.getParamNames(names);
-            for(auto n:names)
-                std::cout<<" - " << n <<std::endl;
-            return false;
-        }
-
-        if(v.size()==0)
-        {
-            ROS_ERROR_STREAM("empty param: actuated_joints");
-            return false;
-        }
-
         grasp_msg.grasp_trajectory.joint_names.clear();
+        grasp_msg.grasp_trajectory.joint_names = actuated_joints;
         grasp_msg.grasp_trajectory.points.clear();
-        std::cout<<" - actuated_joints: | ";
         trajectory_msgs::JointTrajectoryPoint pp;
-        for(int i =0; i < v.size(); i++)
-        {
-            grasp_msg.grasp_trajectory.joint_names.push_back(v[i]);
-            pp.positions.push_back(0);
-            std::cout << v[i] << " | ";
-        }
+        pp.positions.resize(actuated_joints.size(),0);
         grasp_msg.grasp_trajectory.points.push_back(pp);
-        std::cout << std::endl;
         update_joint_names();
         update_sliders(grasp_msg.grasp_trajectory.joint_names.size());
         gmu.set_object(obj_id);
