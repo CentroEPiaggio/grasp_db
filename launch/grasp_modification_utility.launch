@@ -26,6 +26,7 @@
 <!--         <node pkg="dual_manipulation_grasp_db" type="grasp_modification_utility" name="grasp_modification_utility" respawn="false" output="screen"/> -->
 
         <param name="hand_mesh_path" value="package://soft_hand_description/meshes/palm_right.stl"/>
+        <param name="ee_link_name" value="gmu_hand_palm_link"/>
         <rosparam param="actuated_joints">["right_hand_synergy_joint"]</rosparam>
         <node name="grasp_modification_utility_rviz" pkg="rviz" type="rviz" respawn="false" output="screen" args="-d $(find dual_manipulation_grasp_db)/launch/grasp_modification_utility.rviz"/>
 

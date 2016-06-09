@@ -45,10 +45,13 @@ public:
 private:
     GMU gmu;
     gmu_gui gui;
+    ros::AsyncSpinner* spin;
 };
 
 rviz_gmu_panel::rviz_gmu_panel(QWidget* parent): Panel(parent), gui(gmu)
 {
+    spin = new ros::AsyncSpinner(1);
+    spin->start();
     setLayout(&gui.main_layout);
 }
 
