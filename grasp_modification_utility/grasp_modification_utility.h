@@ -106,10 +106,10 @@ private:
     tf::Transform transform_;
     tf::TransformBroadcaster tf_broadcaster_;
 
-    bool leftness_;
     std::string db_name_;
     std::atomic_bool objects_active;
     std::string hand_mesh_path_;
+    std::string ee_link_name_;
 };
 
 #endif //GMU_H

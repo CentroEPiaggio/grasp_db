@@ -56,6 +56,7 @@ GMU::GMU():server("grasp_modification_utility_interactive_marker")
     transform_.setRotation( tf::Quaternion( 0.0, 0.0, 0.0, 1.0) );
     
     node.getParam("hand_mesh_path", hand_mesh_path_);
+    node.getParam("ee_link_name", ee_link_name_);
 
     XmlRpc::XmlRpcValue params;
     std::string database_name;
@@ -343,10 +344,15 @@ void GMU::im_callback(const visualization_msgs::InteractiveMarkerFeedback& feedb
       static tf::TransformListener tf;
       tf::StampedTransform hand_palm;
       double timeout = 5.0;
-      if(!tf.waitForTransform("gmu_hand_palm_link","hand",ros::Time(0), ros::Duration(timeout)))
-	hand_palm.setIdentity();
+      if(!tf.waitForTransform(ee_link_name_,"hand",ros::Time(0), ros::Duration(timeout)))
+      {
+          ROS_WARN_STREAM(__func__ << " : failed to wait for transform between \'" << ee_link_name_ << "\' and \'hand\' > setting to Idendity");
+          hand_palm.setIdentity();
+      }
       else
-    tf.lookupTransform("gmu_hand_palm_link","hand", ros::Time(0), hand_palm);
+      {
+          tf.lookupTransform(ee_link_name_,"hand", ros::Time(0), hand_palm);
+      }
       transform_.setOrigin( tf::Vector3(feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z) );
       transform_.setRotation( tf::Quaternion( feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w) );
       transform_.mult(transform_,hand_palm);
