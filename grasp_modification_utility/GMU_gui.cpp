@@ -217,7 +217,7 @@ void gmu_gui::update_joint_names()
             gj_str += gj;
             gj_str += " ";
         }
-        ROS_WARN_STREAM(__func__ << " : actuated_joints parameter [" << aj_str << "] and deserialized grasp joint_names  [" << gj_str << "] differ, and this won't let you see the hand updated in Rviz!");
+        ROS_WARN_STREAM(__func__ << " : actuated_joints parameter [" << aj_str << "] and deserialized grasp joint_names [" << gj_str << "] differ, and this won't let you see the hand updated in Rviz!");
     }
     
     joint_msg.name = grasp_msg.grasp_trajectory.joint_names;
@@ -316,6 +316,24 @@ bool gmu_gui::initialize_gmu()
     {
 	ROS_INFO_STREAM("Deserialization object" + std::to_string( obj_id ) + "/grasp" + std::to_string( grasp_id ) << " OK! ... You can modify the grasp in Rviz");
 	std::cout << "grasp_msg" << grasp_msg << std::endl;
+            if(grasp_msg.grasp_trajectory.points.size() < grasp_msg.ee_pose.size())
+            {
+                int old_size = grasp_msg.grasp_trajectory.points.size();
+                int new_size = grasp_msg.ee_pose.size();
+                ROS_WARN_STREAM(__func__ << " : the number of trajectory points (\'" << old_size << "\') associated with this grasp is less than the number of poses (\'" << new_size << "\'), the remaining timing information will be made up (1sec per waypoint)");
+                
+                double latest_timing = grasp_msg.grasp_trajectory.points.empty()?0:grasp_msg.grasp_trajectory.points.back().time_from_start.toSec();
+                
+                //grasp_msg.grasp_trajectory.points.resize(grasp_msg.ee_pose.size());
+                for(int i=0; i<new_size-old_size; i++)
+                {
+                    trajectory_msgs::JointTrajectoryPoint pp;
+                    pp.time_from_start.fromSec(latest_timing + i*1.0);
+                    pp.positions.resize(grasp_msg.grasp_trajectory.joint_names.size(),0);
+                    // pp.positions.resize(actuated_joints.size(),0);
+                    grasp_msg.grasp_trajectory.points.push_back(pp);
+                }
+            }
 	if( !gmu.db_mapper->Objects.count( obj_id ) )
 	{
 	    ROS_ERROR_STREAM("Object " << grasp_msg.object_db_id << " is not in the database! . . . Retry!");
