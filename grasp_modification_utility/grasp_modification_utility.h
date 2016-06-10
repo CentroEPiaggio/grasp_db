@@ -109,6 +109,7 @@ private:
     std::string db_name_;
     std::atomic_bool objects_active;
     std::string hand_mesh_path_;
+    double hand_mesh_scale_;
     std::string ee_link_name_;
 };
 
