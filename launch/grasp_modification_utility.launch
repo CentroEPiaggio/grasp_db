@@ -29,6 +29,13 @@
         <param name="hand_mesh_scale" value="0.001"/>
         <param name="ee_link_name" value="gmu_hand_palm_link"/>
         <rosparam param="actuated_joints">["right_hand_synergy_joint"]</rosparam>
+
+        <!-- <param name="hand_mesh_path" value="package://pr2_description/meshes/gripper_v0/gripper_palm.dae"/>
+        <param name="ee_link_name" value="r_gripper_palm_link"/>
+        <rosparam param="actuated_joints">["r_gripper_l_finger_joint", "r_gripper_motor_slider_joint", "r_gripper_motor_screw_joint", "r_gripper_joint"]</rosparam>
+        <rosparam param="joints_lower_limit">[0.0, 0.0, 0.0, 0.0]</rosparam>
+        <rosparam param="joints_upper_limit">[0.55, 1.0, 1.0, 1.0]</rosparam> -->
+
         <node name="grasp_modification_utility_rviz" pkg="rviz" type="rviz" respawn="false" output="screen" args="-d $(find dual_manipulation_grasp_db)/launch/grasp_modification_utility.rviz"/>
 
     </group>
