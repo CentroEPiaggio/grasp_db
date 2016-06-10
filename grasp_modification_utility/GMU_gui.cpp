@@ -183,6 +183,17 @@ gmu_gui::gmu_gui(GMU& gmu_): QWidget(), gmu(gmu_)
     for(auto jn:actuated_joints)
         std::cout << jn << " | ";
     std::cout << std::endl;
+    
+    joints_lb.clear();
+    node.getParam("joints_lower_limit",joints_lb);
+    joints_ub.clear();
+    node.getParam("joints_upper_limit",joints_ub);
+    if(actuated_joints.size() != joints_lb.size() || joints_ub.size() != joints_lb.size())
+    {
+        ROS_WARN_STREAM("actuated_joints has " << actuated_joints.size() << " elements, but " << joints_lb.size() << " joints_lower_limit and " << joints_ub.size() << " joints_upper_limit have been specified: using zeros and ones instead");
+        joints_lb.resize(actuated_joints.size(),0.0);
+        joints_ub.resize(actuated_joints.size(),1.0);
+    }
 }
 
 std::string gmu_gui::common_prefix( const std::string& a, const std::string& b )
@@ -241,12 +252,15 @@ void gmu_gui::update_sliders(int number_of_joints)
         // //       uncomment the next line to show in the label what gets published instead
         // std::string lab = joint_msg.name.at(i);
 
-	QLabel* label = new QLabel(QString::fromStdString(lab));
-	QSlider* slider = new QSlider();
-	slider->setOrientation(Qt::Horizontal);
-	slider->setRange(0,100);
-	slider->setSliderPosition(grasp_msg.grasp_trajectory.points.at(current_wp).positions.at(i)*100);
-    
+        QLabel* label = new QLabel(QString::fromStdString(lab));
+        QSlider* slider = new QSlider();
+        slider->setOrientation(Qt::Horizontal);
+        if(actuated_joints.size() != number_of_joints)
+            slider->setRange(0,100);
+        else
+            slider->setRange(joints_lb.at(i)*100,joints_ub.at(i)*100);;
+        slider->setSliderPosition(grasp_msg.grasp_trajectory.points.at(current_wp).positions.at(i)*100);
+        
 	synergy_label.push_back(label);
 	synergy_slider.push_back(slider);
 

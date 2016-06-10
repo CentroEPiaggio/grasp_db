@@ -56,7 +56,7 @@ GMU::GMU():server("grasp_modification_utility_interactive_marker")
     transform_.setRotation( tf::Quaternion( 0.0, 0.0, 0.0, 1.0) );
     
     node.getParam("hand_mesh_path", hand_mesh_path_);
-    node.getParam("hand_mesh_scale", hand_mesh_scale_);
+    node.param("hand_mesh_scale", hand_mesh_scale_, 1.0);
     node.getParam("ee_link_name", ee_link_name_);
 
     XmlRpc::XmlRpcValue params;
