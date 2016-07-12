@@ -12,11 +12,13 @@ One important piece of software included in this package is the `Grasp Modificat
 
 Use the command `roslaunch dual_manipulation_grasp_db grasp_modification_utility.launch` for launching the `GMU` with standard arguments.
 The arguments are:
+
 - `robot_name`: the name of the robot for which to load the database; this will affect the parameters loaded by `dual_manipulation_shared` launch file `dual_manipulation.launch`
 - `load_ik_params`: setting this value to true is only needed when running a real or simulated experiment, so it is usually not needed when modifying a grasp trajectory
 
 This command will launch `rviz` with a custom panel that allows to load an already present grasp, or to create a new one.
 Possible modifications involve:
+
 - adding or removing waypoints
 - modifying each of the waypoint (object/end-effector relative pose, actuated joint value(s), time from start)
 - modifying the post-grasp pose (the pose close to the yellow object), which is used in the [DualManipulation](https://bitbucket.org/dualmanipulation/dualmanipulation) framework if object tracking during grasp is not active
@@ -24,6 +26,7 @@ Possible modifications involve:
 After modifications have been made, the grasp (or its modifications) can either be discarded or saved.
 
 It is possible to change the end-effector which is used in the utility: to this end, the following changes have to be made:
+
 - in `launch/grasp_modification_utility.launch` file, change the parameters `hand_mesh_path`, `ee_link_name`, `actuated_joints`, `joints_lower_limit`, and `joints_upper_limit`
 - in `urdf/hand.urdf.xacro` file, include the robot model of the end-effector you want to use, and make sure it is attached to the link named `hand`
 
