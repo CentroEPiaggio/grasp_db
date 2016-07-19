@@ -350,7 +350,7 @@ bool gmu_gui::initialize_gmu()
             }
 	if( !gmu.db_mapper->Objects.count( obj_id ) )
 	{
-	    ROS_ERROR_STREAM("Object " << grasp_msg.object_db_id << " is not in the database! . . . Retry!");
+	    ROS_ERROR_STREAM("Object " << obj_id << " is not in the database! . . . Retry!");
 	    return false;
 	}
     }
@@ -411,6 +411,9 @@ bool gmu_gui::initialize_gmu()
         gmu.publish_object();
         gmu.publish_hands();
     }
+    // force the object id in the grasp msg
+    grasp_msg.object_db_id = obj_id;
+    
     return true;
 }
 
