@@ -651,12 +651,25 @@ void gmu_gui::on_save_button_clicked()
         
         std::cout << "chosen grasp_id: " <<grasp_id<< ", actual grasp_id: " <<actual_grasp_id<< ", new grasp_id: " << new_grasp_id << std::endl;
         
-        std::cout << "copying name: " << std::get<2>( gmu.db_mapper->Grasps.at(actual_grasp_id) ) << std::endl;
-
-        std::string new_grasp_name = std::get<2>( gmu.db_mapper->Grasps.at( actual_grasp_id ) ) + " (copy)";
+        // try to get info from the database, if possible
+        std::string old_grasp_name, new_grasp_name;
+        int ee_id;
+        if (gmu.db_mapper->Grasps.count( actual_grasp_id ))
+        {
+            old_grasp_name = std::get<2>( gmu.db_mapper->Grasps.at( actual_grasp_id ) );
+            new_grasp_name = old_grasp_name + " (copy)";
+            ee_id = std::get<1>( gmu.db_mapper->Grasps.at( actual_grasp_id ) );
+        }
+        else
+        {
+            old_grasp_name = "NO NAME TO COPY";
+            new_grasp_name = "grasp without name";
+            //TODO fix this asking the user
+            ee_id = 1;
+        }
+        
+        std::cout << "copying name: " << old_grasp_name << std::endl;
         std::cout << "new name is: " << new_grasp_name << std::endl;
-
-        int ee_id = std::get<1>( gmu.db_mapper->Grasps.at( actual_grasp_id ) );
         std::cout << "copying ee_id: " << ee_id << std::endl;
         std::cout << "writing to database..." << std::endl;
 
