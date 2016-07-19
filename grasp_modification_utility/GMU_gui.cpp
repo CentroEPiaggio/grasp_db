@@ -43,6 +43,8 @@
 #include <algorithm>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <QInputDialog>
+#include <climits>
 
 int gmu_gui::sigintFd[2];
 
@@ -667,8 +669,26 @@ void gmu_gui::on_save_button_clicked()
         {
             old_grasp_name = "NO NAME TO COPY";
             new_grasp_name = "grasp without name";
-            //TODO fix this asking the user
-            ee_id = 1;
+            bool ok;
+            std::string ee_list;
+            int min_ee(INT_MAX),max_ee(-1);
+            for(auto ee:gmu.db_mapper->EndEffectors)
+            {
+                ee_list += (std::to_string(ee.first) + " " + std::get<0>(ee.second) + "\n");
+                if((int)ee.first > max_ee)
+                    max_ee = ee.first;
+                if(ee.first < min_ee)
+                    min_ee = ee.first;
+            }
+            // ask the user for the end-effector id, considering what is possible to get from the database
+            int i = QInputDialog::getInt(this, tr("QInputDialog::getInteger()"),
+                                         tr(ee_list.c_str()), min_ee, min_ee, max_ee, 1, &ok);
+            if (!ok || gmu.db_mapper->EndEffectors.count(i)==0)
+            {
+                i = -1;
+                ROS_WARN_STREAM("The selection made for the end-effector is invalid: not saving...");
+            }
+            ee_id = i;
         }
         
         std::cout << "copying name: " << old_grasp_name << std::endl;
