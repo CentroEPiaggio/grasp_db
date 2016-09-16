@@ -58,6 +58,7 @@
 
 #define EE_GRASP_FACTOR 100
 #define EPS 0.01 // a small additional height
+#define OBJ_GRASP_FACTOR dual_manipulation::shared::OBJ_GRASP_FACTOR
 
 /**
  * Assumptions
