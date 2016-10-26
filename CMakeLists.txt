@@ -23,9 +23,15 @@ catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
-find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
-include(${QT_USE_FILE})
-add_definitions(-DQT_NO_KEYWORDS)
+if($ENV{ROS_DISTRO} STRLESS "indigo" OR $ENV{ROS_DISTRO} STREQUAL "indigo")
+    find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+    include(${QT_USE_FILE})
+elseif($ENV{ROS_DISTRO} STRGREATER "indigo")
+    find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+    include_directories(${Qt5Core_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS})
+    add_definitions(-DQT_NO_KEYWORDS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+endif()
 
 #########
 # BUILD #
@@ -185,8 +191,17 @@ target_link_libraries(grasps_serializer_node
 )
 
 # GRASP MODIFICATION UTILITY (GMU)
-qt4_wrap_cpp(GMU_GUI_MOC_FILES
-grasp_modification_utility/GMU_gui.h)
+if($ENV{ROS_DISTRO} STRLESS "indigo" OR $ENV{ROS_DISTRO} STREQUAL "indigo")
+    qt4_wrap_cpp(GMU_GUI_MOC_FILES
+    grasp_modification_utility/GMU_gui.h)
+elseif($ENV{ROS_DISTRO} STRGREATER "indigo")
+    qt5_wrap_cpp(GMU_GUI_MOC_FILES
+    grasp_modification_utility/GMU_gui.h)
+    SET(QT_LIBRARIES
+        ${Qt5Core_LIBRARIES}
+        ${Qt5Widgets_LIBRARIES}
+    )
+endif()
 
 set(GMU_GUI_SRC
 ${GMU_GUI_MOC_FILES}
