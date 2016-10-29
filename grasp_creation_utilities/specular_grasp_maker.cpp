@@ -42,54 +42,54 @@
 
 specularGraspMaker::specularGraspMaker(uint ee_id, std::string ee_frame, const std::vector< std::string >& new_joint_names, std::string db_name)
 {
-  end_effector_id_ = ee_id;
-  end_effector_frame_ = ee_frame;
-  joint_names_ = new_joint_names;
-  db_name_ = db_name;
+    end_effector_id_ = ee_id;
+    end_effector_frame_ = ee_frame;
+    joint_names_ = new_joint_names;
+    db_name_ = db_name;
 }
 
 bool specularGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_name, bool top_bottom, uint new_grasp_id)
 {
-  dual_manipulation_shared::grasp_trajectory grasp_msg;
-  
-  // try to read the grasp
-  if(!read_grasp_msg(obj_id,grasp_id,grasp_msg))
-    return false;
-  
-  // I want to be sure to have an updated writer every time, so I use a shared_ptr
-  boost::shared_ptr<databaseWriter> db_writer(new databaseWriter(db_name_));
-  assert(db_writer.unique());
-  
-  // write a new entry in the DB
-  int writer_ret;
-  if(new_grasp_id == 0)
-    writer_ret = db_writer->writeNewGrasp(obj_id,end_effector_id_,new_grasp_name);
-  else
-    writer_ret = db_writer->writeNewGrasp(new_grasp_id,obj_id,end_effector_id_,new_grasp_name);
-  if(writer_ret < 0)
-    return false;
-  
-  new_grasp_id = (uint)writer_ret;
-  
-#if DEBUG
-  std::cout << CLASS_NAMESPACE << __func__ << " : transforming grasp #" << grasp_id << " >> #" << new_grasp_id << " (object " << obj_id << ")" << std::endl;
-#endif
-  
-  transform_grasp_specularity(grasp_msg,obj_id,end_effector_frame_,joint_names_,top_bottom);
-  
-  bool write_ok = (write_grasp_msg(obj_id,new_grasp_id,grasp_msg)>0);
-  bool delete_ok = true;
-  if(!write_ok)
-  {
-    ROS_WARN_STREAM("specularGraspMaker::transform_grasp : Unable to serialize the new grasp - performing delete action on the DB entry just created...");
-    delete_ok = db_writer->deleteGrasp(new_grasp_id);
-    if(!delete_ok)
-      ROS_ERROR_STREAM("specularGraspMaker::transform_grasp : Unable to reserialize the grasp and to delete the entry just created!!! Consider deleting grasp #" << new_grasp_id << " by hand!!!");
+    dual_manipulation_shared::grasp_trajectory grasp_msg;
+    
+    // try to read the grasp
+    if(!read_grasp_msg(obj_id,grasp_id,grasp_msg))
+        return false;
+    
+    // I want to be sure to have an updated writer every time, so I use a shared_ptr
+    boost::shared_ptr<databaseWriter> db_writer(new databaseWriter(db_name_));
+    assert(db_writer.unique());
+    
+    // write a new entry in the DB
+    int writer_ret;
+    if(new_grasp_id == 0)
+        writer_ret = db_writer->writeNewGrasp(obj_id,end_effector_id_,new_grasp_name);
     else
-      ROS_INFO_STREAM("specularGraspMaker::transform_grasp : Successfully deleted new grasp (" << new_grasp_id << ") entry from DB");
-  }
-  
-  return (write_ok && delete_ok);
+        writer_ret = db_writer->writeNewGrasp(new_grasp_id,obj_id,end_effector_id_,new_grasp_name);
+    if(writer_ret < 0)
+        return false;
+    
+    new_grasp_id = (uint)writer_ret;
+    
+    #if DEBUG
+    std::cout << CLASS_NAMESPACE << __func__ << " : transforming grasp #" << grasp_id << " >> #" << new_grasp_id << " (object " << obj_id << ")" << std::endl;
+    #endif
+    
+    transform_grasp_specularity(grasp_msg,obj_id,end_effector_frame_,joint_names_,top_bottom);
+    
+    bool write_ok = (write_grasp_msg(obj_id,new_grasp_id,grasp_msg)>0);
+    bool delete_ok = true;
+    if(!write_ok)
+    {
+        ROS_WARN_STREAM("specularGraspMaker::transform_grasp : Unable to serialize the new grasp - performing delete action on the DB entry just created...");
+        delete_ok = db_writer->deleteGrasp(new_grasp_id);
+        if(!delete_ok)
+            ROS_ERROR_STREAM("specularGraspMaker::transform_grasp : Unable to reserialize the grasp and to delete the entry just created!!! Consider deleting grasp #" << new_grasp_id << " by hand!!!");
+        else
+            ROS_INFO_STREAM("specularGraspMaker::transform_grasp : Successfully deleted new grasp (" << new_grasp_id << ") entry from DB");
+    }
+    
+    return (write_ok && delete_ok);
 }
 
 void specularGraspMaker::transform_specular_y(KDL::Frame& pose)
@@ -103,16 +103,16 @@ void specularGraspMaker::transform_specular_y(KDL::Frame& pose)
 
 void specularGraspMaker::transform_specular_y(std::vector< KDL::Frame >& poses)
 {
-  for(int i=0; i<poses.size(); i++)
-  {
-    transform_specular_y(poses.at(i));
-  }
+    for(int i=0; i<poses.size(); i++)
+    {
+        transform_specular_y(poses.at(i));
+    }
 }
 
 void specularGraspMaker::transform_premultiply(std::vector<KDL::Frame>& poses, KDL::Frame frame)
 {
-  for(int i=0; i<poses.size(); i++)
-      poses.at(i) = frame*poses.at(i);
+    for(int i=0; i<poses.size(); i++)
+        poses.at(i) = frame*poses.at(i);
 }
 
 void specularGraspMaker::transform_grasp_specularity(dual_manipulation_shared::grasp_trajectory& grasp_msg, uint obj_id, std::string new_link_name, const std::vector< std::string >& new_joint_names, bool top_bottom)
@@ -149,7 +149,7 @@ void specularGraspMaker::transform_grasp_specularity(dual_manipulation_shared::g
     // transform using specularity on x|z plane (y is the orthogonal axis we consider)
     transform_specular_y(grasp_frames);
     transform_specular_y(postgrasp_frame);
-  
+    
     // NOTE: transform top to bottom and side_low to side_high
     if(top_bottom)
     {
@@ -159,7 +159,7 @@ void specularGraspMaker::transform_grasp_specularity(dual_manipulation_shared::g
         transform_premultiply(v,rot_pi);
         postgrasp_frame = v.front();
     }
-  
+    
     // convert back to geometry_msgs
     grasp_msg.ee_pose.clear();
     for(auto& f:grasp_frames)
@@ -170,18 +170,18 @@ void specularGraspMaker::transform_grasp_specularity(dual_manipulation_shared::g
     }
     postgrasp_frame = postgrasp_frame.Inverse();
     tf::poseKDLToMsg(postgrasp_frame,obj_pose);
-  
-  grasp_msg.attObject.object.mesh_poses.clear();
-  grasp_msg.attObject.object.mesh_poses.push_back(obj_pose);
-  grasp_msg.attObject.link_name = new_link_name;
-  grasp_msg.attObject.object.header.frame_id = grasp_msg.attObject.link_name;
-  if(grasp_msg.object_db_id != obj_id)
-  {
-    ROS_WARN_STREAM("specularGraspMaker::reserialize_grasp : grasp_msg.object_db_id (" << grasp_msg.object_db_id << ") and obj_id (" << obj_id << ") differ! Proceeding assigning the new obj_id");
-    grasp_msg.object_db_id = obj_id;
-  }
-  grasp_msg.grasp_trajectory.joint_names.clear();
-  grasp_msg.grasp_trajectory.joint_names = new_joint_names;
-  
-  return;
+    
+    grasp_msg.attObject.object.mesh_poses.clear();
+    grasp_msg.attObject.object.mesh_poses.push_back(obj_pose);
+    grasp_msg.attObject.link_name = new_link_name;
+    grasp_msg.attObject.object.header.frame_id = grasp_msg.attObject.link_name;
+    if(grasp_msg.object_db_id != obj_id)
+    {
+        ROS_WARN_STREAM("specularGraspMaker::reserialize_grasp : grasp_msg.object_db_id (" << grasp_msg.object_db_id << ") and obj_id (" << obj_id << ") differ! Proceeding assigning the new obj_id");
+        grasp_msg.object_db_id = obj_id;
+    }
+    grasp_msg.grasp_trajectory.joint_names.clear();
+    grasp_msg.grasp_trajectory.joint_names = new_joint_names;
+    
+    return;
 }
