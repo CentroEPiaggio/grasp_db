@@ -275,6 +275,14 @@ int main(int argc, char **argv)
     std::cout<<"|Grasp db| -> create box soma db "<<std::endl;
     std::cout<<std::endl;
     
+    assert(ee_name.size()*EE_GRASP_FACTOR < OBJ_GRASP_FACTOR);
+    assert(ec_name.size()*EC_GRASP_FACTOR < EE_GRASP_FACTOR);
+    for(int i=0; i<ee_name.size(); ++i)
+    {
+        for(auto grasps:ee_grasp_names.at(i))
+            assert(grasps.size()*(ee_prehensile.at(i)?HOW_MANY_VAR:HOW_MANY_ROT) < EC_GRASP_FACTOR);
+    }
+    
     ros::init(argc, argv, "create_box_soma_db");
     // get current date/time to use in the naming of the full DB
     time_t rawtime;
