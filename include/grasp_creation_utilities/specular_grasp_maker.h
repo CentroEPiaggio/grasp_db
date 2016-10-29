@@ -69,10 +69,11 @@ public:
    * @param new_grasp_name name to give to the new grasp
    * @param top_bottom flag specifying if we want to transform the grasp in a top-bottom fashion (top grasp becoming a bottom grasp, sideA-high becoming a sideA-low) instead of just having a new grasp which is specular w.r.t. XZ plane
    * @param new_grasp_id id of the new grasp to write (autochosen if left empty)
+   * @param ec_id environment constraint id - zero by default (meaningless - could not be used with new transition types)
    * 
    * @return true on success
    */
-  bool transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_name, bool top_bottom, uint new_grasp_id = 0);
+  bool transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_name, bool top_bottom, uint new_grasp_id = 0, constraint_id ec_id = 0);
   
 private:
   

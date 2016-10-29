@@ -124,7 +124,7 @@ void tableGraspMaker::build_grasp_msg(dual_manipulation_shared::grasp_trajectory
     ee_pose.push_back(obj_ee_final);
 }
 
-bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KDL::Frame obj_ee, uint64_t new_grasp_id)
+bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KDL::Frame obj_ee, uint64_t new_grasp_id, constraint_id ec_id)
 {
     dual_manipulation_shared::grasp_trajectory grasp_msg;
     
@@ -145,9 +145,9 @@ bool tableGraspMaker::create_table_grasps(int obj_id, std::string grasp_name, KD
         // write its entry in the database
         int writer_ret;
         if(new_grasp_id == 0)
-            writer_ret = db_writer.writeNewGrasp(obj_id,end_effector_id_,grasp_name_rotated);
+            writer_ret = db_writer.writeNewGrasp(obj_id,end_effector_id_,grasp_name_rotated,ec_id);
         else
-            writer_ret = db_writer.writeNewGrasp(new_grasp_id+i,obj_id,end_effector_id_,grasp_name_rotated);
+            writer_ret = db_writer.writeNewGrasp(new_grasp_id+i,obj_id,end_effector_id_,grasp_name_rotated,ec_id);
         if(writer_ret == -1)
         {
             ROS_ERROR_STREAM("Unable to write entry in the grasp DB - returning");

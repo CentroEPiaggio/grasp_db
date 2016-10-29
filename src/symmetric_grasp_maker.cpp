@@ -48,7 +48,7 @@ symmetricGraspMaker::symmetricGraspMaker(uint ee_id, std::string ee_frame, const
     db_name_ = db_name;
 }
 
-bool symmetricGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_base_name, std::vector<uint> new_grasp_ids, uint how_many_rot, KDL::Vector rot_axis, KDL::Frame rotFrame_obj = KDL::Frame::Identity())
+bool symmetricGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_base_name, std::vector< uint > new_grasp_ids, uint how_many_rot, KDL::Vector rot_axis, KDL::Frame rotFrame_obj, constraint_id ec_id)
 {
     if(!new_grasp_ids.empty() && new_grasp_ids.size() != how_many_rot-1)
     {
@@ -84,9 +84,9 @@ bool symmetricGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::strin
         if(!new_grasp_ids.empty())
             new_grasp_id = new_grasp_ids.at(i-1);
         if(new_grasp_id == 0)
-            writer_ret = db_writer->writeNewGrasp(obj_id,end_effector_id_,new_grasp_name);
+            writer_ret = db_writer->writeNewGrasp(obj_id,end_effector_id_,new_grasp_name,ec_id);
         else
-            writer_ret = db_writer->writeNewGrasp(new_grasp_id,obj_id,end_effector_id_,new_grasp_name);
+            writer_ret = db_writer->writeNewGrasp(new_grasp_id,obj_id,end_effector_id_,new_grasp_name,ec_id);
         if(writer_ret < 0)
             break;
         

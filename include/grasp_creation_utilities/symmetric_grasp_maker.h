@@ -73,10 +73,11 @@ public:
      * @param new_grasp_name name to give to the new grasp
      * @param new_grasp_id vector of id of the new grasps to write (autochosen if left empty)
      * @param how_many_rot number of total rotations (1 already present - so 1 less will be generated)
+     * @param ec_id environment constraint id - zero by default (meaningless - could not be used with new transition types)
      * 
      * @return true on success
      */
-    bool transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_base_name, std::vector< uint > new_grasp_ids, uint how_many_rot, KDL::Vector rot_axis, KDL::Frame rotFrame_obj);
+    bool transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_base_name, std::vector< uint > new_grasp_ids, uint how_many_rot, KDL::Vector rot_axis, KDL::Frame rotFrame_obj, constraint_id ec_id = 0);
     
 private:
     

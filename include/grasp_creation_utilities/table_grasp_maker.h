@@ -65,7 +65,17 @@ public:
   tableGraspMaker(std::string db_name = "test.db", uint yaw_steps = YAW_STEPS, uint ee_id = END_EFFECTOR_ID, double wp_height = WAYPOINT_HEIGHT, std::string ee_frame = END_EFFECTOR_FRAME);
   
   bool read_data_from_file(std::string& obj_name, std::string& grasp_name, KDL::Frame& obj_ee_final, std::string filename = "/test/table_grasp_data.txt");
-  bool create_table_grasps(int obj_id, std::string grasp_name, KDL::Frame obj_ee, uint64_t new_grasp_id=0);
+  
+  /**
+   * @brief Create table grasps: the number is specified in the constructor
+   * 
+   * @param obj_id id of the object
+   * @param grasp_name the prefix of the name to give to the new grasps
+   * @param obj_ee the frame to consider between object and end-effector - rotations will be applied about the object z-axis
+   * @param new_grasp_id the first id to use to make new grasps - default: write in the database and get the id from there
+   * @param ec_id environment constraint id - zero by default (meaningless - could not be used with new transition types)
+   */
+  bool create_table_grasps(int obj_id, std::string grasp_name, KDL::Frame obj_ee, uint64_t new_grasp_id=0, constraint_id ec_id = 0);
   
 private:
   void build_grasp_msg(dual_manipulation_shared::grasp_trajectory& grasp_msg, const KDL::Frame& obj_ee_frame, int obj_id, std::string ee_frame_name);
