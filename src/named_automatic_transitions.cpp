@@ -37,6 +37,7 @@
 #include <string>
 
 #define DEBUG 1
+#define CLASS_NAMESPACE "namedAutomaticTransitions::"
 
 namedAutomaticTransitions::namedAutomaticTransitions(std::string db_name):db_name_(db_name)
 {
@@ -104,6 +105,19 @@ bool namedAutomaticTransitions::write_transitions()
     std::map<std::string,std::vector<uint>> grasp_id_from_prefix;
     std::map<std::string,std::vector<uint>> ee_id_from_prefix;
     std::map<std::string,std::vector<uint>> obj_id_from_prefix;
+    std::map<std::string,std::vector<uint>> ec_id_from_prefix;
+    
+    ROS_WARN_STREAM(CLASS_NAMESPACE << __func__ << " : automatic transition work in this way\n" << 
+        "\t- use old behavior when at least on end-effector is movable: this is for GRASP, UNGRASP, and EXCHANGE_GRASP\n\t\t(as provided for backward compatibility in databaseWriter)\n" <<
+        "\t- if both end-effectors are non-movable, consider the transition to be a SLIDE if EC in the transition are (1->1) or (1->2),\n\t\tand use all movable end-effectors as extra_ees for that transition\n" <<
+        "\t- other, more flexible behaviors need further implementation..."
+    );
+    
+    // store a vector of all movable end-effectors
+    std::vector<endeffector_id> movable_ees;
+    for(auto ee:db_mapper_->EndEffectors)
+        if(std::get<1>(ee.second))
+            movable_ees.push_back(ee.first);
     
     for(auto grasp:db_mapper_->Grasps)
     {
@@ -112,6 +126,7 @@ bool namedAutomaticTransitions::write_transitions()
         uint obj_id = std::get<0>(grasp.second);
         uint ee_id = std::get<1>(grasp.second);
         std::string grasp_name = std::get<2>(grasp.second);
+        uint ec_id = std::get<3>(grasp.second);
         
         for(auto pref:prefixes_)
         {
@@ -119,6 +134,7 @@ bool namedAutomaticTransitions::write_transitions()
             {
                 ee_id_from_prefix[pref].push_back(ee_id);
                 obj_id_from_prefix[pref].push_back(obj_id);
+                ec_id_from_prefix[pref].push_back(ec_id);
             }
             
             // do the same for each correspondence
@@ -128,6 +144,7 @@ bool namedAutomaticTransitions::write_transitions()
                 {
                     ee_id_from_prefix[corr].push_back(ee_id);
                     obj_id_from_prefix[corr].push_back(obj_id);
+                    ec_id_from_prefix[corr].push_back(ec_id);
                 }
             }
         }
@@ -158,30 +175,50 @@ bool namedAutomaticTransitions::write_transitions()
             {
                 uint pref_ee_id = ee_id_from_prefix.at(pref).at(i1);
                 uint pref_obj_id = obj_id_from_prefix.at(pref).at(i1);
+                bool pref_ee_movable = std::get<1>(db_mapper_->EndEffectors.at(pref_ee_id));
+                uint pref_ec_id = ec_id_from_prefix.at(pref).at(i1);
                 
                 for(int i2=0; i2<ee_id_from_prefix.at(corr).size(); i2++)
                 {
                     uint corr_ee_id = ee_id_from_prefix.at(corr).at(i2);
                     uint corr_obj_id = obj_id_from_prefix.at(corr).at(i2);
+                    bool corr_ee_movable = std::get<1>(db_mapper_->EndEffectors.at(corr_ee_id));
+                    uint corr_ec_id = ec_id_from_prefix.at(corr).at(i2);
                     
-                    if(pref_obj_id == corr_obj_id && pref_ee_id != corr_ee_id)
+                    // if the object is not the same, move on
+                    if(pref_obj_id != corr_obj_id)
+                        continue;
+                    else
                     {
                         uint pref_grasp_id = grasp_id_from_prefix.at(pref).at(i1);
                         uint corr_grasp_id = grasp_id_from_prefix.at(corr).at(i2);
-                        
-                        int write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,true);
-                        //      int write_res2 = db_writer_->writeNewTransition(corr_grasp_id,pref_grasp_id);
-                        int write_res2 = write_res;
-                        
                         std::string pref_to_corr(std::to_string(pref_grasp_id) + " > " + std::to_string(corr_grasp_id));
-                        std::string corr_to_pref(std::to_string(corr_grasp_id) + " > " + std::to_string(pref_grasp_id));
-                        if(write_res < 0 || write_res2 < 0)
-                            ROS_ERROR_STREAM("Unable to write transition " << (write_res<0?pref_to_corr:"") << (write_res*write_res2>0?" AND ":"") << (write_res2<0?corr_to_pref:""));
-                        else if(write_res == 0 || write_res2 == 0)
-                            ROS_WARN_STREAM("Transition " << (write_res==0?pref_to_corr:"") << (write_res+write_res2==0?" AND ":"") << (write_res2==0?corr_to_pref:"") << " was(were) already present in the DB - not added");
+                        int write_res;
+                        
+                        // if at least one end-effector is movable, and they are different, use old procedure
+                        if((pref_ee_movable || corr_ee_movable) && (pref_ee_id != corr_ee_id))
+                        {
+                            write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,true);
+                        }
+                        // if they are not movable (either same or different end-effectors)
+                        else if(!pref_ee_movable && !corr_ee_movable)
+                        {
+                            if( (pref_ec_id == 1 && corr_ec_id == 2) || 
+                                (pref_ec_id == 1 && corr_ec_id == 1)
+                            )
+                                write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,1.0,dual_manipulation::shared::NodeTransitionTypes::SLIDE,movable_ees);
+                            // case of UNKNOWN TRANSITION -> but write it anyway...
+                            else
+                                write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,true);
+                        }
+                        
+                        if(write_res < 0)
+                            ROS_ERROR_STREAM("Unable to write transition " << pref_to_corr);
+                        else if(write_res == 0)
+                            ROS_WARN_STREAM("Transition " << pref_to_corr << " was(were) already present in the DB - not added");
                         #if DEBUG
                         else
-                            ROS_INFO_STREAM("Written transitions " << pref_to_corr << " and " << corr_to_pref << " in the DB with IDs " << write_res << " and " << write_res2);
+                            ROS_INFO_STREAM("Written transitions " << pref_to_corr << " in the DB with IDs " << write_res);
                         #endif
                     }
                 }
