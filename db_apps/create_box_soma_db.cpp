@@ -425,15 +425,31 @@ int main(int argc, char **argv)
     // Make all transitions based on names
     // // THIS COULD BE DONE WITH THE GEOMETRIC FILTER
     #if NAMED_TRANSITIONS>0
-    std::vector<std::string> prefixes({"sideA_bottom","sideA_top","sideB_bottom","sideB_top","sideC_bottom","sideC_top","sideC"});
+    std::vector<std::string> prefixes({ "sideA_bottom_table","sideA_top_table","sideA_bottom_left","sideA_top_left","sideA_bottom_right","sideA_top_right",
+                                        "sideB_bottom_table","sideB_top_table","sideB_bottom_left","sideB_top_left","sideB_bottom_right","sideB_top_right",
+                                        "sideC_bottom_table","sideC_top_table"});
     std::map<std::string,std::vector<std::string>> correspondences;
-    correspondences["sideA_bottom"] = {"sideA_top"};
-    correspondences["sideA_top"] = {"sideA_bottom"};
-    correspondences["sideB_bottom"] = {"sideB_top"};
-    correspondences["sideB_top"] = {"sideB_bottom"};
-    correspondences["sideC_bottom"] = {"sideC_bottom"};
-    correspondences["sideC_top"] = {"sideC_top"};
-    correspondences["sideC"] = {"sideA","sideB"}; // needed for the edge grasp transitions, but will also add the same grasps (that will always fail) from the table...
+    // allowed sideA : table > hands; hands > [table, hands]
+    correspondences["sideA_bottom_table"] = {"sideA_top_left","sideA_top_right"};
+    correspondences["sideA_top_table"] = {"sideA_bottom_left","sideA_bottom_right"};
+    correspondences["sideA_bottom_left"] = {"sideA_top"}; // both table and other hand(s)
+    correspondences["sideA_top_left"] = {"sideA_bottom"};
+    correspondences["sideA_bottom_right"] = {"sideA_top"};
+    correspondences["sideA_top_right"] = {"sideA_bottom"};
+    // allowed sideB : table > hands; hands > table
+    correspondences["sideB_bottom_table"] = {"sideB_top_left","sideB_top_right"};
+    correspondences["sideB_top_table"] = {"sideB_bottom_left","sideB_bottom_right"};
+    correspondences["sideB_bottom_left"] = {"sideB_top_table"}; // only table: sideB is too small to do a grasp exchange
+    correspondences["sideB_top_left"] = {"sideB_bottom_table"};
+    correspondences["sideB_bottom_right"] = {"sideB_top_table"};
+    correspondences["sideB_top_right"] = {"sideB_bottom_table"};
+    // allowed sideC : table (no constraint) > table (no or edge constraint); table (edge) > hands
+    // NOTE 1: this will also add transitions from table (edge) to table (no constraint)...
+    // NOTE 2: this will also add transitions from table (no constraint) to hands, that will always fail...
+    correspondences["sideC_bottom_table"] = {   "sideC_bottom_table",
+                                                "sideA_top_left","sideA_top_right","sideA_bottom_left","sideA_bottom_right", "sideB_top_left","sideB_top_right","sideB_bottom_left","sideB_bottom_right"};
+    correspondences["sideC_top_table"] =    {   "sideC_top_table",
+                                                "sideA_top_left","sideA_top_right","sideA_bottom_left","sideA_bottom_right", "sideB_top_left","sideB_top_right","sideB_bottom_left","sideB_bottom_right"};
     
     namedAutomaticTransitions nat( prefixes, correspondences, new_db_name );
     
@@ -444,11 +460,49 @@ int main(int argc, char **argv)
         return -1;
     }
     
-    // TODO delete transitions from sideC NO_CONSTRAINT_ID to sideA/sideB, and between top/bottom of sideA/sideB for the table
-    // databaseMapper db_mapper(new_db_name);
-    // // find stuff
-    // // for all wrong transitions
-    // db_writer.deleteGraspTransition(source_id,target_id);
+    // delete unwanted transitions
+    // - between non-movable ee's, starting from ec_id == 2 (UNKNOWN type)
+    // - between non-movable ee's with (name == "sideC*" and ec_id == 1) and movable ee's
+    {
+        databaseMapper db_mapper(new_db_name);
+        databaseWriter db_writer_eraser(new_db_name);
+        db_writer_eraser.open_global();
+        
+        int total_transitions = 0;
+        int removed_transitions = 0;
+        for(auto& trans:db_mapper.Grasp_transitions)
+        {
+            total_transitions += trans.second.size();
+            grasp_id source_id = trans.first;
+            endeffector_id source_ee = std::get<1>(db_mapper.Grasps.at(source_id));
+            bool source_movable = std::get<1>(db_mapper.EndEffectors.at( source_ee ));
+            constraint_id source_ec = std::get<3>(db_mapper.Grasps.at(source_id));
+            std::string source_name = std::get<2>(db_mapper.Grasps.at(source_id));
+            std::string sub_str("sideC");
+            bool is_source_sideC = (source_name.compare(0,sub_str.length(),sub_str) == 0);
+            
+            // in case starting from a movable, all transitions should be ok
+            if(source_movable)
+                continue;
+            
+            for(grasp_id target_id:trans.second)
+            {
+                endeffector_id target_ee = std::get<1>(db_mapper.Grasps.at(target_id));
+                bool target_movable = std::get<1>(db_mapper.EndEffectors.at( target_ee ));
+                
+                ++removed_transitions;
+                if(!source_movable && !target_movable && source_ec == 2)
+                    db_writer_eraser.deleteGraspTransition(source_id,target_id);
+                else if(!source_movable && target_movable && is_source_sideC && source_ec == 1)
+                    db_writer_eraser.deleteGraspTransition(source_id,target_id);
+                else
+                    --removed_transitions;
+            }
+        }
+        
+        db_writer_eraser.close_global();
+        ROS_INFO_STREAM("Deleted " << removed_transitions << " unwanted transitions from the initial " << total_transitions << " transitions in the DB..."); 
+    }
     
     #endif
     
