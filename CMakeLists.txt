@@ -40,17 +40,15 @@ endif()
 ### CREATE/COMPLETE DATABASES
 
 # CREATION UTILITIES
-include_directories(grasp_creation_utilities/include)
 add_library(grasp_creation_utilities
-	grasp_creation_utilities/table_grasp_maker.cpp
-    grasp_creation_utilities/specular_grasp_maker.cpp
-    grasp_creation_utilities/symmetric_grasp_maker.cpp
-        grasp_creation_utilities/named_automatic_transitions.cpp #DEPRECATED
-	grasp_creation_utilities/geometric_automatic_transitions.cpp
+    src/table_grasp_maker.cpp
+    src/specular_grasp_maker.cpp
+    src/symmetric_grasp_maker.cpp
+    src/named_automatic_transitions.cpp
+    src/geometric_automatic_transitions.cpp
 )
 target_link_libraries(grasp_creation_utilities
-	${catkin_LIBRARIES}
-	sqlite3
+    ${catkin_LIBRARIES}
 )
 
 # GRASP MODIFICATION UTILITY (GMU)
