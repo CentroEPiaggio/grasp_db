@@ -36,6 +36,11 @@
         <rosparam param="joints_lower_limit">[0.0, -0.1, -100.0, 0.0]</rosparam>
         <rosparam param="joints_upper_limit">[0.55, 0.1, 100.0, 0.09]</rosparam> -->
 
+        <!-- <param name="hand_mesh_path" value="package://dual_manipulation_grasp_db/grasp_modification_utility/meshes/table.dae"/>
+        <param name="hand_mesh_scale" value="0.01"/>
+        <param name="ee_link_name" value="table_link"/>
+        <rosparam param="actuated_joints">[]</rosparam> -->
+
         <node name="grasp_modification_utility_rviz" pkg="rviz" type="rviz" respawn="false" output="screen" args="-d $(find dual_manipulation_grasp_db)/launch/grasp_modification_utility.rviz"/>
 
     </group>
