@@ -13,7 +13,7 @@
         </include>
 
         <!-- this is to have a nice visualization of the hand (left/right) with the joint slide -->
-        <param name="robot_description" command="$(find xacro)/xacro --inorder $(find dual_manipulation_grasp_db)/urdf/hand.urdf.xacro" />
+        <param name="robot_description" command="$(find xacro)/xacro --inorder $(find dual_manipulation_grasp_db)/grasp_modification_utility/urdf/hand.urdf.xacro" />
 
         <!--<param name="use_gui" value="true"/>-->
         <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">

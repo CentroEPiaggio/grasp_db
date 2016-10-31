@@ -28,7 +28,7 @@ After modifications have been made, the grasp (or its modifications) can either 
 It is possible to change the end-effector which is used in the utility: to this end, the following changes have to be made:
 
 - in `launch/grasp_modification_utility.launch` file, change the parameters `hand_mesh_path`, `ee_link_name`, `actuated_joints`, `joints_lower_limit`, and `joints_upper_limit`
-- in `urdf/hand.urdf.xacro` file, include the robot model of the end-effector you want to use, and make sure it is attached to the link named `hand`
+- in `grasp_modification_utility/urdf/hand.urdf.xacro` file, include the robot model of the end-effector you want to use, and make sure it is attached to the link named `hand`
 
 ## How to generate a new grasp from a PhaseSpace acquisition?
 
