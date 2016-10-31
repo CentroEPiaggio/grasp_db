@@ -7,7 +7,7 @@
 
 	<group ns="grasps_serializer">
 
-		<rosparam command="load" file="$(find dual_manipulation_grasp_db)/grasps_info/$(arg object).yaml" />
+		<rosparam command="load" file="$(find dual_manipulation_grasp_db)/grasps_serializer/grasps_info/$(arg object).yaml" />
 		
 		<node name="serializer" pkg="dual_manipulation_grasp_db" type="grasps_serializer_node" output="screen" respawn="false" />
 	
