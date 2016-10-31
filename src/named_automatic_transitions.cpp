@@ -211,6 +211,8 @@ bool namedAutomaticTransitions::write_transitions()
                             else
                                 write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,true);
                         }
+                        else
+                            continue;
                         
                         if(write_res < 0)
                             ROS_ERROR_STREAM("Unable to write transition " << pref_to_corr);
