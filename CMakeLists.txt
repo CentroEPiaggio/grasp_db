@@ -279,6 +279,8 @@ target_link_libraries(create_house_db
         grasp_creation_utilities
 )
 
+add_subdirectory(db_apps)
+
 #########
 # TESTS #
 #########
