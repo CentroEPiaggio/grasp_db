@@ -90,3 +90,14 @@ target_link_libraries(create_house_db
 )
 
 # 
+add_executable(create_box_soma_db
+    create_box_soma_db.cpp
+)
+add_dependencies(create_box_soma_db
+    dual_manipulation_shared
+    grasp_creation_utilities
+)
+target_link_libraries(create_box_soma_db
+    ${catkin_LIBRARIES}
+    grasp_creation_utilities
+)
