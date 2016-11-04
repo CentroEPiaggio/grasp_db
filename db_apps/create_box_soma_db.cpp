@@ -279,8 +279,7 @@ int main(int argc, char **argv)
     assert(ec_name.size()*EC_GRASP_FACTOR < EE_GRASP_FACTOR);
     for(int i=0; i<ee_name.size(); ++i)
     {
-        for(auto grasps:ee_grasp_names.at(i))
-            assert(grasps.size()*(ee_prehensile.at(i)?HOW_MANY_VAR:HOW_MANY_ROT) < EC_GRASP_FACTOR);
+        assert(ee_grasp_names.at(i).size()*(ee_prehensile.at(i)?HOW_MANY_VAR:HOW_MANY_ROT) < EC_GRASP_FACTOR);
     }
     
     ros::init(argc, argv, "create_box_soma_db");
