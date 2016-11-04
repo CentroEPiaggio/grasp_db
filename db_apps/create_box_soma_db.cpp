@@ -111,7 +111,7 @@ std::map<endeffector_id,std::vector<workspace_id>> reachability={
 std::vector<std::vector<KDL::Frame>> ee_nonprehensile_grasps = {
     {},
     {},
-    {   KDL::Frame(KDL::Vector(0.0,0.0,-1*BOX_SIDE_C/2.0-EPS)), // table
+    {   KDL::Frame(KDL::Rotation::RPY(0.0,0.0,M_PI/2.0), KDL::Vector(0.0,0.0,-1*BOX_SIDE_C/2.0-EPS)), // table
         KDL::Frame(KDL::Rotation::RPY(M_PI/2.0,0.0,0.0),KDL::Vector(0.0,-1*BOX_SIDE_B/2.0+EPS,0.0)),
         KDL::Frame(KDL::Rotation::RPY(0.0,-1*M_PI/2.0,0.0),KDL::Vector(-1*BOX_SIDE_A/2.0+EPS,0.0,0.0)),
         KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,BOX_SIDE_C/2.0+EPS)),
