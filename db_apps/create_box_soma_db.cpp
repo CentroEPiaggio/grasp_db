@@ -137,6 +137,8 @@ std::vector<double> ws_x_min({-1.7,-1.7,-1.7});
 std::vector<double> ws_x_max({0.0,0.0,0.0});
 std::vector<double> ws_y_min({-0.6,-0.15,0.15});
 std::vector<double> ws_y_max({-0.15,0.15,0.6});
+std::vector<double> ws_z_min({0.06,0.06,0.06});
+std::vector<double> ws_z_max({0.65,0.65,0.65});
 // adjacencies monolateral information is enough
 std::map<workspace_id,std::vector<workspace_id>> adjacency = {
     {1,{2}},
@@ -173,13 +175,19 @@ std::string convert_to_rectangular_geometry_string(double x_min, double x_max, d
 
 int writeGlobalDatabaseInformation(databaseWriter& db_writer)
 {
+    
     // write ws information
     for(int i=1; i<ws_x_max.size()+1; i++)
     {
-        if(db_writer.writeNewWorkspace(i,"ws" + std::to_string(i)) < 0)
+        
+        double x_side = (ws_x_max.at(i-1) - ws_x_min.at(i-1))/2.0;
+        double y_side = (ws_y_max.at(i-1) - ws_y_min.at(i-1))/2.0;
+        std::vector<std::pair<double,double>> polygon({{-x_side, y_side},{x_side, y_side},{x_side, -y_side},{-x_side, -y_side}});
+        std::pair<double,double> height_min_mx({0.0, ws_z_max.at(i-1) - ws_z_min.at(i-1)});
+        
+        KDL::Frame centroid(KDL::Vector((ws_x_min.at(i-1)+ws_x_max.at(i-1))/2,(ws_y_min.at(i-1)+ws_y_max.at(i-1))/2, ws_z_min.at(i-1)));
+        if(db_writer.writeNewWorkspace(i,"ws" + std::to_string(i), polygon, height_min_mx, centroid) < 0)
             return -1;
-        if(db_writer.writeNewGeometry(i,convert_to_rectangular_geometry_string(ws_x_min.at(i-1),ws_x_max.at(i-1),ws_y_min.at(i-1),ws_y_max.at(i-1))) < 0)
-            return -2;
     }
     for(auto ws_adj:adjacency)
     {
