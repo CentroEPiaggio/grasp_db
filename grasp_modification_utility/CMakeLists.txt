@@ -39,9 +39,6 @@ add_executable(grasp_modification_utility ${GMU_GUI_SRC}
     grasp_modification_utility.cpp
     main.cpp
 )
-add_dependencies(grasp_modification_utility
-    dual_manipulation_shared
-)
 target_link_libraries(grasp_modification_utility
     ${catkin_LIBRARIES} ${QT_LIBRARIES}
 )
