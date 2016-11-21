@@ -78,9 +78,9 @@ int main(int argc, char **argv)
     uint ee_id;
     std::string grasp_name;
 
-    obj_id = std::get<0>(db_mapper.Grasps.at(grasp_id));
-    ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id));
-    grasp_name = std::get<2>(db_mapper.Grasps.at(grasp_id));
+    obj_id = db_mapper.Grasps.at(grasp_id).obj_id;
+    ee_id = db_mapper.Grasps.at(grasp_id).ee_id;
+    grasp_name = db_mapper.Grasps.at(grasp_id).name;
     
     ROS_INFO_STREAM("Converting grasp " << grasp_name << " > " << new_grasp_name << " (" << (i+1) << " out of " << to_be_converted_grasp_ids.size() << ")");
 

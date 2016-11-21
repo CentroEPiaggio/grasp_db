@@ -661,9 +661,9 @@ void gmu_gui::on_save_button_clicked()
         int ee_id;
         if (gmu.db_mapper->Grasps.count( actual_grasp_id ))
         {
-            old_grasp_name = std::get<2>( gmu.db_mapper->Grasps.at( actual_grasp_id ) );
+            old_grasp_name = gmu.db_mapper->Grasps.at( actual_grasp_id ).name;
             new_grasp_name = old_grasp_name + " (copy)";
-            ee_id = std::get<1>( gmu.db_mapper->Grasps.at( actual_grasp_id ) );
+            ee_id = gmu.db_mapper->Grasps.at( actual_grasp_id ).ee_id;
         }
         else
         {

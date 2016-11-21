@@ -259,9 +259,9 @@ bool specularize_grasps(endeffector_id new_ee_id,std::string new_link_name,std::
         endeffector_id ee_id;
         std::string grasp_name;
         
-        obj_id = std::get<0>(db_mapper.Grasps.at(grasp_id_));
-        ee_id = std::get<1>(db_mapper.Grasps.at(grasp_id_));
-        grasp_name = std::get<2>(db_mapper.Grasps.at(grasp_id_));
+        obj_id = db_mapper.Grasps.at(grasp_id_).obj_id;
+        ee_id = db_mapper.Grasps.at(grasp_id_).ee_id;
+        grasp_name = db_mapper.Grasps.at(grasp_id_).name;
         
         ROS_INFO_STREAM("Converting grasp " << grasp_name << " > " << new_grasp_name << " (" << (i+1) << " out of " << specularized_grasps.size() << ")");
         
@@ -481,10 +481,10 @@ int main(int argc, char **argv)
         {
             total_transitions += trans.second.size();
             grasp_id source_id = trans.first;
-            endeffector_id source_ee = std::get<1>(db_mapper.Grasps.at(source_id));
+            endeffector_id source_ee = db_mapper.Grasps.at(source_id).ee_id;
             bool source_movable = std::get<1>(db_mapper.EndEffectors.at( source_ee ));
-            constraint_id source_ec = std::get<3>(db_mapper.Grasps.at(source_id));
-            std::string source_name = std::get<2>(db_mapper.Grasps.at(source_id));
+            constraint_id source_ec = db_mapper.Grasps.at(source_id).ec_id;
+            std::string source_name = db_mapper.Grasps.at(source_id).name;
             std::string sub_str("sideC");
             bool is_source_sideC = (source_name.compare(0,sub_str.length(),sub_str) == 0);
             
@@ -494,7 +494,7 @@ int main(int argc, char **argv)
             
             for(grasp_id target_id:trans.second)
             {
-                endeffector_id target_ee = std::get<1>(db_mapper.Grasps.at(target_id));
+                endeffector_id target_ee = db_mapper.Grasps.at(target_id).ee_id;
                 bool target_movable = std::get<1>(db_mapper.EndEffectors.at( target_ee ));
                 
                 ++removed_transitions;

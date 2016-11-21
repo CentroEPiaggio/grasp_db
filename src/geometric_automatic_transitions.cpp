@@ -73,12 +73,12 @@ bool GeometricAutomaticTransitions::writeTransitions()
         continue;
       }
 
-      uint object1d = std::get<0>(grasp1.second);
-      uint object2d = std::get<0>(grasp2.second);
+      uint object1d = grasp1.second.obj_id;
+      uint object2d = grasp2.second.obj_id;
       if( object1d == object2d )
       {
-        uint ee1 = std::get<1>(grasp1.second);
-        uint ee2 = std::get<1>(grasp2.second);
+        uint ee1 = grasp1.second.ee_id;
+        uint ee2 = grasp2.second.ee_id;
 
         // skip transition between same ee, future work !
         if( ee1 == ee2 )

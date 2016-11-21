@@ -123,10 +123,10 @@ bool namedAutomaticTransitions::write_transitions()
     {
         uint grasp_id = grasp.first;
         
-        uint obj_id = std::get<0>(grasp.second);
-        uint ee_id = std::get<1>(grasp.second);
-        std::string grasp_name = std::get<2>(grasp.second);
-        uint ec_id = std::get<3>(grasp.second);
+        uint obj_id = grasp.second.obj_id;
+        uint ee_id = grasp.second.ee_id;
+        std::string grasp_name = grasp.second.name;
+        uint ec_id = grasp.second.ec_id;
         
         for(auto pref:prefixes_)
         {
