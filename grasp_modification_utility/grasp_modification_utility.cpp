@@ -149,7 +149,7 @@ void GMU::setCurrentWaypoint(int wp)
 
 void GMU::publish_object()
 {
-    std::string path = std::get<1>(db_mapper->Objects.at(obj_id));
+    std::string path = db_mapper->Objects.at(obj_id).mesh_path;
 
     visualization_msgs::Marker& marker(object_marker);
     marker.header.frame_id="world";

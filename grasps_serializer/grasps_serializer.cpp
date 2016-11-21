@@ -315,7 +315,7 @@ bool GraspsSerializer::serializeGrasp(uint grasp_id, const rec_grasp grasp)
   traj_point.positions.push_back( 1.0 );
   grasp_trajectory.points.push_back( traj_point );
   
-  attached_object.object.id = std::get<0>( db_mapper_->Objects.at( object_id_ ) );
+  attached_object.object.id = db_mapper_->Objects.at( object_id_ ).name;
   
   // ASK HAMAL ABOUT THIS
   grasp_msg.object_db_id = object_id_;
