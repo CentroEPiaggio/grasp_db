@@ -320,7 +320,7 @@ bool GraspsSerializer::serializeGrasp(uint grasp_id, const rec_grasp grasp)
   // ASK HAMAL ABOUT THIS
   grasp_msg.object_db_id = object_id_;
 
-  std::string ee = std::get<0>(db_mapper_->EndEffectors.at( grasp.end_effector_id ));
+  std::string ee = db_mapper_->EndEffectors.at( grasp.end_effector_id ).name;
   
   if( ee == "left_hand" || ee == "right_hand" )
   {

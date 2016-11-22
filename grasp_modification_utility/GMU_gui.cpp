@@ -674,7 +674,7 @@ void gmu_gui::on_save_button_clicked()
             int min_ee(INT_MAX),max_ee(-1);
             for(auto ee:gmu.db_mapper->EndEffectors)
             {
-                ee_list += (std::to_string(ee.first) + " " + std::get<0>(ee.second) + "\n");
+                ee_list += (std::to_string(ee.first) + " " + ee.second.name + "\n");
                 if((int)ee.first > max_ee)
                     max_ee = ee.first;
                 if(ee.first < min_ee)

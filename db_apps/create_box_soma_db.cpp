@@ -482,7 +482,7 @@ int main(int argc, char **argv)
             total_transitions += trans.second.size();
             grasp_id source_id = trans.first;
             endeffector_id source_ee = db_mapper.Grasps.at(source_id).ee_id;
-            bool source_movable = std::get<1>(db_mapper.EndEffectors.at( source_ee ));
+            bool source_movable = db_mapper.EndEffectors.at( source_ee ).movable;
             constraint_id source_ec = db_mapper.Grasps.at(source_id).ec_id;
             std::string source_name = db_mapper.Grasps.at(source_id).name;
             std::string sub_str("sideC");
@@ -495,7 +495,7 @@ int main(int argc, char **argv)
             for(grasp_id target_id:trans.second)
             {
                 endeffector_id target_ee = db_mapper.Grasps.at(target_id).ee_id;
-                bool target_movable = std::get<1>(db_mapper.EndEffectors.at( target_ee ));
+                bool target_movable = db_mapper.EndEffectors.at( target_ee ).movable;
                 
                 ++removed_transitions;
                 if(!source_movable && !target_movable && source_ec == 2)

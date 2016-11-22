@@ -87,9 +87,9 @@ bool GeometricAutomaticTransitions::writeTransitions()
           continue;
         }
 
-        int is_ee1_movable = std::get<1>( db_mapper_->EndEffectors.at( ee1 ));
+        int is_ee1_movable = db_mapper_->EndEffectors.at( ee1 ).movable;
         // std::cout << "ee1 " << ee1 << " is_ee1_movable " << is_ee1_movable << std::endl;
-        int is_ee2_movable = std::get<1>( db_mapper_->EndEffectors.at( ee2 ));
+        int is_ee2_movable = db_mapper_->EndEffectors.at( ee2 ).movable;
         // std::cout << "ee2 " << ee2 << " is_ee2_movable " << is_ee2_movable << std::endl;
 
         // extract grasp 1, use this as the reference grasp posture

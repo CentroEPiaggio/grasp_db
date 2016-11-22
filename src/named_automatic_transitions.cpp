@@ -116,7 +116,7 @@ bool namedAutomaticTransitions::write_transitions()
     // store a vector of all movable end-effectors
     std::vector<endeffector_id> movable_ees;
     for(auto ee:db_mapper_->EndEffectors)
-        if(std::get<1>(ee.second))
+        if(ee.second.movable)
             movable_ees.push_back(ee.first);
     
     for(auto grasp:db_mapper_->Grasps)
@@ -175,14 +175,14 @@ bool namedAutomaticTransitions::write_transitions()
             {
                 uint pref_ee_id = ee_id_from_prefix.at(pref).at(i1);
                 uint pref_obj_id = obj_id_from_prefix.at(pref).at(i1);
-                bool pref_ee_movable = std::get<1>(db_mapper_->EndEffectors.at(pref_ee_id));
+                bool pref_ee_movable = db_mapper_->EndEffectors.at(pref_ee_id).movable;
                 uint pref_ec_id = ec_id_from_prefix.at(pref).at(i1);
                 
                 for(int i2=0; i2<ee_id_from_prefix.at(corr).size(); i2++)
                 {
                     uint corr_ee_id = ee_id_from_prefix.at(corr).at(i2);
                     uint corr_obj_id = obj_id_from_prefix.at(corr).at(i2);
-                    bool corr_ee_movable = std::get<1>(db_mapper_->EndEffectors.at(corr_ee_id));
+                    bool corr_ee_movable = db_mapper_->EndEffectors.at(corr_ee_id).movable;
                     uint corr_ec_id = ec_id_from_prefix.at(corr).at(i2);
                     
                     // if the object is not the same, move on
