@@ -58,7 +58,7 @@ int main()
   int obj_id = -1;
   
   for(auto& obj:db_mapper.Objects)
-  if(std::get<0>(obj.second) == obj_name)
+  if(obj.second.name == obj_name)
   {
     obj_id = obj.first;
     break;
