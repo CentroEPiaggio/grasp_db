@@ -57,6 +57,7 @@
 #define BELT_WP_HEIGHT 0.0
 #define TABLE_WP_HEIGHT 0.05
 #define BELT_EE_ID 8
+#define NO_CONSTRAINT_ID 1
 // a small additional height
 #define EPS 0.01
 
@@ -95,7 +96,7 @@ bool specularize_grasps(uint new_ee_id,std::string new_link_name,std::vector<std
         ROS_INFO_STREAM("Converting grasp " << grasp_name << " > " << new_grasp_name << " (" << (i+1) << " out of " << specularized_grasps.size() << ")");
 
         bool transform_ok;
-        transform_ok = sgm.transform_grasp( obj_id, grasp_id, new_grasp_name, top_bottom, new_grasp_id );
+        transform_ok = sgm.transform_grasp( obj_id, grasp_id, new_grasp_name, top_bottom, new_grasp_id, NO_CONSTRAINT_ID );
         
         if(!transform_ok)
         {
@@ -124,7 +125,7 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     table_grasp_frames.emplace_back(KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+EPS)));
     std::vector<std::string> table_grasp_names({"bottom","top"});
     for(int i=0; i<table_grasp_names.size(); i++)
-        if(!table_grasps.create_table_grasps(OBJECT_ID, table_grasp_names.at(i), table_grasp_frames.at(i),1+i*HOW_MANY_ROT))
+        if(!table_grasps.create_table_grasps(OBJECT_ID, table_grasp_names.at(i), table_grasp_frames.at(i),1+i*HOW_MANY_ROT,NO_CONSTRAINT_ID))
         {
             ROS_FATAL_STREAM("Unable to create \'" << table_grasp_names.at(i) << "\' table grasps!!!");
             return -1;
@@ -137,7 +138,7 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
     belt_grasp_frames.emplace_back(KDL::Frame(KDL::Rotation::RPY(M_PI,0.0,0.0),KDL::Vector(0.0,0.0,CYLINDER_HEIGHT/2.0+2.0*EPS)));
     std::vector<std::string> belt_grasp_names({"bottom","top"});
     for(int i=0; i<belt_grasp_names.size(); i++)
-        if(!belt_grasps.create_table_grasps(OBJECT_ID, belt_grasp_names.at(i), belt_grasp_frames.at(i),BELT_EE_ID*100+1+i*HOW_MANY_ROT))
+        if(!belt_grasps.create_table_grasps(OBJECT_ID, belt_grasp_names.at(i), belt_grasp_frames.at(i),BELT_EE_ID*100+1+i*HOW_MANY_ROT,NO_CONSTRAINT_ID))
         {
             ROS_FATAL_STREAM("Unable to create \'" << belt_grasp_names.at(i) << "\' belt grasps!!!");
             return -1;
@@ -153,11 +154,11 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
 
         // rotate bottom grasp
         std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 2);
-        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 1,"bottom",new_grasp_ids,how_many_var,z_axis,rotFrame_obj))
+        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 1,"bottom",new_grasp_ids,how_many_var,z_axis,rotFrame_obj,NO_CONSTRAINT_ID))
             return -1;
         // rotate sidelow grasp
         std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + how_many_var + 2);
-        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + how_many_var + 1,"sidelow",new_grasp_ids,how_many_var,z_axis,rotFrame_obj))
+        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + how_many_var + 1,"sidelow",new_grasp_ids,how_many_var,z_axis,rotFrame_obj,NO_CONSTRAINT_ID))
             return -1;
     }
 

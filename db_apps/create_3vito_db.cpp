@@ -67,9 +67,23 @@ std::map<int,std::vector<int>> reachability={
 
 // this vector and WS_Y_MIN, WS_Y_MAX define the workspaces geometry (only for rectangular workspaces all with the same Y bounds)
 std::vector<double> ws_x_coords({0,0.8,1.2,1.8,2.2,2.8,3.2,3.5,4.2,4.8,5.5,6,7});
+double ws_z_min = 0.06;
+double ws_z_max = 0.64;
 
 // which Kukas do not create
 std::vector<int> dont_kuka({5});
+
+// ENVIRONMENTAL CONSTRAINTS
+#define NO_CONSTRAINT_ID 1
+std::vector<constraint_id> ec_ids = {NO_CONSTRAINT_ID}; // to stay as generic as possible
+std::vector<std::string> ec_name = {"None"};
+std::map<constraint_id,std::vector<workspace_id>> ec_reachability={
+    {NO_CONSTRAINT_ID,      {1,2,3,4,5,6,7,8,9,10,11,12}}
+};
+// bi-lateral information needed
+std::map<constraint_id,std::vector<constraint_id>> ec_adjacency = {
+    {NO_CONSTRAINT_ID,      {NO_CONSTRAINT_ID}}
+};
 
 int main(int argc, char **argv)
 {
@@ -99,13 +113,8 @@ int main(int argc, char **argv)
     system(command.c_str());
 
     databaseWriter db_writer(new_db_name);
-    //Workspaces
-    for (int i=1;i<NUM_WORKSPACES+1;i++)
-    {
-        db_writer.writeNewWorkspace(i,"w"+std::to_string(i));
-    }
     //Object
-    db_writer.writeNewObject(object_id,"cylinder","../../dualmanipulation/grasp_db/object_meshes/cylinder.dae");
+    db_writer.writeNewObject(object_id,"cylinder","package://dual_manipulation_grasp_db/object_meshes/cylinder.dae");
     //EndEffectors
     /* left -> 1,3,5
      * right -> 2,4,6
@@ -119,42 +128,55 @@ int main(int argc, char **argv)
     }
     db_writer.writeNewEndEffectors(NUM_KUKAS+1,"table",false);
     db_writer.writeNewEndEffectors(NUM_KUKAS+2,"belt",true);
-    //Geometry
+    
+    // write ws information
     for (int i=0;i<NUM_WORKSPACES;i++)
     {
-        std::string temp_geometry;
-        temp_geometry.append(std::to_string(ws_x_coords.at(i)));
-        temp_geometry.append(" ");
-        temp_geometry.append(std::to_string(WS_Y_MAX));
-        temp_geometry.append(" ");
-        temp_geometry.append(std::to_string(ws_x_coords.at(i)));
-        temp_geometry.append(" ");
-        temp_geometry.append(std::to_string(WS_Y_MIN));
-        temp_geometry.append(" ");
-        temp_geometry.append(std::to_string(ws_x_coords.at(i+1)));
-        temp_geometry.append(" ");
-        temp_geometry.append(std::to_string(WS_Y_MIN));
-        temp_geometry.append(" ");
-        temp_geometry.append(std::to_string(ws_x_coords.at(i+1)));
-        temp_geometry.append(" ");
-        temp_geometry.append(std::to_string(WS_Y_MAX));
-        temp_geometry.append(" ");
-        db_writer.writeNewGeometry(i+1,temp_geometry);
-    }
-    //Reachability
-    for (int i=1;i<NUM_END_EFFECTORS+1;i++)
-    {
-        for (auto reach:reachability[i])
-            db_writer.writeNewReachability(i,reach);
+        double x_side = (ws_x_coords.at(i+1) - ws_x_coords.at(i))/2.0;
+        double y_side = (WS_Y_MAX - WS_Y_MIN)/2.0;
+        std::vector<std::pair<double,double>> polygon({{-x_side, y_side},{x_side, y_side},{x_side, -y_side},{-x_side, -y_side}});
+        std::pair<double,double> height_min_mx({0.0, ws_z_max - ws_z_min});
+        
+        KDL::Frame centroid(KDL::Vector((ws_x_coords.at(i+1)+ws_x_coords.at(i))/2,(WS_Y_MAX + WS_Y_MIN)/2, ws_z_min));
+        if(db_writer.writeNewWorkspace(i+1,"ws" + std::to_string(i+1), polygon, height_min_mx, centroid) < 0)
+            return -1;
     }
     //Adjacency
     for (int i=1;i<NUM_WORKSPACES+1;i++)
     {
         db_writer.writeNewAdjacency(i,i+1);
     }
+    
+    //Reachability
+    for (int i=1;i<NUM_END_EFFECTORS+1;i++)
+    {
+        for (auto reach:reachability[i])
+            db_writer.writeNewReachability(i,reach);
+    }
+    
+    // write environmental constraint information
+    assert(ec_name.size() == ec_ids.size());
+    assert(ec_name.size() == ec_adjacency.size());
+    assert(ec_name.size() == ec_reachability.size());
+    for(int i=0; i<ec_name.size(); ++i)
+    {
+        int source = ec_ids.at(i);
+        if(db_writer.writeNewEnvironmentConstraint(source,ec_name.at(i)) < 0)
+            return -6;
+    }
+    for(int source:ec_ids)
+    {
+        for(auto target:ec_adjacency.at(source))
+            if(db_writer.writeNewECAdjacency(source,target) < 0)
+                return -7;
+            for(auto ws:ec_reachability.at(source))
+                if(db_writer.writeNewECReachability(source,ws) < 0)
+                    return -8;
+    }
+    
     // Grasps - there have to be only two
-    db_writer.writeNewGrasp(GRASPS_OFFSET+1,OBJECT_ID,SOURCE_EE_ID,"bottom");
-    db_writer.writeNewGrasp(GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1,OBJECT_ID,SOURCE_EE_ID,"sidelow");
+    db_writer.writeNewGrasp(GRASPS_OFFSET+1,OBJECT_ID,SOURCE_EE_ID,"bottom",NO_CONSTRAINT_ID);
+    db_writer.writeNewGrasp(GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1,OBJECT_ID,SOURCE_EE_ID,"sidelow",NO_CONSTRAINT_ID);
 
     // call an externally implemented function to do the rest of the job
     int ret;
