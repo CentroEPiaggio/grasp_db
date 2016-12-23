@@ -118,6 +118,30 @@ bool symmetricGraspMaker::transform_grasp(uint obj_id, uint grasp_id, std::strin
     return (write_ok && delete_ok);
 }
 
+bool symmetricGraspMaker::reserialize_grasp(uint obj_id, uint grasp_id)
+{
+    dual_manipulation_shared::grasp_trajectory grasp_msg;
+    
+    // try to read the grasp
+    if(!read_grasp_msg(obj_id,grasp_id,grasp_msg))
+    {
+        ROS_ERROR_STREAM(CLASS_NAMESPACE << __func__ << " : unable to read grasp #" << grasp_id << " for object #" << obj_id);
+        return false;
+    }
+    
+    grasp_msg.grasp_trajectory.joint_names = joint_names_;
+    grasp_msg.object_db_id = obj_id;
+    grasp_msg.attObject.link_name = end_effector_frame_;
+    grasp_msg.attObject.object.header.frame_id = end_effector_frame_;
+    
+    bool write_ok = (write_grasp_msg(obj_id,grasp_id,grasp_msg) > 0);
+    
+    if(!write_ok)
+        ROS_ERROR_STREAM(CLASS_NAMESPACE << __func__ << " : Unable to reserialize the grasp #" << grasp_id << " !!!");
+    
+    return write_ok;
+}
+
 void symmetricGraspMaker::transform_premultiply(std::vector<KDL::Frame>& poses, KDL::Frame frame)
 {
     for(int i=0; i<poses.size(); i++)

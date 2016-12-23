@@ -79,6 +79,16 @@ public:
      */
     bool transform_grasp(uint obj_id, uint grasp_id, std::string new_grasp_base_name, std::vector< uint > new_grasp_ids, uint how_many_rot, KDL::Vector rot_axis, KDL::Frame rotFrame_obj, constraint_id ec_id = 0);
     
+    /**
+     * @brief reserialize a grasp making sure that the important information in the serialized message are the needed ones (object id, ee_frame, ... etc)
+     * 
+     * @param obj_id the object of the grasp
+     * @param grasp_id the id of the grasp
+     * 
+     * @return false if the grasp did not exist or it was not possible to modify it, true otherwise
+     */
+    bool reserialize_grasp(uint obj_id, uint grasp_id);
+    
 private:
     
     void transform_premultiply(std::vector< KDL::Frame >& poses, KDL::Frame frame);
