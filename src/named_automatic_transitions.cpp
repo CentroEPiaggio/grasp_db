@@ -206,7 +206,7 @@ bool namedAutomaticTransitions::write_transitions()
                             if( (pref_ec_id == 1 && corr_ec_id == 2) || 
                                 (pref_ec_id == 1 && corr_ec_id == 1)
                             )
-                                write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,1.0,dual_manipulation::shared::NodeTransitionTypes::SLIDE,movable_ees);
+                                write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,1.0,dual_manipulation::shared::NodeTransitionTypes::SLIDE,movable_ees,false);
                             // case of UNKNOWN TRANSITION -> but write it anyway...
                             else
                                 write_res = db_writer_->writeNewTransition(pref_grasp_id,corr_grasp_id,true);

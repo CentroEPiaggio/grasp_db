@@ -175,8 +175,8 @@ int main(int argc, char **argv)
     }
     
     // Grasps - there have to be only two
-    db_writer.writeNewGrasp(GRASPS_OFFSET+1,OBJECT_ID,SOURCE_EE_ID,"bottom",NO_CONSTRAINT_ID);
-    db_writer.writeNewGrasp(GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1,OBJECT_ID,SOURCE_EE_ID,"sidelow",NO_CONSTRAINT_ID);
+    db_writer.writeNewGrasp(GRASPS_OFFSET+1,OBJECT_ID,SOURCE_EE_ID,"bottom_right",NO_CONSTRAINT_ID);
+    db_writer.writeNewGrasp(GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1,OBJECT_ID,SOURCE_EE_ID,"sidelow_right",NO_CONSTRAINT_ID);
 
     // call an externally implemented function to do the rest of the job
     int ret;
