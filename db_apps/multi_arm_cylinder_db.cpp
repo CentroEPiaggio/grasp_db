@@ -107,6 +107,13 @@ bool specularize_grasps(uint new_ee_id,std::string new_link_name,std::vector<std
     return true;
 }
 
+uint robot_id_from_ee_id(uint ee_id)
+{
+    assert(ee_id > 0);
+    // this gets already floor-rounded
+    return (ee_id-1)/2;
+}
+
 int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_VITO, int how_many_var = HOW_MANY_VAR)
 {
     // CONDITIONS:

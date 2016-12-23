@@ -50,6 +50,7 @@
 #define NUM_END_EFFECTORS NUM_KUKAS+2
 #define HOW_MANY_HAND_GRASPS 8
 
+uint robot_id_from_ee_id(uint ee_id);
 int add_vitos_in_cylinder_db(std::string db_name, int num_vito, int how_many_var);
 
 std::map<int,std::vector<int>> reachability={
@@ -121,10 +122,10 @@ int main(int argc, char **argv)
      */
     for (int i=1;i<NUM_KUKAS/2+1;i++)
     {
-        if(std::find(dont_kuka.begin(), dont_kuka.end(), (i-1)*2+1) == dont_kuka.end())
-            db_writer.writeNewEndEffectors((i-1)*2+1,std::to_string(i-1)+"_left_hand",true);
+        if(std::find(dont_kuka.begin(), dont_kuka.end(), i*2-1) == dont_kuka.end())
+            db_writer.writeNewEndEffectors(i*2-1,std::to_string( robot_id_from_ee_id(i*2-1) )+"_left_hand",true);
         if(std::find(dont_kuka.begin(), dont_kuka.end(), i*2) == dont_kuka.end())
-            db_writer.writeNewEndEffectors(i*2,std::to_string(i-1)+"_right_hand",true);
+            db_writer.writeNewEndEffectors(i*2,std::to_string( robot_id_from_ee_id(i*2) )+"_right_hand",true);
     }
     db_writer.writeNewEndEffectors(NUM_KUKAS+1,"table",false);
     db_writer.writeNewEndEffectors(NUM_KUKAS+2,"belt",true);
