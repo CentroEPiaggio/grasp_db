@@ -39,6 +39,7 @@
 #include <dual_manipulation_shared/databasewriter.h>
 #include <ctime>
 
+#define MAX_GRASPS 10000
 #define OBJ_GRASP_FACTOR 1000
 #define NUM_KUKAS 6
 #define NUM_WORKSPACES 12
@@ -95,7 +96,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "create_6kuka_db");
     /* Assumptions
     *  - a file named empty.db exists with tables already created but empty
-    *  - two right_hand grasps (bottom and sidelow) already serialized in the folder "object($OBJECT_ID)", with IDs (GRASPS_OFFSET+1) and (GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1)
+    *  - two right_hand grasps (bottom and sidelow) already serialized in the folder "object($OBJECT_ID)", with IDs (MAX_GRASPS-1) and (MAX_GRASPS-2)
     */
     // get current date/time to use in the naming of the full DB
     time_t rawtime;
@@ -176,6 +177,11 @@ int main(int argc, char **argv)
     }
     
     // Grasps - there have to be only two
+    std::string grasp_path = path + "/grasp_trajectories/object" + std::to_string(object_id) + "/grasp";
+    command = "cp " + grasp_path + std::to_string(MAX_GRASPS-1) + " " + grasp_path + std::to_string(GRASPS_OFFSET+1) + "\n";
+    system(command.c_str());
+    command = "cp " + grasp_path + std::to_string(MAX_GRASPS-2) + " " + grasp_path + std::to_string(GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1) + "\n";
+    system(command.c_str());
     db_writer.writeNewGrasp(GRASPS_OFFSET+1,OBJECT_ID,SOURCE_EE_ID,"bottom_right",NO_CONSTRAINT_ID);
     db_writer.writeNewGrasp(GRASPS_OFFSET+HOW_MANY_HAND_GRASPS+1,OBJECT_ID,SOURCE_EE_ID,"sidelow_right",NO_CONSTRAINT_ID);
 

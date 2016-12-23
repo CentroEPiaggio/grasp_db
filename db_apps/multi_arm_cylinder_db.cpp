@@ -157,15 +157,19 @@ int add_vitos_in_cylinder_db(std::string db_name = DB_NAME, int num_vito = NUM_V
         KDL::Vector z_axis(0,0,1);
         KDL::Frame rotFrame_obj(KDL::Frame::Identity());
         symmetricGraspMaker sgm(STARTING_EE_ID,SOURCE_EE_FRAME,SOURCE_JOINTS,db_name);
+        // Reserialize original grasps to make sure they are ok, then go on
+        if(!sgm.reserialize_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 1) || !sgm.reserialize_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 1))
+            return -1;
+        
         std::vector<uint> new_grasp_ids(how_many_var - 1);
 
         // rotate bottom grasp
         std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 2);
-        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 1,"bottom",new_grasp_ids,how_many_var,z_axis,rotFrame_obj,NO_CONSTRAINT_ID))
+        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + 1,"bottom_right",new_grasp_ids,how_many_var,z_axis,rotFrame_obj,NO_CONSTRAINT_ID))
             return -1;
         // rotate sidelow grasp
         std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + how_many_var + 2);
-        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + how_many_var + 1,"sidelow",new_grasp_ids,how_many_var,z_axis,rotFrame_obj,NO_CONSTRAINT_ID))
+        if(!sgm.transform_grasp(OBJECT_ID,SINGLE_HAND_GRASP_LIMIT*STARTING_EE_ID + how_many_var + 1,"sidelow_right",new_grasp_ids,how_many_var,z_axis,rotFrame_obj,NO_CONSTRAINT_ID))
             return -1;
     }
 
