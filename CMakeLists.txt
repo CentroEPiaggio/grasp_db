@@ -42,6 +42,7 @@ add_library(grasp_creation_utilities
     src/symmetric_grasp_maker.cpp
     src/named_automatic_transitions.cpp
     src/geometric_automatic_transitions.cpp
+    src/create_db_utils.cpp
 )
 target_link_libraries(grasp_creation_utilities
     ${catkin_LIBRARIES}
