@@ -45,6 +45,7 @@
 #include <grasp_creation_utilities/specular_grasp_maker.h>
 #include <grasp_creation_utilities/symmetric_grasp_maker.h>
 #include <grasp_creation_utilities/named_automatic_transitions.h>
+#include <grasp_creation_utilities/create_db_utils.h>
 #include <algorithm>
 
 #define BOX_HEIGHT 0.15
@@ -53,7 +54,7 @@
 
 #define HOW_MANY_ROT 4 // how many rotations for table grasps
 #define HOW_MANY_VAR 8 // how many variations for each of the prehensile grasps
-#define TINO_WP_HEIGHT 0.0
+#define TINO_WP_HEIGHT 0.01
 #define TABLE_WP_HEIGHT 0.05
 #define NAMED_TRANSITIONS 1
 
@@ -85,10 +86,10 @@ std::map<int,int> how_many_var_map = {
 };
 
 // END-EFFECTORS
-std::vector<uint> ee_ids = {1,2,3,4,5}; // to stay as generic as possible
+std::vector<endeffector_id> ee_ids = {1,2,3,4,5}; // to stay as generic as possible
 std::vector<std::string> ee_name = {"0_right_hand","1_right_hand","tinoBot1_ee","tinoBot2_ee","table"};
-std::vector<uint> ee_movable = {1,1,1,1,0}; // can move
-std::vector<uint> ee_prehensile = {1,1,0,0,0}; // can be actuated during grasping
+std::vector<bool> ee_movable = {true,true,true,true,false}; // can move
+std::vector<bool> ee_prehensile = {true,true,false,false,false}; // can be actuated during grasping
 std::vector<std::string> ee_link = {"0_right_hand_palm_link","1_right_hand_palm_link","tinoBot1_ee","tinoBot2_ee",""};
 std::vector<std::vector<std::string>> ee_prehension_joints = {
     {"0_right_hand_synergy_joint"},
@@ -97,7 +98,7 @@ std::vector<std::vector<std::string>> ee_prehension_joints = {
     {},
     {}
 };
-std::map<int,std::vector<int>> reachability={
+std::map<endeffector_id,std::vector<workspace_id>> reachability={
     {1,{7,8,9,10,11}}, // kuka1
     {2,{1,2,3,4,5}}, // kuka2
     {3,{5,6,7}}, // tinoBot1
@@ -136,96 +137,25 @@ std::vector<double> ws_x_min({-2.5,-2.375,-2.25,-2.125,-2.0,-1.5,1.5,2.0,2.125,2
 std::vector<double> ws_x_max({-2.375,-2.25,-2.125,-2.0,-1.5,1.5,2.0,2.125,2.25,2.375,2.5});
 std::vector<double> ws_y_min({-0.5,-0.5,-0.5,-0.5,-0.5,-0.5,-0.5,-0.5,-0.5,-0.5,-0.5});
 std::vector<double> ws_y_max({0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5});
+std::vector<double> ws_z_min(ws_x_min.size(),0.06);
+std::vector<double> ws_z_max(ws_x_min.size(),0.65);
 // adjacencies monolateral information is enough
-std::map<int,std::vector<int>> adjacency = {
+std::map<workspace_id,std::vector<workspace_id>> adjacency = {
     {5,{1,2,3,4,6}},
     {7,{6,8,9,10,11}}
 };
 
-std::string convert_to_rectangular_geometry_string(double x_min, double x_max, double y_min, double y_max)
-{
-    std::string temp_geometry;
-    temp_geometry = std::to_string(x_min) + " " + std::to_string(y_max) + " " + std::to_string(x_max) + " " + std::to_string(y_max) + " " + std::to_string(x_max) + " " + std::to_string(y_min) + " " + std::to_string(x_min) + " " + std::to_string(y_min);
-    
-    return temp_geometry;
-}
-
-int writeGlobalDatabaseInformation(databaseWriter& db_writer)
-{
-    // write ws information
-    for(int i=1; i<ws_x_max.size()+1; i++)
-    {
-        if(db_writer.writeNewWorkspace(i,"ws" + std::to_string(i)) < 0)
-            return -1;
-        if(db_writer.writeNewGeometry(i,convert_to_rectangular_geometry_string(ws_x_min.at(i-1),ws_x_max.at(i-1),ws_y_min.at(i-1),ws_y_max.at(i-1))) < 0)
-            return -2;
-    }
-    for(auto ws_adj:adjacency)
-    {
-        int ws_source = ws_adj.first;
-        for(auto ws_target:ws_adj.second)
-            if(db_writer.writeNewAdjacency(ws_source,ws_target) < 0)
-                return -3;
-    }
-    
-    // write end-effector information
-    assert(ee_name.size() == ee_link.size());
-    assert(ee_name.size() == ee_ids.size());
-    assert(ee_name.size() == ee_prehension_joints.size());
-    assert(ee_name.size() == ee_prehensile.size());
-    assert(ee_name.size() == ee_movable.size());
-    for(int i=0; i<ee_name.size(); i++)
-    {
-        if(db_writer.writeNewEndEffectors(ee_ids.at(i),ee_name.at(i),bool(ee_movable.at(i))) < 0)
-            return -4;
-    }
-    
-    // write reachability information
-    for(auto r:reachability)
-    {
-        int ee = r.first;
-        for(auto ws:r.second)
-            if(db_writer.writeNewReachability(ee,ws) < 0)
-                return -5;
-    }
-}
-
-bool specularize_grasps(uint new_ee_id,std::string new_link_name,std::vector<std::string> new_joint_names,std::vector<uint> specularized_grasps,std::vector<uint> new_grasp_ids,std::vector<std::string> specularized_grasp_names,bool top_bottom,std::string db_name)
-{
-    databaseMapper db_mapper( db_name );
-    
-    assert( specularized_grasps.size() == specularized_grasp_names.size() );
-    assert( specularized_grasps.size() == new_grasp_ids.size() );
-    
-    specularGraspMaker sgm( new_ee_id, new_link_name, new_joint_names, db_name );
-    
-    for(int i=0; i < specularized_grasps.size(); i++)
-    {
-        uint grasp_id = specularized_grasps.at(i);
-        uint new_grasp_id = new_grasp_ids.at(i);
-        std::string new_grasp_name = specularized_grasp_names.at(i);
-        
-        uint obj_id;
-        uint ee_id;
-        std::string grasp_name;
-        
-        obj_id = db_mapper.Grasps.at(grasp_id).obj_id;
-        ee_id = db_mapper.Grasps.at(grasp_id).ee_id;
-        grasp_name = db_mapper.Grasps.at(grasp_id).name;
-        
-        ROS_INFO_STREAM("Converting grasp " << grasp_name << " > " << new_grasp_name << " (" << (i+1) << " out of " << specularized_grasps.size() << ")");
-        
-        bool transform_ok;
-        transform_ok = sgm.transform_grasp( obj_id, grasp_id, new_grasp_name, top_bottom, new_grasp_id );
-        
-        if(!transform_ok)
-        {
-            ROS_FATAL_STREAM("Stopped transformation at grasp " << grasp_name << " > " << new_grasp_name << "!!!");
-            return false;
-        }
-    }
-    return true;
-}
+// ENVIRONMENTAL CONSTRAINTS
+#define NO_CONSTRAINT_ID 1
+std::vector<constraint_id> ec_ids = {NO_CONSTRAINT_ID}; // to stay as generic as possible
+std::vector<std::string> ec_name = {"None"};
+std::map<constraint_id,std::vector<workspace_id>> ec_reachability={
+    {NO_CONSTRAINT_ID,      {1,2,3,4,5,6,7,8,9,10,11}}
+};
+// bi-lateral information needed
+std::map<constraint_id,std::vector<constraint_id>> ec_adjacency = {
+    {NO_CONSTRAINT_ID,      {NO_CONSTRAINT_ID}}
+};
 
 int main(int argc, char **argv)
 {
@@ -252,7 +182,7 @@ int main(int argc, char **argv)
     
     db_writer.open_global();
     
-    int ret = writeGlobalDatabaseInformation(db_writer);
+    int ret = writeGlobalDatabaseInformation(db_writer, ws_x_min, ws_x_max, ws_y_min, ws_y_max, ws_z_min, ws_z_max, adjacency, ee_ids, ee_name, ee_movable, ee_prehensile, ee_link, ee_prehension_joints, reachability, ec_ids, ec_name, ec_reachability, ec_adjacency);
     if(ret < 0)
     {
         ROS_ERROR_STREAM("writeGlobalDatabaseInformation returned the error code " << ret);
@@ -274,6 +204,9 @@ int main(int argc, char **argv)
         {
             uint ee_id = ee_ids.at(i);
             
+            // NOTE: only one EC will be considered here, this file has been preserved - legacy only
+            constraint_id ec_id = 1;
+            
             // TODO: if prehensile, generate all grasps, starting from the exemplary one already serialized
             if(ee_prehensile.at(i))
             {
@@ -285,7 +218,7 @@ int main(int argc, char **argv)
                 // obtain, via specularity, a top and a bottom grasp
                 bool top_bottom = true;
                 uint grasp_id = 1;
-                specularize_grasps(ee_id,ee_link.at(i),ee_prehension_joints.at(i),{OBJ_GRASP_FACTOR-1},{OBJ_GRASP_FACTOR*obj_id+EE_GRASP_FACTOR*ee_id+grasp_id},{"top_" + ee_name.at(i) + "_" + std::to_string(grasp_id)},top_bottom,new_db_name);
+                specularize_grasps(ee_id,ee_link.at(i),ee_prehension_joints.at(i),{OBJ_GRASP_FACTOR-1},{OBJ_GRASP_FACTOR*obj_id+EE_GRASP_FACTOR*ee_id+grasp_id},{ec_id},{"top_prehensile_" + ee_name.at(i) + "_" + std::to_string(grasp_id)},top_bottom,new_db_name);
 //                 grasp_id = 1 + how_many_var_map.at(obj_id);
 //                 top_bottom = false;
 //                 specularize_grasps(ee_id,ee_link.at(i),ee_prehension_joints.at(i),{OBJ_GRASP_FACTOR-1},{OBJ_GRASP_FACTOR*obj_id+EE_GRASP_FACTOR*ee_id+grasp_id},{"top_" + ee_name.at(i) + "_" + std::to_string(grasp_id)},top_bottom,new_db_name);
@@ -299,7 +232,7 @@ int main(int argc, char **argv)
                 // rotate top grasp
                 grasp_id = 1;
                 std::iota(new_grasp_ids.begin(),new_grasp_ids.end(),OBJ_GRASP_FACTOR*obj_id+EE_GRASP_FACTOR*ee_id+grasp_id+1);
-                if(!sgm.transform_grasp(obj_id,OBJ_GRASP_FACTOR*obj_id+EE_GRASP_FACTOR*ee_id+grasp_id,"top_" + ee_name.at(i),new_grasp_ids,how_many_var_map.at(obj_id),z_axis,rotFrame_obj))
+                if(!sgm.transform_grasp(obj_id,OBJ_GRASP_FACTOR*obj_id+EE_GRASP_FACTOR*ee_id+grasp_id,"top_prehensile_" + ee_name.at(i),new_grasp_ids,how_many_var_map.at(obj_id),z_axis,rotFrame_obj,ec_id))
                     return -1;
                 // rotate bottom grasp
 //                 grasp_id = 1 + how_many_var_map.at(obj_id);
@@ -322,9 +255,9 @@ int main(int argc, char **argv)
                 tableGraspMaker tgm_grasps(new_db_name,HOW_MANY_ROT,ee_id,wp_height,ee_frame_id);
                 for(int j=0; j<ee_nonprehensile_grasps.at(obj_id).at(i).size(); j++)
                 {
-                    if(!tgm_grasps.create_table_grasps(obj_id, ee_nonprehensile_grasp_names.at(i).at(j) + "_" + ee_name.at(i), ee_nonprehensile_grasps.at(obj_id).at(i).at(j),obj_id*OBJ_GRASP_FACTOR + ee_id*EE_GRASP_FACTOR + 1 + j*HOW_MANY_ROT))
+                    if(!tgm_grasps.create_table_grasps(obj_id, ee_nonprehensile_grasp_names.at(i).at(j) + "_movablenp_" + ee_name.at(i), ee_nonprehensile_grasps.at(obj_id).at(i).at(j),obj_id*OBJ_GRASP_FACTOR + ee_id*EE_GRASP_FACTOR + 1 + j*HOW_MANY_ROT,ec_id))
                     {
-                        ROS_FATAL_STREAM("Unable to create \'" << ee_nonprehensile_grasp_names.at(i).at(j) + "_" + ee_name.at(i) << "\' grasps!!!");
+                        ROS_FATAL_STREAM("Unable to create \'" << ee_nonprehensile_grasp_names.at(i).at(j) + "_movablenp_" + ee_name.at(i) << "\' grasps!!!");
                         return -1;
                     }
                 }
@@ -342,9 +275,9 @@ int main(int argc, char **argv)
                 tableGraspMaker tgm_grasps(new_db_name,HOW_MANY_ROT,ee_id,wp_height,ee_frame_id);
                 for(int j=0; j<ee_nonprehensile_grasps.at(obj_id).at(i).size(); j++)
                 {
-                    if(!tgm_grasps.create_table_grasps(obj_id, ee_nonprehensile_grasp_names.at(i).at(j) + "_" + ee_name.at(i), ee_nonprehensile_grasps.at(obj_id).at(i).at(j),obj_id*OBJ_GRASP_FACTOR + ee_id*EE_GRASP_FACTOR + 1 + j*HOW_MANY_ROT))
+                    if(!tgm_grasps.create_table_grasps(obj_id, ee_nonprehensile_grasp_names.at(i).at(j) + "_table_" + ee_name.at(i), ee_nonprehensile_grasps.at(obj_id).at(i).at(j),obj_id*OBJ_GRASP_FACTOR + ee_id*EE_GRASP_FACTOR + 1 + j*HOW_MANY_ROT,ec_id))
                     {
-                        ROS_FATAL_STREAM("Unable to create \'" << ee_nonprehensile_grasp_names.at(i).at(j) + "_" + ee_name.at(i) << "\' grasps!!!");
+                        ROS_FATAL_STREAM("Unable to create \'" << ee_nonprehensile_grasp_names.at(i).at(j) + "_table_" + ee_name.at(i) << "\' grasps!!!");
                         return -1;
                     }
                 }
@@ -359,12 +292,18 @@ int main(int argc, char **argv)
     // Make all transitions based on names
     // // THIS COULD BE DONE WITH THE GEOMETRIC FILTER
     #if NAMED_TRANSITIONS>0
-    std::vector<std::string> prefixes({"bottom","top"}); //,"sidehigh","sidelow"});
+//     std::vector<std::string> prefixes({"bottom","top"}); //,"sidehigh","sidelow"});
+//     std::map<std::string,std::vector<std::string>> correspondences;
+//     correspondences["bottom"]    = {"top"}; //,      "sidehigh"};
+//     // correspondences["sidelow"]  = {"top",      "sidehigh"};
+//     correspondences["top"]       = {"bottom"}; //,   "sidelow"};
+//     // correspondences["sidehigh"] = {"bottom",   "sidelow"};
+    
+    std::vector<std::string> prefixes({"top_prehensile","bottom_movablenp","bottom_table"});
     std::map<std::string,std::vector<std::string>> correspondences;
-    correspondences["bottom"]    = {"top"}; //,      "sidehigh"};
-    // correspondences["sidelow"]  = {"top",      "sidehigh"};
-    correspondences["top"]       = {"bottom"}; //,   "sidelow"};
-    // correspondences["sidehigh"] = {"bottom",   "sidelow"};
+    correspondences["top_prehensile"] = {"bottom"};
+    correspondences["bottom_movablenp"] = {"top_prehensile"};
+    correspondences["bottom_table"] = {"top_prehensile"};
     
     namedAutomaticTransitions nat( prefixes, correspondences, new_db_name );
     
