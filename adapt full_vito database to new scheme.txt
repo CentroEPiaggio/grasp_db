@@ -1,0 +1,73 @@
+LEGEND:
+$ command to be executed on a shell
+sqlite> command to be executed in the sqlite3 shell
+[no symbol] output of the previous command
+
+============ COMMANDS TO BE EXECUTED ============
+
+$ roscd dual_manipulation_grasp_db
+$ cp full\ \(vito\ -\ all\ objects\ -\ containerA\ and\ containerB\ working\).db full_vito_orig.db 
+$ rm full_vito.db
+$ sqlite3 full_vito.db
+sqlite> .quit
+
+$ sqlite3 full_box_soma.db
+sqlite> .tables
+EC_Adjacency            Grasp_transitions       Workspaces            
+EC_Reachability         Grasps                  WorkspacesAdjacency   
+EndEffectors            Objects               
+EnvironmentConstraints  Reachability          
+
+sqlite> ATTACH DATABASE 'full_vito.db' AS vito ;
+sqlite> CREATE TABLE vito.EC_Adjacency AS SELECT * FROM main.EC_Adjacency ;
+sqlite> CREATE TABLE vito.EC_Reachability AS SELECT * FROM main.EC_Reachability ;
+sqlite> CREATE TABLE vito.EndEffectors AS SELECT * FROM main.EndEffectors ;
+sqlite> CREATE TABLE vito.EnvironmentConstraints AS SELECT * FROM main.EnvironmentConstraints ;
+sqlite> CREATE TABLE vito.Reachability AS SELECT * FROM main.Reachability ;
+sqlite> CREATE TABLE vito.Workspaces AS SELECT * FROM main.Workspaces ;
+sqlite> CREATE TABLE vito.WorkspacesAdjacency AS SELECT * FROM main.WorkspacesAdjacency ;
+sqlite> CREATE TABLE vito.Grasp_transitions AS SELECT * FROM main.Grasp_transitions WHERE 1=0 ;
+sqlite> CREATE TABLE vito.Grasps AS SELECT * FROM main.Grasps WHERE 1=0 ;
+sqlite> CREATE TABLE vito.Objects AS SELECT * FROM main.Objects WHERE 1=0 ;
+sqlite> DELETE FROM vito.EC_Adjacency ;
+sqlite> DELETE FROM vito.EC_Reachability WHERE EC_id <> 1 ;
+sqlite> DELETE FROM vito.EnvironmentConstraints WHERE Id <> 1 ;
+
+sqlite> ATTACH DATABASE 'full_vito_orig.db' AS vito_old ;
+sqlite> INSERT INTO vito.Objects SELECT * FROM vito_old.Objects ;
+sqlite> .schema Grasps
+CREATE TABLE "Grasps" (
+	`Object_id`	NUMERIC,
+	`EndEffector_id`	NUMERIC,
+	`Grasp_id`	INTEGER,
+	`Grasp_info`	BLOB,
+	`Grasp_name`	TEXT,
+	`EC_id`	INTEGER,
+	PRIMARY KEY(Grasp_id)
+);
+sqlite> INSERT INTO vito.Grasps(Object_id, EndEffector_id, Grasp_id, Grasp_info, Grasp_name, EC_id) SELECT Object_id, EndEffector_id, Grasp_id, Grasp_info, Grasp_name, 1 FROM vito_old.Grasps ;
+
+sqlite> .schema Grasp_transitions
+CREATE TABLE "Grasp_transitions" (
+	`Source_id`	NUMERIC,
+	`Target_id`	NUMERIC,
+	`actionCost`	NUMERIC,
+	`actionType`	TEXT,
+	`extraEE_id`	TEXT
+);
+
+sqlite> INSERT INTO vito.Grasp_transitions(Source_id, Target_id, actionCost, actionType) SELECT Source_id, Target_id, 1, 'GRASP' FROM vito_old.Grasp_transitions GT WHERE Source_id IN (SELECT Grasp_id FROM vito_old.Grasps WHERE EndEffector_id IN (SELECT Id FROM vito_old.EndEffectors WHERE Movable = 0)) AND Target_id IN (SELECT Grasp_id FROM vito_old.Grasps WHERE EndEffector_id IN (SELECT Id FROM vito_old.EndEffectors WHERE Movable = 1)) ;
+sqlite> INSERT INTO vito.Grasp_transitions(Source_id, Target_id, actionCost, actionType) SELECT Source_id, Target_id, 1, 'UNGRASP' FROM vito_old.Grasp_transitions GT WHERE Source_id IN (SELECT Grasp_id FROM vito_old.Grasps WHERE EndEffector_id IN (SELECT Id FROM vito_old.EndEffectors WHERE Movable = 1)) AND Target_id IN (SELECT Grasp_id FROM vito_old.Grasps WHERE EndEffector_id IN (SELECT Id FROM vito_old.EndEffectors WHERE Movable = 0)) ;
+sqlite> INSERT INTO vito.Grasp_transitions(Source_id, Target_id, actionCost, actionType) SELECT Source_id, Target_id, 1, 'EXCHANGE_GRASP' FROM vito_old.Grasp_transitions GT WHERE Source_id IN (SELECT Grasp_id FROM vito_old.Grasps WHERE EndEffector_id IN (SELECT Id FROM vito_old.EndEffectors WHERE Movable = 1)) AND Target_id IN (SELECT Grasp_id FROM vito_old.Grasps WHERE EndEffector_id IN (SELECT Id FROM vito_old.EndEffectors WHERE Movable = 1)) ;
+sqlite> .quit
+
+$ rm full_vito_orig.db
+
+============ TESTS ============
+
+SELECT Source_id, Target_id, 1, 'GRASP' FROM vito_old.Grasp_transitions GT WHERE (SELECT Object_id FROM vito_old.Grasps WHERE Grasp_id = GT.Source_id AND Object_id = 1) ;
+
+SELECT Source_id, Target_id, 1, 'GRASP' FROM vito_old.Grasp_transitions GT WHERE Source_id IN (SELECT Grasp_id FROM vito_old.Grasps WHERE EndEffector_id IN (SELECT Id FROM vito_old.EndEffectors WHERE Movable = 0) AND Object_id = 1) AND Target_id IN (SELECT Grasp_id FROM vito_old.Grasps WHERE EndEffector_id IN (SELECT Id FROM vito_old.EndEffectors WHERE Movable = 1)) ;
+
+
+
