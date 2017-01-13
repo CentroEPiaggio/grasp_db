@@ -53,7 +53,7 @@
 #define BOX_SIDE_B 0.112 // length along y-axis
 #define BOX_SIDE_C 0.046 // length along z-axis
 #define DB_POSTFIX "box_soma_"
-#define EMPTY_DB "empty_soma"
+#define EMPTY_DB "empty"
 
 #define TINO_WP_HEIGHT 0.0
 #define TABLE_WP_HEIGHT 0.05
