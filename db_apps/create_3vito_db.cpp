@@ -77,15 +77,26 @@ std::vector<int> dont_kuka({5});
 
 // ENVIRONMENTAL CONSTRAINTS
 #define NO_CONSTRAINT_ID 1
-std::vector<constraint_id> ec_ids = {NO_CONSTRAINT_ID}; // to stay as generic as possible
-std::vector<std::string> ec_name = {"None"};
+#define NO_CONSTRAINT_TYPE_ID 1
+
+std::vector<constraint_type> ec_type_ids = {NO_CONSTRAINT_TYPE_ID}; // to stay as generic as possible
+std::vector<std::string> ec_type_name = {"None"};
+
+std::map<constraint_id, constraint_type> ec_type = {    {NO_CONSTRAINT_ID, NO_CONSTRAINT_TYPE_ID}};
+
+std::map<constraint_id, std::string> ec_names = {{NO_CONSTRAINT_ID, "NOCONSTRAINT"}};
+                                                        
+std::map<constraint_id, KDL::Frame> ec_poses = {{NO_CONSTRAINT_ID, KDL::Frame(KDL::Vector(-0.85,0.0,0.0))}};
+                                                
+std::map<constraint_id, std::pair<KDL::Twist, KDL::Twist>> ec_bounds = { 
+    {NO_CONSTRAINT_ID,{KDL::Twist(KDL::Vector(0.0,0.0,0.0), KDL::Vector(0.0,0.0,0.0)), KDL::Twist(KDL::Vector(0.0,0.0,0.0), KDL::Vector(0.0,0.0,0.0))}}};
 std::map<constraint_id,std::vector<workspace_id>> ec_reachability={
     {NO_CONSTRAINT_ID,      {1,2,3,4,5,6,7,8,9,10,11,12}}
 };
-// bi-lateral information needed
-std::map<constraint_id,std::vector<constraint_id>> ec_adjacency = {
-    {NO_CONSTRAINT_ID,      {NO_CONSTRAINT_ID}}
-};
+
+// bi-lateral information needed // not used for now
+std::map<constraint_type,std::vector<constraint_type>> ec_adjacency = {
+    {NO_CONSTRAINT_TYPE_ID,      {NO_CONSTRAINT_TYPE_ID} }};
 
 int main(int argc, char **argv)
 {
@@ -157,25 +168,35 @@ int main(int argc, char **argv)
     }
     
     // write environmental constraint information
-    assert(ec_name.size() == ec_ids.size());
-    assert(ec_name.size() == ec_adjacency.size());
-    assert(ec_name.size() == ec_reachability.size());
-    for(int i=0; i<ec_name.size(); ++i)
+    assert(ec_type_name.size() == ec_type_ids.size());
+    assert(ec_type_name.size() == ec_adjacency.size());
+    assert(ec_names.size() == ec_reachability.size());
+    assert(ec_names.size() == ec_type.size());
+    assert(ec_names.size() == ec_poses.size());
+    assert(ec_names.size() == ec_bounds.size());
+    for(int i=0; i<ec_type_name.size(); ++i)
     {
-        int source = ec_ids.at(i);
-        if(db_writer.writeNewEnvironmentConstraint(source,ec_name.at(i)) < 0)
+        int source = ec_type_ids.at(i);
+        if(db_writer.writeNewEnvironmentConstraintType(source,ec_type_name.at(i)) < 0)
             return -6;
     }
-    for(int source:ec_ids)
+    for(int source:ec_type_ids)
     {
         for(auto target:ec_adjacency.at(source))
             if(db_writer.writeNewECAdjacency(source,target) < 0)
                 return -7;
-            for(auto ws:ec_reachability.at(source))
-                if(db_writer.writeNewECReachability(source,ws) < 0)
-                    return -8;
     }
-    
+    for(auto& ec:ec_names)
+    {
+        auto ec_id = ec.first;
+        auto ec_name = ec.second;
+        if( db_writer.writeNewEnvironmentConstraint(ec_id, ec_name, ec_type.at(ec_id), ec_poses.at(ec_id), ec_bounds.at(ec_id).first, ec_bounds.at(ec_id).second) < 0)
+            return -8;
+        for(auto ws:ec_reachability.at(ec_id))
+            if(db_writer.writeNewECReachability(ec_id,ws) < 0)
+                return -9;
+    }
+
     // Grasps - there have to be only two
     std::string grasp_path = path + "/grasp_trajectories/object" + std::to_string(object_id) + "/grasp";
     command = "cp " + grasp_path + std::to_string(MAX_GRASPS-1) + " " + grasp_path + std::to_string(GRASPS_OFFSET+1) + "\n";

@@ -142,15 +142,26 @@ std::map<workspace_id,std::vector<workspace_id>> adjacency = {
 
 // ENVIRONMENTAL CONSTRAINTS
 #define NO_CONSTRAINT_ID 1
-std::vector<constraint_id> ec_ids = {NO_CONSTRAINT_ID}; // to stay as generic as possible
-std::vector<std::string> ec_name = {"None"};
+#define NO_CONSTRAINT_TYPE_ID 1
+
+std::vector<constraint_type> ec_type_ids = {NO_CONSTRAINT_TYPE_ID}; // to stay as generic as possible
+std::vector<std::string> ec_type_name = {"None"};
+
+std::map<constraint_id, constraint_type> ec_type = {    {NO_CONSTRAINT_ID, NO_CONSTRAINT_TYPE_ID}};
+
+std::map<constraint_id, std::string> ec_names = {{NO_CONSTRAINT_ID, "NOCONSTRAINT"}};
+                                                        
+std::map<constraint_id, KDL::Frame> ec_poses = {{NO_CONSTRAINT_ID, KDL::Frame(KDL::Vector(-0.85,0.0,0.0))}};
+                                                
+std::map<constraint_id, std::pair<KDL::Twist, KDL::Twist>> ec_bounds = { 
+    {NO_CONSTRAINT_ID,{KDL::Twist(KDL::Vector(0.0,0.0,0.0), KDL::Vector(0.0,0.0,0.0)), KDL::Twist(KDL::Vector(0.0,0.0,0.0), KDL::Vector(0.0,0.0,0.0))}}};
 std::map<constraint_id,std::vector<workspace_id>> ec_reachability={
     {NO_CONSTRAINT_ID,      {1,2,3,4,5,6,7,8,9,10,11}}
 };
-// bi-lateral information needed
-std::map<constraint_id,std::vector<constraint_id>> ec_adjacency = {
-    {NO_CONSTRAINT_ID,      {NO_CONSTRAINT_ID}}
-};
+
+// bi-lateral information needed // not used for now
+std::map<constraint_type,std::vector<constraint_type>> ec_adjacency = {
+    {NO_CONSTRAINT_TYPE_ID,      {NO_CONSTRAINT_TYPE_ID} }};
 
 int main(int argc, char **argv)
 {
@@ -177,7 +188,7 @@ int main(int argc, char **argv)
     
     db_writer.open_global();
     
-    int ret = writeGlobalDatabaseInformation(db_writer, ws_x_min, ws_x_max, ws_y_min, ws_y_max, ws_z_min, ws_z_max, adjacency, ee_ids, ee_name, ee_movable, ee_prehensile, ee_link, ee_prehension_joints, reachability, ec_ids, ec_name, ec_reachability, ec_adjacency);
+    int ret = writeGlobalDatabaseInformation(db_writer, ws_x_min, ws_x_max, ws_y_min, ws_y_max, ws_z_min, ws_z_max, adjacency, ee_ids, ee_name, ee_movable, ee_prehensile, ee_link, ee_prehension_joints, reachability, ec_type_ids, ec_type_name, ec_reachability, ec_adjacency, ec_names, ec_type, ec_poses, ec_bounds );
     if(ret < 0)
     {
         ROS_ERROR_STREAM("writeGlobalDatabaseInformation returned the error code " << ret);
