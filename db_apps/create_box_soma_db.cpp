@@ -60,9 +60,12 @@
 #define EPS 0.01 // a small additional height
 #define NAMED_TRANSITIONS 1
 // constraint id's
+#define NO_CONSTRAINT_TYPE_ID 1
+#define EDGE_CONSTRAINT_TYPE_ID 2
+#define WALL_CONSTRAINT_TYPE_ID 3
 #define NO_CONSTRAINT_ID 1
-#define EDGE_CONSTRAINT_ID 2
-#define WALL_CONSTRAINT_ID 3
+#define EDGE_CONSTRAINT_1 2
+#define EDGE_CONSTRAINT_2 3
 
 // grasp ID-ing
 #define OBJ_GRASP_FACTOR dual_manipulation::shared::OBJ_GRASP_FACTOR
@@ -128,14 +131,14 @@ std::vector<std::vector<std::string>> ee_grasp_names = {
 std::vector<std::vector<std::vector<constraint_id>>> ee_grasp_constraint = {
     {   {NO_CONSTRAINT_ID}, {NO_CONSTRAINT_ID}  }, // left_hand
     {   {NO_CONSTRAINT_ID}, {NO_CONSTRAINT_ID}  }, // right_hand
-    {   {NO_CONSTRAINT_ID,EDGE_CONSTRAINT_ID},{NO_CONSTRAINT_ID},{NO_CONSTRAINT_ID},
-        {NO_CONSTRAINT_ID,EDGE_CONSTRAINT_ID},{NO_CONSTRAINT_ID},{NO_CONSTRAINT_ID} }  // table
+    {   {NO_CONSTRAINT_ID,EDGE_CONSTRAINT_1, EDGE_CONSTRAINT_2},{NO_CONSTRAINT_ID},{NO_CONSTRAINT_ID},
+        {NO_CONSTRAINT_ID,EDGE_CONSTRAINT_1, EDGE_CONSTRAINT_2},{NO_CONSTRAINT_ID},{NO_CONSTRAINT_ID} }  // table
 };
 
 // WORKSPACES
 // this vector and WS_Y_MIN, WS_Y_MAX define the workspaces geometry (only for rectangular workspaces all with the same Y bounds)
 std::vector<double> ws_x_min({-1.7,-1.7,-1.7});
-std::vector<double> ws_x_max({0.0,0.0,0.0});
+std::vector<double> ws_x_max({0.0,0.0,0.0}); // TODO: Adjust for real ws's
 std::vector<double> ws_y_min({-0.6,-0.15,0.15});
 std::vector<double> ws_y_max({-0.15,0.15,0.6});
 std::vector<double> ws_z_min({0.06,0.06,0.06});
@@ -147,19 +150,43 @@ std::map<workspace_id,std::vector<workspace_id>> adjacency = {
 };
 
 // ENVIRONMENTAL CONSTRAINTS
-std::vector<constraint_id> ec_ids = {NO_CONSTRAINT_ID,EDGE_CONSTRAINT_ID,WALL_CONSTRAINT_ID}; // to stay as generic as possible
-std::vector<std::string> ec_name = {"None","Edge","Wall"};
+std::vector<constraint_type> ec_type_ids = {NO_CONSTRAINT_TYPE_ID,EDGE_CONSTRAINT_TYPE_ID,WALL_CONSTRAINT_TYPE_ID}; // to stay as generic as possible
+std::vector<std::string> ec_type_name = {"None","Edge","Wall"};
+
+std::map<constraint_id, constraint_type> ec_type = {    {NO_CONSTRAINT_ID, NO_CONSTRAINT_TYPE_ID},
+                                                        {EDGE_CONSTRAINT_1,EDGE_CONSTRAINT_TYPE_ID},
+                                                        {EDGE_CONSTRAINT_2, EDGE_CONSTRAINT_TYPE_ID}
+};
+
+std::map<constraint_id, std::string> ec_names = {{NO_CONSTRAINT_ID, "NOCONSTRAINT"},
+                                                {EDGE_CONSTRAINT_1, "CLOSETABLEEDGE"},
+                                                {EDGE_CONSTRAINT_2, "RIGHTTABLEEDGE"}
+};
+                                                        
+std::map<constraint_id, KDL::Frame> ec_poses = {{NO_CONSTRAINT_ID, KDL::Frame(KDL::Vector(-0.85,0.0,0.0))},
+                                                {EDGE_CONSTRAINT_1, KDL::Frame(KDL::Rotation::RPY(0.0,0.0,M_PI/2.0), KDL::Vector(-0.45,0.0,0.0))},
+                                                {EDGE_CONSTRAINT_2, KDL::Frame(KDL::Rotation::RPY(0.0,0.0,M_PI), KDL::Vector(-0.85,0.6,0.0))}
+};
+                                                
+std::map<constraint_id, std::pair<KDL::Twist, KDL::Twist>> ec_bounds = { 
+    {NO_CONSTRAINT_ID,{KDL::Twist(KDL::Vector(0.0,0.0,0.0), KDL::Vector(0.0,0.0,0.0)), KDL::Twist(KDL::Vector(0.0,0.0,0.0), KDL::Vector(0.0,0.0,0.0))}},
+    {EDGE_CONSTRAINT_1,{KDL::Twist(KDL::Vector(-0.6,0.0,0.0), KDL::Vector(0.0,0.0,0.0)), KDL::Twist(KDL::Vector(0.6,0.0,0.0), KDL::Vector(0.0,0.0,0.0))}},
+    {EDGE_CONSTRAINT_2,{KDL::Twist(KDL::Vector(-0.40,0.0,0.0), KDL::Vector(0.0,0.0,0.0)), KDL::Twist(KDL::Vector(0.4,0.0,0.0), KDL::Vector(0.0,0.0,0.0))}}
+};
 std::map<constraint_id,std::vector<workspace_id>> ec_reachability={
     {NO_CONSTRAINT_ID,      {1,2,3}},
-    {EDGE_CONSTRAINT_ID,    {1,2,3}},
-    {WALL_CONSTRAINT_ID,    {2}}
+    {EDGE_CONSTRAINT_1,    {1,2,3}},
+    {EDGE_CONSTRAINT_2,    {3}}
 };
-// bi-lateral information needed
-std::map<constraint_id,std::vector<constraint_id>> ec_adjacency = {
-    {NO_CONSTRAINT_ID,      {EDGE_CONSTRAINT_ID,WALL_CONSTRAINT_ID}},
-    {EDGE_CONSTRAINT_ID,    {NO_CONSTRAINT_ID}},
-    {WALL_CONSTRAINT_ID,    {NO_CONSTRAINT_ID}}
+
+// bi-lateral information needed // not used for now
+std::map<constraint_type,std::vector<constraint_type>> ec_adjacency = {
+    {NO_CONSTRAINT_TYPE_ID,      {NO_CONSTRAINT_TYPE_ID,EDGE_CONSTRAINT_TYPE_ID,WALL_CONSTRAINT_TYPE_ID}},
+    {EDGE_CONSTRAINT_TYPE_ID,    {NO_CONSTRAINT_TYPE_ID}},
+    {WALL_CONSTRAINT_TYPE_ID,    {NO_CONSTRAINT_TYPE_ID}}
 };
+
+
 
 inline grasp_id computeGraspId(object_id obj_id, endeffector_id ee_id, constraint_id ec_id, grasp_id id_offset)
 {
@@ -173,7 +200,7 @@ int main(int argc, char **argv)
     std::cout<<std::endl;
     
     assert(ee_name.size()*EE_GRASP_FACTOR < OBJ_GRASP_FACTOR);
-    assert(ec_name.size()*EC_GRASP_FACTOR < EE_GRASP_FACTOR);
+    assert(ec_type_name.size()*EC_GRASP_FACTOR < EE_GRASP_FACTOR);
     for(int i=0; i<ee_name.size(); ++i)
     {
         assert(ee_grasp_names.at(i).size()*(ee_prehensile.at(i)?HOW_MANY_VAR:HOW_MANY_ROT) < EC_GRASP_FACTOR);
@@ -198,7 +225,7 @@ int main(int argc, char **argv)
     
     db_writer.open_global();
     
-    int ret = writeGlobalDatabaseInformation(db_writer, ws_x_min, ws_x_max, ws_y_min, ws_y_max, ws_z_min, ws_z_max, adjacency, ee_ids, ee_name, ee_movable, ee_prehensile, ee_link, ee_prehension_joints, reachability, ec_ids, ec_name, ec_reachability, ec_adjacency);
+    int ret = writeGlobalDatabaseInformation(db_writer, ws_x_min, ws_x_max, ws_y_min, ws_y_max, ws_z_min, ws_z_max, adjacency, ee_ids, ee_name, ee_movable, ee_prehensile, ee_link, ee_prehension_joints, reachability, ec_type_ids, ec_type_name, ec_reachability, ec_adjacency, ec_names, ec_type, ec_poses, ec_bounds );
     if(ret < 0)
     {
         ROS_ERROR_STREAM("writeGlobalDatabaseInformation returned the error code " << ret);

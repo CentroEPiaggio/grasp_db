@@ -40,7 +40,7 @@ bool specularize_grasps(endeffector_id new_ee_id,std::string new_link_name,std::
     return true;
 }
 
-int writeGlobalDatabaseInformation(databaseWriter& db_writer, std::vector<double>& ws_x_min, std::vector<double>& ws_x_max, std::vector<double>& ws_y_min, std::vector<double>& ws_y_max, std::vector<double>& ws_z_min, std::vector<double>& ws_z_max, std::map<workspace_id,std::vector<workspace_id>>& adjacency, std::vector<endeffector_id>& ee_ids, std::vector<std::string>& ee_name, std::vector<bool>& ee_movable, std::vector<bool>& ee_prehensile, std::vector<std::string>& ee_link, std::vector<std::vector<std::string>>& ee_prehension_joints, std::map<endeffector_id,std::vector<workspace_id>>& reachability, std::vector<constraint_id>& ec_ids, std::vector<std::string>& ec_name, std::map<constraint_id,std::vector<workspace_id>>& ec_reachability, std::map<constraint_id,std::vector<constraint_id>>& ec_adjacency)
+int writeGlobalDatabaseInformation(databaseWriter& db_writer, std::vector<double>& ws_x_min, std::vector<double>& ws_x_max, std::vector<double>& ws_y_min, std::vector<double>& ws_y_max, std::vector<double>& ws_z_min, std::vector<double>& ws_z_max, std::map<workspace_id,std::vector<workspace_id>>& adjacency, std::vector<endeffector_id>& ee_ids, std::vector<std::string>& ee_name, std::vector<bool>& ee_movable, std::vector<bool>& ee_prehensile, std::vector<std::string>& ee_link, std::vector<std::vector<std::string>>& ee_prehension_joints, std::map<endeffector_id,std::vector<workspace_id>>& reachability, std::vector<constraint_type>& ec_type_ids, std::vector<std::string>& ec_type_name, std::map<constraint_id,std::vector<workspace_id>>& ec_reachability, std::map<constraint_type,std::vector<constraint_type>>& ec_adjacency, std::map<constraint_id, std::string>& ec_names, std::map<constraint_id, constraint_type>& ec_type, std::map<constraint_id, KDL::Frame>& ec_poses, std::map<constraint_id, std::pair<KDL::Twist, KDL::Twist>>& ec_bounds )
 {
     // write ws information
     for(int i=1; i<ws_x_max.size()+1; i++)
@@ -84,22 +84,32 @@ int writeGlobalDatabaseInformation(databaseWriter& db_writer, std::vector<double
     }
     
     // write environmental constraint information
-    assert(ec_name.size() == ec_ids.size());
-    assert(ec_name.size() == ec_adjacency.size());
-    assert(ec_name.size() == ec_reachability.size());
-    for(int i=0; i<ec_name.size(); ++i)
+    assert(ec_type_name.size() == ec_type_ids.size());
+    assert(ec_type_name.size() == ec_adjacency.size());
+    assert(ec_names.size() == ec_reachability.size());
+    assert(ec_names.size() == ec_type.size());
+    assert(ec_names.size() == ec_poses.size());
+    assert(ec_names.size() == ec_bounds.size());
+    for(int i=0; i<ec_type_name.size(); ++i)
     {
-        int source = ec_ids.at(i);
-        if(db_writer.writeNewEnvironmentConstraint(source,ec_name.at(i)) < 0)
+        int source = ec_type_ids.at(i);
+        if(db_writer.writeNewEnvironmentConstraintType(source,ec_type_name.at(i)) < 0)
             return -6;
     }
-    for(int source:ec_ids)
+    for(int source:ec_type_ids)
     {
         for(auto target:ec_adjacency.at(source))
             if(db_writer.writeNewECAdjacency(source,target) < 0)
                 return -7;
-            for(auto ws:ec_reachability.at(source))
-                if(db_writer.writeNewECReachability(source,ws) < 0)
-                    return -8;
+    }
+    for(auto& ec:ec_names)
+    {
+        auto ec_id = ec.first;
+        auto ec_name = ec.second;
+        if( db_writer.writeNewEnvironmentConstraint(ec_id, ec_name, ec_type.at(ec_id), ec_poses.at(ec_id), ec_bounds.at(ec_id).first, ec_bounds.at(ec_id).second) < 0)
+            return -8;
+        for(auto ws:ec_reachability.at(ec_id))
+            if(db_writer.writeNewECReachability(ec_id,ws) < 0)
+                return -9;
     }
 }
