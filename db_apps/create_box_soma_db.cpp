@@ -400,6 +400,7 @@ int main(int argc, char **argv)
             endeffector_id source_ee = db_mapper.Grasps.at(source_id).ee_id;
             bool source_movable = db_mapper.EndEffectors.at( source_ee ).movable;
             constraint_id source_ec = db_mapper.Grasps.at(source_id).ec_id;
+            constraint_type source_ec_type = db_mapper.EnvironmentConstraints.at(source_ec).type;
             std::string source_name = db_mapper.Grasps.at(source_id).name;
             std::string sub_str("sideC");
             bool is_source_sideC = (source_name.compare(0,sub_str.length(),sub_str) == 0);
@@ -414,9 +415,9 @@ int main(int argc, char **argv)
                 bool target_movable = db_mapper.EndEffectors.at( target_ee ).movable;
                 
                 ++removed_transitions;
-                if(!source_movable && !target_movable && source_ec == 2)
+                if(!source_movable && !target_movable && source_ec_type == 2)
                     db_writer_eraser.deleteGraspTransition(source_id,target_id);
-                else if(!source_movable && target_movable && is_source_sideC && source_ec == 1)
+                else if(!source_movable && target_movable && is_source_sideC && source_ec_type == 1)
                     db_writer_eraser.deleteGraspTransition(source_id,target_id);
                 else
                     --removed_transitions;

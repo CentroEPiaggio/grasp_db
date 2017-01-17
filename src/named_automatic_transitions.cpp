@@ -109,7 +109,7 @@ bool namedAutomaticTransitions::write_transitions()
     
     ROS_WARN_STREAM(CLASS_NAMESPACE << __func__ << " : automatic transition work in this way\n" << 
         "\t- use old behavior when at least on end-effector is movable: this is for GRASP, UNGRASP, and EXCHANGE_GRASP\n\t\t(as provided for backward compatibility in databaseWriter)\n" <<
-        "\t- if both end-effectors are non-movable, consider the transition to be a SLIDE if EC in the transition are (1->1) or (1->2),\n\t\tand use all movable end-effectors as extra_ees for that transition\n" <<
+        "\t- if both end-effectors are non-movable, consider the transition to be a SLIDE if EC_type in the transition are (1->1) or (1->2),\n\t\tand use all movable end-effectors as extra_ees for that transition\n" <<
         "\t- other, more flexible behaviors need further implementation..."
     );
     
@@ -126,7 +126,8 @@ bool namedAutomaticTransitions::write_transitions()
         uint obj_id = grasp.second.obj_id;
         uint ee_id = grasp.second.ee_id;
         std::string grasp_name = grasp.second.name;
-        uint ec_id = grasp.second.ec_id;
+        // Using the type of the constraint
+        uint ec_type = db_mapper_->EnvironmentConstraints.at(grasp.second.ec_id).type;
         
         for(auto pref:prefixes_)
         {
@@ -134,7 +135,7 @@ bool namedAutomaticTransitions::write_transitions()
             {
                 ee_id_from_prefix[pref].push_back(ee_id);
                 obj_id_from_prefix[pref].push_back(obj_id);
-                ec_id_from_prefix[pref].push_back(ec_id);
+                ec_id_from_prefix[pref].push_back(ec_type);
             }
             
             // do the same for each correspondence
@@ -144,7 +145,7 @@ bool namedAutomaticTransitions::write_transitions()
                 {
                     ee_id_from_prefix[corr].push_back(ee_id);
                     obj_id_from_prefix[corr].push_back(obj_id);
-                    ec_id_from_prefix[corr].push_back(ec_id);
+                    ec_id_from_prefix[corr].push_back(ec_type);
                 }
             }
         }
