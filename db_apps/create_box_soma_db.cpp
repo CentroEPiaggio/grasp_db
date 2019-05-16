@@ -48,6 +48,7 @@
 #include <grasp_creation_utilities/named_automatic_transitions.h>
 #include <grasp_creation_utilities/create_db_utils.h>
 #include <algorithm>
+#include <numeric>
 
 #define BOX_SIDE_A 0.175 // length along x-axis
 #define BOX_SIDE_B 0.112 // length along y-axis

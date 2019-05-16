@@ -42,6 +42,7 @@
 #include <grasp_creation_utilities/symmetric_grasp_maker.h>
 #include <grasp_creation_utilities/named_automatic_transitions.h>
 #include <algorithm>
+#include <numeric>
 
 #define HOW_MANY_ROT 16 // how many rotations for table grasps
 #define HOW_MANY_VAR 8 // how many variations for each of the hand grasps

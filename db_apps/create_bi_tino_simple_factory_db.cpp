@@ -47,6 +47,7 @@
 #include <grasp_creation_utilities/named_automatic_transitions.h>
 #include <grasp_creation_utilities/create_db_utils.h>
 #include <algorithm>
+#include <numeric>
 
 #define CYLINDER_HEIGHT 0.255
 #define DB_POSTFIX "bi_tino_simple_factory_"

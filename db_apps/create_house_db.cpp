@@ -47,6 +47,7 @@
 #include <grasp_creation_utilities/named_automatic_transitions.h>
 #include <grasp_creation_utilities/create_db_utils.h>
 #include <algorithm>
+#include <numeric>
 
 #define BOX_HEIGHT 0.15
 #define TRI_HEIGHT 0.18
